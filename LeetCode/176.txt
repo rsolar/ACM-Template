@@ -1,0 +1,5 @@
+select distinct Salary
+from Employee
+union (select null as Salary)
+order by Salary desc
+limit 1,1

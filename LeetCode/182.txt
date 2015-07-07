@@ -1,0 +1,3 @@
+select Email
+from (select Email, count(*) Count from Person group by Email) t
+where t.Count > 1
