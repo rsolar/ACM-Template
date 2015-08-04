@@ -21,8 +21,7 @@ void bfs(Node s) {
 	queue<Node> que;
 	que.push(s);
 	while (!que.empty()) {
-		p = que.front();
-		que.pop();
+		p = que.front(); que.pop();
 		for (int i, d = 0; d < 4; d++) {
 			t.x = p.x + mov[d][0]; t.y = p.y + mov[d][1]; t.step = p.step + 1;
 			if (judge(t.x, t.y) && mp[t.x][t.y] != '#' && !vis[t.x][t.y]) {
@@ -33,21 +32,17 @@ void bfs(Node s) {
 						posstep[s.num][i] = posstep[i][s.num] = t.step;
 					}
 				}
-				vis[t.x][t.y] = 1;
+				vis[t.x][t.y] = true;
 				que.push(t);
 			}
 		}
 	}
-	if (cnt == k) {
-		flag = true;
-	}
+	if (cnt == k) { flag = true; }
 }
 
 void dfs(int n, int dis, int pre) {
 	if (n == k) {
-		if (dis < ans) {
-			ans = dis;
-		}
+		if (dis < ans) { ans = dis; }
 		return;
 	}
 	for (int i = 1; i <= k; i++) {
@@ -78,7 +73,7 @@ int main() {
 		}
 		scanf("%d", &k);
 		for (int x, y, i = 1; i <= k; i++) {
-			scanf("%d%d", &x, &y);
+			scanf("%d %d", &x, &y);
 			pos[i].x = x - 1;
 			pos[i].y = y - 1;
 			pos[i].num = i;
@@ -88,7 +83,7 @@ int main() {
 		if (flag) {
 			for (int i = 1; i <= k; i++) {
 				memset(vis, 0, sizeof(vis));
-				vis[pos[i].x][pos[i].y] = 1;
+				vis[pos[i].x][pos[i].y] = true;
 				bfs(pos[i]);
 			}
 			dfs(0, 0, 0);
