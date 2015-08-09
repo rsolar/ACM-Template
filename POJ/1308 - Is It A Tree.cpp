@@ -9,9 +9,7 @@ int fa[N], mx;
 bool flag;
 
 int findfa(int n) {
-	if (fa[n] < 0) {
-		fa[n] = n;
-	}
+	if (fa[n] < 0) { fa[n] = n; }
 	return n == fa[n] ? n : fa[n] = findfa(fa[n]);
 }
 
@@ -29,21 +27,13 @@ int main() {
 		if (b > mx) { mx = b; }
 		if (a + b != 0) {
 			int x = findfa(a), y = findfa(b);
-			if (a == b || (a != b && x == y) || (b != y && x != y)) {
-				flag = true;
-			} else {
-				fa[y] = fa[x];
-			}
+			if (a == b || (a != b && x == y) || (b != y && x != y)) { flag = true; }
+			else { fa[y] = x; }
 		} else {
 			if (!flag) {
 				for (int i = 1, j = 0; i <= mx; i++) {
-					if (fa[i] == i) {
-						j++;
-					}
-					if (j > 1) {
-						flag = true;
-						break;
-					}
+					if (fa[i] == i) { j++; }
+					if (j > 1) { flag = true; break; }
 				}
 			}
 			printf("Case %d is %sa tree.\n", ++C, flag ? "not " : "");

@@ -3,16 +3,26 @@
 #include <cstring>
 using namespace std;
 
-#define N 1002
+#define N 1005
 
 int fa[N], fx[N], fy[N];
 bool fix[N];
 
+template <class T>
+inline bool getInt(T &x) {
+	char c = 0; T sign = 1;
+	if ((c = getchar()) == EOF) { return false; }
+	while ((c < '0' || c > '9') && c != '-') { c = getchar(); };
+	if (c == '-') { sign = -1; c = getchar(); }
+	x = c - '0';
+	while ((c = getchar()) >= '0' && c <= '9') { x = x * 10 + c - '0'; }
+	x *= sign;
+	return true;
+}
+
 void init(int n) {
 	memset(fix, 0, sizeof(fix));
-	for (int i = 1; i <= n; i++) {
-		fa[i] = i;
-	}
+	for (int i = 1; i <= n; i++) { fa[i] = i; }
 }
 
 int findfa(int n) {
@@ -22,9 +32,7 @@ int findfa(int n) {
 inline void unite(int a, int b) {
 	a = findfa(a);
 	b = findfa(b);
-	if (a != b) {
-		fa[b] = a;
-	}
+	if (a != b) { fa[b] = a; }
 }
 
 int main() {
@@ -34,19 +42,13 @@ int main() {
 	d *= d;
 	init(n);
 	for (int i = 1; i <= n; i++) {
-		while ((c = getchar()) < '0' || c > '9');
-		fx[i] = c - '0';
-		while ((c = getchar()) >= '0' && c <= '9') { fx[i] = fx[i] * 10 + c - '0'; }
-		fy[i] = (c = getchar()) - '0';
-		while ((c = getchar()) >= '0' && c <= '9') { fy[i] = fy[i] * 10 + c - '0'; }
+		getInt(fx[i]); getInt(fy[i]);
 	}
 	while ((c = getchar()) != EOF) {
 		if (c == 'O') {
-			while ((c = getchar()) < '0' || c > '9');
-			a = c - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { a = a * 10 + c - '0'; }
+			getInt(a);
 			if (!fix[a]) {
-				fix[a] = 1;
+				fix[a] = true;
 				for (int i = 1; i <= n; i++) {
 					if (a != i && fix[i] && (t1 = fx[a] - fx[i]) * t1 + (t2 = fy[a] - fy[i]) * t2 <= d) {
 						unite(a, i);
@@ -54,11 +56,7 @@ int main() {
 				}
 			}
 		} else if (c == 'S') {
-			while ((c = getchar()) < '0' || c > '9');
-			a = c - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { a = a * 10 + c - '0'; }
-			b = (c = getchar()) - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { b = b * 10 + c - '0'; }
+			getInt(a); getInt(b);
 			puts(findfa(a) == findfa(b) ? "SUCCESS" : "FAIL");
 		}
 	}

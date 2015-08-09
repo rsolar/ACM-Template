@@ -3,15 +3,26 @@
 #include <cstring>
 using namespace std;
 
-#define N 30001
+#define N 30005
 
 int fa[N], rnk[N], dep[N];
+
+template <class T>
+inline bool getInt(T &x) {
+	char c = 0; T sign = 1;
+	if ((c = getchar()) == EOF) { return false; }
+	while ((c < '0' || c > '9') && c != '-') { c = getchar(); };
+	if (c == '-') { sign = -1; c = getchar(); }
+	x = c - '0';
+	while ((c = getchar()) >= '0' && c <= '9') { x = x * 10 + c - '0'; }
+	x *= sign;
+	return true;
+}
 
 void init() {
 	memset(rnk, 0, sizeof(rnk));
 	for (int i = 1; i < N; i++) {
-		fa[i] = i;
-		dep[i] = 1;
+		fa[i] = i; dep[i] = 1;
 	}
 }
 
@@ -39,16 +50,11 @@ int main() {
 	scanf("%d", &p);
 	while (p--) {
 		while ((c = getchar()) < 'C' || c > 'M');
-		getchar();
 		if (c == 'M') {
-			a = (c = getchar()) - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { a = a * 10 + c - '0'; }
-			b = (c = getchar()) - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { b = b * 10 + c - '0'; }
+			getInt(a); getInt(b);
 			unite(a, b);
 		} else {
-			a = (c = getchar()) - '0';
-			while ((c = getchar()) >= '0' && c <= '9') { a = a * 10 + c - '0'; }
+			getInt(a);
 			printf("%d\n", dep[findfa(a)] - rnk[a] - 1);
 		}
 	}

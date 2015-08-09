@@ -22,9 +22,7 @@ int main() {
 	char c;
 	int n, ans, t;
 	while (~scanf("%d", &n)) {
-		for (int i = 0; i < N; i++) {
-			fa[i] = i;
-		}
+		for (int i = 0; i < N; i++) { fa[i] = i; }
 		ans = 0;
 		for (int i = 0; i < n; i++) {
 			while ((c = getchar()) < '0' || c > '9');

@@ -4,7 +4,7 @@
 #include <algorithm>
 using namespace std;
 
-#define N 21
+#define N 25
 
 int s[N], sn, len;
 bool vis[N];
@@ -20,22 +20,14 @@ bool dfs(int currentn, int currentpos, int currentlen) {
 			now = s[i];
 			vis[i] = true;
 			if (currentlen == s[i]) {
-				if (currentn == 3) {
-					return true;
-				} else if (dfs(currentn + 1, 0, len)) {
-					return true;
-				} else {
-					vis[i] = false;
-					return false;
-				}
+				if (currentn == 3) { return true; }
+				else if (dfs(currentn + 1, 0, len)) { return true; }
+				else { vis[i] = false; return false; }
 			} else if (currentlen > s[i]) {
-				if (dfs(currentn, i, currentlen - s[i])) {
-					return true;
-				} else {
+				if (dfs(currentn, i, currentlen - s[i])) { return true; }
+				else {
 					vis[i] = false;
-					if (currentlen == len) {
-						return false;
-					}
+					if (currentlen == len) { return false; }
 				}
 			}
 		}
@@ -53,14 +45,12 @@ int main() {
 			scanf("%d", &s[i]);
 			totallen += s[i];
 		}
-		if (sn < 4 || totallen % 4 != 0) {
-			puts("no");
-		} else {
+		if (sn < 4 || totallen % 4 != 0) { puts("no"); }
+		else {
 			len = totallen >> 2;
 			sort(s, s + sn, cmp);
-			if (s[0] > len) {
-				puts("no");
-			} else {
+			if (s[0] > len) { puts("no"); }
+			else {
 				memset(vis, 0, sizeof(vis));
 				puts((dfs(1, 0, len) ? "yes" : "no"));
 			}

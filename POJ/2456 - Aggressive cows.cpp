@@ -4,15 +4,20 @@
 #include <climits>
 using namespace std;
 
-#define N 100001
+#define N 100005
 
 int n, m, a[N];
 
-inline void getInt(int &x) {
-	char c;
-	while ((c = getchar()) < '0' || c > '9');
+template <class T>
+inline bool getInt(T &x) {
+	char c = 0; T sign = 1;
+	if ((c = getchar()) == EOF) { return false; }
+	while ((c < '0' || c > '9') && c != '-') { c = getchar(); };
+	if (c == '-') { sign = -1; c = getchar(); }
 	x = c - '0';
 	while ((c = getchar()) >= '0' && c <= '9') { x = x * 10 + c - '0'; }
+	x *= sign;
+	return true;
 }
 
 bool judge(int x) {
@@ -31,14 +36,11 @@ int main() {
 		getInt(a[i]);
 	}
 	sort(a, a + n);
-	int mid, l = 0, r = INT_MAX;
+	int mid, l = 0, r = INT_MAX >> 1;
 	while (r - l > 1) {
 		mid = (l + r) >> 1;
-		if (judge(mid)) {
-			l = mid;
-		} else {
-			r = mid;
-		}
+		if (judge(mid)) { l = mid; }
+		else { r = mid; }
 	}
 	printf("%d\n", l);
 }

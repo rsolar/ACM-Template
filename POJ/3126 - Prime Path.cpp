@@ -28,39 +28,32 @@ bool bfs() {
 	que[back++] = n;
 	while (front < back) {
 		p = que[front++];
-		if (p == m) {
-			ans = mp[p];
-			return true;
-		}
+		if (p == m) { ans = mp[p]; return true; }
 		for (int i = 1; i <= 9; i += 2) {
 			t = p - p % 10 + i;
 			if (isprime[t] && !vis[t]) {
-				mp[t] = mp[p] + 1;
-				vis[t] = true;
+				mp[t] = mp[p] + 1; vis[t] = true;
 				que[back++] = t;
 			}
 		}
 		for (int i = 0; i <= 9; i++) {
 			t = p - (p / 10 % 10 - i) * 10;
 			if (isprime[t] && !vis[t]) {
-				mp[t] = mp[p] + 1;
-				vis[t] = true;
+				mp[t] = mp[p] + 1; vis[t] = true;
 				que[back++] = t;
 			}
 		}
 		for (int i = 0; i <= 9; i++) {
 			t = p - (p / 100 % 10 - i) * 100;
 			if (isprime[t] && !vis[t]) {
-				mp[t] = mp[p] + 1;
-				vis[t] = true;
+				mp[t] = mp[p] + 1; vis[t] = true;
 				que[back++] = t;
 			}
 		}
 		for (int i = 1; i <= 9; i++) {
 			t = p - (p / 1000 % 10 - i) * 1000;
 			if (isprime[t] && !vis[t]) {
-				mp[t] = mp[p] + 1;
-				vis[t] = true;
+				mp[t] = mp[p] + 1; vis[t] = true;
 				que[back++] = t;
 			}
 		}
@@ -73,13 +66,9 @@ int main() {
 	int T;
 	scanf("%d", &T);
 	while (T--) {
-		scanf("%d%d", &n, &m);
-		if (n == m) {
-			puts("0");
-		} else if (bfs()) {
-			printf("%d\n", ans);
-		} else {
-			puts("Impossible");
-		}
+		scanf("%d %d", &n, &m);
+		if (n == m) { puts("0"); }
+		else if (bfs()) { printf("%d\n", ans); }
+		else { puts("Impossible"); }
 	}
 }

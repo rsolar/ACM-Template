@@ -1,9 +1,8 @@
 #include <iostream>
 #include <cstdio>
-#include <cstring>
 using namespace std;
 
-#define N 7
+#define N 8
 
 struct Node {
 	int a[N], sum, len;
@@ -11,14 +10,11 @@ struct Node {
 int a, x, ansn;
 
 void dfs(int num, int len) {
-	if (num + t.sum < ans.sum) {
-		return;
-	}
+	if (num + t.sum < ans.sum) { return; }
 	if (!num) {
 		t.len = len;
 		if (t.sum <= x && ans.sum < t.sum && t.len < x) {
-			ans = t;
-			ansn = 1;
+			ans = t; ansn = 1;
 		} else if (t.sum <= x && ans.sum == t.sum && t.len < x) {
 			ansn++;
 		}
@@ -35,16 +31,13 @@ void dfs(int num, int len) {
 }
 
 int main() {
-	while (scanf("%d%d", &x, &a), a) {
+	while (scanf("%d %d", &x, &a), a) {
 		ansn = 0;
-		memset(&t, 0, sizeof(t));
-		memset(&ans, 0, sizeof(ans));
+		ans = t = (Node) {0};
 		dfs(a, 0);
-		if (!ansn) {
-			puts("error");
-		} else if (ansn > 1) {
-			puts("rejected");
-		} else {
+		if (!ansn) { puts("error"); }
+		else if (ansn > 1) { puts("rejected"); }
+		else {
 			printf("%d", ans.sum);
 			for (int i = ans.len - 1; i >= 0; i--) {
 				printf(" %d", ans.a[i]);

@@ -3,20 +3,25 @@
 #include <algorithm>
 using namespace std;
 
-#define N 1001
+#define N 1005
 
 int a[N];
 
-inline void getInt(int &x) {
-	char c;
-	while ((c = getchar()) < '0' || c > '9');
+template <class T>
+inline bool getInt(T &x) {
+	char c = 0; T sign = 1;
+	if ((c = getchar()) == EOF) { return false; }
+	while ((c < '0' || c > '9') && c != '-') { c = getchar(); };
+	if (c == '-') { sign = -1; c = getchar(); }
 	x = c - '0';
 	while ((c = getchar()) >= '0' && c <= '9') { x = x * 10 + c - '0'; }
+	x *= sign;
+	return true;
 }
 
 int main() {
 	int r, n, ans;
-	while (scanf("%d %d", &r, &n), r != -1) {
+	while (getInt(r), getInt(n), r != -1) {
 		ans = 0;
 		for (int i = 0; i < n; i++) {
 			getInt(a[i]);

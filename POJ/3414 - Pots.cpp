@@ -2,7 +2,7 @@
 #include <cstdio>
 using namespace std;
 
-#define N 101
+#define N 105
 
 struct Step {
 	int a, b, step, op;
@@ -31,31 +31,19 @@ bool bfs() {
 				case 3:
 					t.b = 0; t.op = 3; break;
 				case 4:
-					if (t.a + t.b <= b) {
-						t.b += t.a;
-						t.a = 0;
-					} else {
-						t.a -= b - t.b;
-						t.b = b;
-					}
+					if (t.a + t.b <= b) { t.b += t.a; t.a = 0; }
+					else { t.a -= b - t.b; t.b = b; }
 					t.op = 4; break;
 				case 5:
-					if (t.a + t.b <= a) {
-						t.a += t.b;
-						t.b = 0;
-					} else {
-						t.b -= a - t.a;
-						t.a = a;
-					}
+					if (t.a + t.b <= a) { t.a += t.b; t.b = 0; }
+					else { t.b -= a - t.a; t.a = a; }
 					t.op = 5; break;
 			}
 			if (!vis[t.a][t.b]) {
 				t.step = p.step + 1;
 				t.ans[p.step] = t.op;
 				vis[t.a][t.b] = true;
-				if (t.a == c || t.b == c) {
-					return true;
-				}
+				if (t.a == c || t.b == c) { return true; }
 				que[back++] = t;
 			}
 		}
@@ -64,12 +52,10 @@ bool bfs() {
 }
 
 int main() {
-	scanf("%d%d%d", &a, &b, &c);
+	scanf("%d %d %d", &a, &b, &c);
 	if (bfs()) {
 		printf("%d\n", t.step);
-		for (int i = 0; i < t.step; i++) {
-			puts(ans[t.ans[i]]);
-		}
+		for (int i = 0; i < t.step; i++) { puts(ans[t.ans[i]]); }
 	} else {
 		puts("impossible");
 	}
