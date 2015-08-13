@@ -7,42 +7,58 @@ inline size_t __stl_hash_string(const char *__s) {
 
 // BKDR Hash Function
 inline size_t BKDRHash(char *str) {
-	size_t seed = 131; // 31 131 1313 13131 131313 etc..
-	size_t hash = 0;
-	while (*str) { hash = hash * seed + (*str++); }
-	return (hash & 0x7FFFFFFF);
+	size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
+	while (*str) { h = h * seed + (*str++); }
+	return (h & 0x7FFFFFFF);
 }
 
 //------------------------------------------------------------------------------
 
 //Manacher 最长回文子串
-char mstr[N << 1];
-int mdp[N << 1];
+char s[N];
+char Mstr[N << 1];
+int Mdp[N << 1];
 void Manacher(char s[], int len) {
 	int l = 0, mx = 0, id = 0;
-	mstr[l++] = '$'; mstr[l++] = '#';
-	for (int i = 0; i < len; i++) { mstr[l++] = s[i]; mstr[l++] = '#'; }
-	mstr[l] = 0;
+	Mstr[l++] = '$'; Mstr[l++] = '#';
+	for (int i = 0; i < len; i++) { Mstr[l++] = s[i]; Mstr[l++] = '#'; }
+	Mstr[l] = 0;
 	for (int i = 0; i < l; i++) {
-		mdp[i] = mx > i ? min(mdp[(id << 1) - i], mx - i) : 1;
-		while (mstr[i + mdp[i]] == mstr[i - mdp[i]]) { mdp[i]++; }
-		if (i + mdp[i] > mx) { mx = i + mdp[i]; id = i; }
+		Mdp[i] = mx > i ? min(Mdp[(id << 1) - i], mx - i) : 1;
+		while (Mstr[i + Mdp[i]] == Mstr[i - Mdp[i]]) { Mdp[i]++; }
+		if (i + Mdp[i] > mx) { mx = i + Mdp[i]; id = i; }
 	}
 }
-//abaaba
-//i: 0 1 2 3 4 5 6 7 8 9 10 11 12 13
-//mstr[i]: $ # a # b # a # a $ b # a #
-//mdp[i]: 1 1 2 1 4 1 2 7 2 1 4 1 2 1
-char s[N];
+
 int main() {
 	while (~scanf("%s", s)) {
-		int len = strlen(s), ans = 0;
+		int len = strlen(s), Mlen = (len << 1) + 2, mxlen = 0, mxpos = 0;
 		Manacher(s, len);
-		for (int i = 0; i < (len << 1) + 2; i++) {
-			ans = max(ans, mdp[i] - 1);
+		for (int i = 0; i < Mlen; i++) {
+			if (mxlen < Mdp[i]) {
+				mxlen = Mdp[i]; mxpos = i;
+			}
 		}
-		printf("%d\n", ans);
+		printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
 	}
+}
+
+//------------------------------------------------------------------------------
+
+//字符串最小表示
+int minString(char s[], int m) {
+	int i, j, k;
+	char ss[m << 1];
+	for (i = 0; i < m; i++) { ss[i] = ss[i + m] = s[i]; }
+	for (i = k = 0, j = 1; k < m && i < m && j < m;) {
+		for (k = 0; k < m && ss[i + k] == ss[j + k]; k++);
+		if (k < m) {
+			if (ss[i + k] > ss[j + k]) { i += k + 1; }
+			else { j += k + 1; }
+			if (i == j) { j++; }
+		}
+	}
+	return min(i, j);
 }
 
 //------------------------------------------------------------------------------
@@ -51,49 +67,68 @@ int main() {
 char *strstr(char *str1, const char *str2);
 
 //KMP匹配算法 O(M+N)
-//next[]的含义：x[i-next[i]...i-1]=x[0...next[i]-1]
-//next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
-int next[N];
-void getNext(char x[], int m) {
-	int i = 0, j = -1; next[0] = -1;
+//Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
+//Next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
+int Next[N];
+
+void getNext(char x[], int m, int Next[]) {
+	int i = 0, j = -1; Next[0] = -1;
 	while (i < m) {
-		while (j != -1 && x[i] != x[j]) { j = next[j]; }
-		next[++i] = ++j;
+		while (j != -1 && x[i] != x[j]) { j = Next[j]; }
+		Next[++i] = ++j;
 	}
 }
 //返回x在y中出现的次数，可以重叠
 //x是模式串，y是主串
-int KMP_Count(char x[], int m, char y[], int n, int &longest, int &lp) {
-	getNext(x, m);
-	int i = 0, j = 0, ans = 0; longest = 0; lp = 0;
+int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int &lp*/) {
+	int i = 0, j = 0, ans = 0;
+	//longest = 0; lp = 0;
 	while (i < n) {
-		while (j != -1 && y[i] != x[j]) { j = next[j]; }
+		while (j != -1 && y[i] != x[j]) { j = Next[j]; }
 		i++; j++;
-		//返回最大匹配长度及对应起始位置
-		if (j > longest) { longest = j; lp = i − j; }
-		if (j >= m) { j = next[j]; ans++; }
+		//if (j > longest) { longest = j; lp = i − j; }
+		if (j >= m) { j = Next[j]; ans++; }
 	}
 	return ans;
 }
 
-//Sunday Algorithm BM算法的改进的算法
-void SUNDAY(char *text, char *patt) {
-	size_t temp[256], *shift = temp;
-	size_t i, patt_size = strlen(patt), text_size = strlen(text);
-	for (i = 0; i < 256; i++) { *(shift + i) = patt_size + 1; }
-	for (i = 0; i < patt_size; i++) {
-		*(shift + unsigned char(*(patt + i))) = patt_size - i;
-	}
-	size_t limit = text_size - patt_size + 1;
-	for (i = 0; i < limit; i += shift[text[i + patt_size]]) {
-		if (text[i] == *patt) {
-			char *match_text = text + i + 1;
-			size_t match_size = 1;
-			do {// 输出所有匹配的位置
-				if (match_size == patt_size) { cout << "the NO. is " << i << endl; }
-			} while ((*match_text++) == patt[match_size++]);
+//扩展KMP算法
+//Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
+//Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
+int Next[N], Extend[N];
+
+void preExtend(char x[], int m, int Next[]) {
+	int j = 0, k = 1;
+	while (j + 1 < m && x[j] == x[j + 1]) { j++; }
+	Next[0] = m; Next[1] = j;
+	for (int i = 2; i < m; i++) {
+		int p = Next[k] + k - 1, l = Next[i - k];
+		if (i + l < p + 1) { Next[i] = l; }
+		else {
+			j = max(0, p - i + 1);
+			while (i + j < m && x[i + j] == x[j]) { j++; }
+			Next[i] = j;
+			k = i;
 		}
 	}
 }
 
+void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
+	preExtend(x, m);
+	int j = 0, k = 0;
+	while (j < n && j < m && x[j] == y[j]) { j++; }
+	Extend[0] = j;
+	for (int i = 1; i < n; i++) {
+		int p = Extend[k] + k - 1, l = Next[i - k];
+		if (i + l < p + 1) { Extend[i] = l; }
+		else {
+			j = max(0, p - i + 1);
+			while (i + j < n && j < m && y[i + j] == x[j]) { j++; }
+			Extend[i] = j;
+			k = i;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 

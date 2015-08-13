@@ -1,4 +1,5 @@
 //输入一个整数
+//FOR G++ ONLY!!!
 template <class T>
 inline bool getInt(T &x) {
 	char c = 0; T sign = 1;
