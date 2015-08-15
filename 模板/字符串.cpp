@@ -5,12 +5,19 @@ inline size_t __stl_hash_string(const char *__s) {
 	return size_t(__h);
 }
 
-// BKDR Hash Function
+//BKDR Hash Function
 inline size_t BKDRHash(char *str) {
 	size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
 	while (*str) { h = h * seed + (*str++); }
 	return (h & 0x7FFFFFFF);
 }
+
+//for hash_map
+struct str_hash {
+	size_t operator()(const string &str) const {
+		return __stl_hash_string(str.c_str());
+	}
+};
 
 //------------------------------------------------------------------------------
 
