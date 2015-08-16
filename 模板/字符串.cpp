@@ -12,7 +12,9 @@ inline size_t BKDRHash(char *str) {
 	return (h & 0x7FFFFFFF);
 }
 
-//for hash_map
+//hash_map
+//C++: using namespace stdext;
+//G++: using namespace __gnu_cxx;
 struct str_hash {
 	size_t operator()(const string &str) const {
 		return __stl_hash_string(str.c_str());
@@ -73,7 +75,7 @@ int minString(char s[], int m) {
 //strstr 在串中查找指定字符串的第一次出现
 char *strstr(char *str1, const char *str2);
 
-//KMP匹配算法 O(M+N)
+//KMP O(M+N)
 //Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
 //Next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
 int Next[N];
@@ -99,7 +101,7 @@ int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int 
 	return ans;
 }
 
-//扩展KMP算法
+//扩展KMP
 //Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
 //Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
 int Next[N], Extend[N];
@@ -139,3 +141,75 @@ void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
 
 //------------------------------------------------------------------------------
 
+//AC自动机
+char buf[M];
+struct Trie {
+	int Next[N * 50][26], Fail[N * 50], End[N * 50];
+	int root, L;
+	int newnode() {
+		for (int i = 0; i < 26; i++) { Next[L][i] = -1; }
+		End[L++] = 0;
+		return L - 1;
+	}
+	void init() {
+		L = 0;
+		root = newnode();
+	}
+	void insert(char buf[]) {
+		int len = strlen(buf);
+		int now = root;
+		for (int i = 0; i < len; i++) {
+			if (Next[now][buf[i] - 'a'] == -1) {
+				Next[now][buf[i] - 'a'] = newnode();
+			}
+			now = Next[now][buf[i] - 'a'];
+		}
+		End[now]++;
+	}
+	void build() {
+		queue<int> que;
+		Fail[root] = root;
+		for (int i = 0; i < 26; i++) {
+			if (Next[root][i] == -1) {
+				Next[root][i] = root;
+			} else {
+				Fail[Next[root][i]] = root;
+				que.push(Next[root][i]);
+			}
+		}
+		while (!que.empty()) {
+			int now = que.front();
+			que.pop();
+			for (int i = 0; i < 26; i++) {
+				if (Next[now][i] == -1) {
+					Next[now][i] = Next[Fail[now]][i];
+				} else {
+					Fail[Next[now][i]] = Next[Fail[now]][i];
+					que.push(Next[now][i]);
+				}
+			}
+		}
+	}
+	int query(char buf[]) {
+		int len = strlen(buf);
+		int now = root;
+		int res = 0;
+		for (int i = 0; i < len; i++) {
+			now = Next[now][buf[i] - 'a'];
+			int temp = now;
+			while (temp != root) {
+				res += End[temp];
+				End[temp] = 0; //每串只数一次
+				temp = Fail[temp];
+			}
+		}
+		return res;
+	}
+	void debug() {
+		for (int i = 0; i < L; i++) {
+			printf("id = %3d,Fail = %3d,End = %3d,chi = [", i, Fail[i], End[i]);
+			for (int j = 0; j < 26; j++) { printf("%2d", Next[i][j]); }
+			printf("]\n");
+		}
+	}
+} ac;
