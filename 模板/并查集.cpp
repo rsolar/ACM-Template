@@ -1,5 +1,3 @@
-#define N 100005
-
 int fa[N];
 
 void init(int n) {
@@ -13,4 +11,14 @@ int findfa(int n) {
 inline void unite(int x, int y) {
 	x = findfa(x); y = findfa(y);
 	if (x != y) { fa[y] = x; }
+}
+
+//种类并查集 ans = 假话数量
+int ta = findfa(a), ta1 = findfa(a + n), ta2 = findfa(a + n + n), tb = findfa(b), tb1 = findfa(b + n), tb2 = findfa(b + n + n);
+if (d == 1) {
+	if (ta == tb1 || ta == tb2) { ans++; }
+	else { if (ta != tb) { unite(ta, tb); unite(ta1, tb1); unite(ta2, tb2); } }
+} else {
+	if (ta == tb || ta == tb2) { ans++; }
+	else { unite(ta, tb1); unite(ta1, tb2); unite(ta2, tb); }
 }

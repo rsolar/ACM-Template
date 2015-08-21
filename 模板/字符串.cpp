@@ -44,9 +44,7 @@ int main() {
 		int len = strlen(s), Mlen = (len << 1) + 2, mxlen = 0, mxpos = 0;
 		Manacher(s, len);
 		for (int i = 0; i < Mlen; i++) {
-			if (mxlen < Mdp[i]) {
-				mxlen = Mdp[i]; mxpos = i;
-			}
+			if (mxlen < Mdp[i]) { mxlen = Mdp[i]; mxpos = i; }
 		}
 		printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
 	}
@@ -78,9 +76,10 @@ char *strstr(char *str1, const char *str2);
 //KMP O(M+N)
 //Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
 //Next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
+char x[N], y[N];
 int Next[N];
 
-void getNext(char x[], int m, int Next[]) {
+void getNext(char x[], int m, int Next[] = Next) {
 	int i = 0, j = -1; Next[0] = -1;
 	while (i < m) {
 		while (j != -1 && x[i] != x[j]) { j = Next[j]; }
@@ -89,7 +88,7 @@ void getNext(char x[], int m, int Next[]) {
 }
 //返回x在y中出现的次数，可以重叠
 //x是模式串，y是主串
-int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int &lp*/) {
+int KMP_Count(char x[], int m, char y[], int n, int Next[] = Next/*, int &longest, int &lp*/) {
 	int i = 0, j = 0, ans = 0;
 	//longest = 0; lp = 0;
 	while (i < n) {
@@ -106,7 +105,7 @@ int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int 
 //Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
 int Next[N], Extend[N];
 
-void preExtend(char x[], int m, int Next[]) {
+void preExtend(char x[], int m, int Next[] = Next) {
 	int j = 0, k = 1;
 	while (j + 1 < m && x[j] == x[j + 1]) { j++; }
 	Next[0] = m; Next[1] = j;
@@ -122,7 +121,7 @@ void preExtend(char x[], int m, int Next[]) {
 	}
 }
 
-void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
+void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[] = Extend) {
 	preExtend(x, m);
 	int j = 0, k = 0;
 	while (j < n && j < m && x[j] == y[j]) { j++; }
@@ -141,15 +140,16 @@ void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
 
 //------------------------------------------------------------------------------
 
-//AC自动机
+//Trie / AC自动机
 char buf[M];
+
 struct Trie {
 	int Next[N * 50][26], Fail[N * 50], End[N * 50];
 	int root, L;
-	int newnode() {
-		for (int i = 0; i < 26; i++) { Next[L][i] = -1; }
-		End[L++] = 0;
-		return L - 1;
+	inline int newnode() {
+		memset(Next[L], -1, sizeof(Next[L]));
+		End[L] = 0;
+		return L++;
 	}
 	void init() {
 		L = 0;
@@ -159,10 +159,11 @@ struct Trie {
 		int len = strlen(buf);
 		int now = root;
 		for (int i = 0; i < len; i++) {
-			if (Next[now][buf[i] - 'a'] == -1) {
-				Next[now][buf[i] - 'a'] = newnode();
+			int c = buf[i] - 'a';
+			if (Next[now][c] == -1) {
+				Next[now][c] = newnode();
 			}
-			now = Next[now][buf[i] - 'a'];
+			now = Next[now][c];
 		}
 		End[now]++;
 	}
@@ -178,8 +179,7 @@ struct Trie {
 			}
 		}
 		while (!que.empty()) {
-			int now = que.front();
-			que.pop();
+			int now = que.front(); que.pop();
 			for (int i = 0; i < 26; i++) {
 				if (Next[now][i] == -1) {
 					Next[now][i] = Next[Fail[now]][i];
@@ -195,21 +195,15 @@ struct Trie {
 		int now = root;
 		int res = 0;
 		for (int i = 0; i < len; i++) {
-			now = Next[now][buf[i] - 'a'];
+			int c = buf[i] - 'a';
+			now = Next[now][c];
 			int temp = now;
 			while (temp != root) {
 				res += End[temp];
-				End[temp] = 0; //每串只数一次
+				End[temp] = 0;
 				temp = Fail[temp];
 			}
 		}
 		return res;
-	}
-	void debug() {
-		for (int i = 0; i < L; i++) {
-			printf("id = %3d,Fail = %3d,End = %3d,chi = [", i, Fail[i], End[i]);
-			for (int j = 0; j < 26; j++) { printf("%2d", Next[i][j]); }
-			printf("]\n");
-		}
 	}
 } ac;

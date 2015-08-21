@@ -76,7 +76,7 @@ struct Trie {
 			int temp = now;
 			while (temp != root) {
 				res += End[temp];
-				End[temp] = 0; //每串只数一次
+				End[temp] = 0;
 				temp = Fail[temp];
 			}
 		}
