@@ -96,20 +96,7 @@ struct Matrix {
 	}
 };
 
-int mul(Matrix &c, const Matrix &a, const Matrix &b) {
-	int i, j, k;
-	if (a.c != b.r) { return 0; }
-	c.r = a.r, c.c = b.c;
-	for (i = 0; i < c.r; i++) {
-		for (j = 0; j < c.c; j++) {
-			for (c.m[i][j] = k = 0; k < a.c; k++) {
-				c.m[i][j] += a.m[i][k] * b.m[k][j];
-			}
-		}
-	}
-	return 1;
-}
-
+//求逆矩阵
 int inv(Matrix &a) {
 	int i, j, k, is[N], js[N];
 	double t;
@@ -167,6 +154,7 @@ int inv(Matrix &a) {
 	return 1;
 }
 
+//求行列式
 double det(const Matrix &a) {
 	int i, j, k, sign = 0;
 	double b[N][N], ret = 1, t;

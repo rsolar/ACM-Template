@@ -144,7 +144,7 @@ void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[]
 char buf[M];
 
 struct Trie {
-	int Next[N * 50][26], Fail[N * 50], End[N * 50];
+	int Next[N * 20][26], Fail[N * 20], End[N * 20];
 	int root, L;
 	inline int newnode() {
 		memset(Next[L], -1, sizeof(Next[L]));
