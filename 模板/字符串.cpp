@@ -12,7 +12,7 @@ inline size_t BKDRHash(char *str) {
 	return (h & 0x7FFFFFFF);
 }
 
-//hash_map
+//hash_map<string, XXX>
 //C++: using namespace stdext;
 //G++: using namespace __gnu_cxx;
 struct str_hash {
@@ -206,4 +206,4 @@ struct Trie {
 		}
 		return res;
 	}
-} ac;
+} trie;
