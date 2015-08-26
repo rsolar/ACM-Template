@@ -1,7 +1,6 @@
 //输入一个整数
-//FOR G++ ONLY!!!
-template <class T>
-inline bool getInt(T &x) {
+//G++ ONLY?
+template <class T> inline bool getInt(T &x) {
 	char c = 0; T sign = 1;
 	if ((c = getchar()) == EOF) { return false; }
 	while ((c < '0' || c > '9') && c != '-') { c = getchar(); };
@@ -13,8 +12,7 @@ inline bool getInt(T &x) {
 }
 
 //输出一个整数
-template <class T>
-inline void printInt(T x) {
+template <class T> inline void printInt(T x) {
 	if (x > 9) { printInt(x / 10); }
 	putchar(x % 10 + '0');
 }

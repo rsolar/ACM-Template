@@ -1,10 +1,9 @@
 #define fabs(x) ((x)>=0?(x):-(x))
 #define isZero(x) (fabs(x)<1e-10)
-#define type_m ll
 
-struct Matrix {
+template <class T = ll> struct Matrix {
 	int r, c;
-	type_m m[N][N];
+	T m[N][N];
 	void init() {
 		for (int i = 0; i < r; i++) {
 			for (int j = 0; j < c; j++) {
