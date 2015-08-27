@@ -2,7 +2,7 @@
 template <class T> int BS(const T a[], int L, int R, int x) {
 	int l = L, r = R, mid;
 	while (l <= r) {
-		mid = (l + r) >> 1;
+		mid = l + r >> 1;
 		if (a[mid] > x) { mid = r = mid - 1;}
 		else if (a[mid] < x) { l = mid + 1;}
 		else { break; }
@@ -10,20 +10,20 @@ template <class T> int BS(const T a[], int L, int R, int x) {
 	return a[mid] == x ? mid : -1;
 }
 
-template <class T> int upBS(const T a[], int L, int R) {
+template <class T> int BSup(const T a[], int L, int R) {
 	int l = L, r = R, mid, ans = -1;
 	while (l <= r) {
-		mid = (l + r) >> 1;
+		mid = l + r >> 1;
 		if (judge(a[mid])) { l = mid + 1; ans = a[mid]; }
 		else { r = mid - 1; }
 	}
 	return ans;
 }
 
-template <class T> int lowBS(const T a[], int L, int R) {
+template <class T> int BSlow(const T a[], int L, int R) {
 	int l = L, r = R, mid, ans = -1;
 	while (l <= r) {
-		mid = (l + r) >> 1;
+		mid = l + r >> 1;
 		if (judge(a[mid])) { r = mid - 1; ans = a[mid]; }
 		else { l = mid + 1; }
 	}

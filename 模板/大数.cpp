@@ -7,7 +7,7 @@
 #define DLEN 4
 class BigNum {
 private:
-	int a[500]; //可以控制大数的位数
+	int a[500]; //大数位数
 	int len;
 public:
 	BigNum() : len(1) {memset(a, 0, sizeof(a));} //构造函数
@@ -250,4 +250,3 @@ void BigNum::print() { //输出大数
 	}
 	printf("\n");
 }
-

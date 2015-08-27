@@ -238,3 +238,14 @@ bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
 	}
 	return flag;
 }
+
+//组合数C(n, r) = C(n, n - r)
+int com(int n, int r) {
+	if (n - r > r) { r = n - r; }
+	int s = 1;
+	for (int i = 0, j = 1; i < r; i++) {
+		s *= n - i;
+		for (; j <= r && s % j == 0; j++) { s /= j; }
+	}
+	return s;
+}
