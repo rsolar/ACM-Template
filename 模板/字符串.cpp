@@ -140,20 +140,55 @@ void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[]
 
 //------------------------------------------------------------------------------
 
-//Trie / AC自动机
+//Trie
 char buf[M];
-
 struct Trie {
-	int Next[N * 20][26], Fail[N * 20], End[N * 20];
+	int Next[N * 10][26], End[N * 10];
 	int root, L;
-	inline int newnode() {
+	int newnode() {
 		memset(Next[L], -1, sizeof(Next[L]));
 		End[L] = 0;
 		return L++;
 	}
 	void init() {
-		L = 0;
-		root = newnode();
+		L = 0; root = newnode();
+	}
+	void insert(char buf[]) {
+		int len = strlen(buf);
+		int now = root;
+		for (int i = 0; i < len; i++) {
+			int c = buf[i] - 'a';
+			if (Next[now][c] == -1) {
+				Next[now][c] = newnode();
+			}
+			now = Next[now][c];
+		}
+		End[now]++;
+	}
+	int query(char buf[]) {
+		int len = strlen(buf);
+		int now = root;
+		for (int i = 0; i < len; i++) {
+			int c = buf[i] - 'a';
+			if (Next[now][c] == -1) { return -1; }
+			now = Next[now][c];
+		}
+		return End[now];
+	}
+} trie;
+
+//AC自动机
+char buf[M];
+struct Trie {
+	int Next[N * 20][26], Fail[N * 20], End[N * 20];
+	int root, L;
+	int newnode() {
+		memset(Next[L], -1, sizeof(Next[L]));
+		End[L] = 0;
+		return L++;
+	}
+	void init() {
+		L = 0; root = newnode();
 	}
 	void insert(char buf[]) {
 		int len = strlen(buf);
@@ -200,10 +235,190 @@ struct Trie {
 			int temp = now;
 			while (temp != root) {
 				res += End[temp];
-				End[temp] = 0;
+				//End[temp] = 0;
 				temp = Fail[temp];
 			}
 		}
 		return res;
 	}
-} trie;
+} ac;
+
+//后缀数组
+/*
+*suffix array
+*待排序数组长度为n,放在0~n-1中，在最后面补一个0
+*da(str, n + 1, sa, rnk, height, , );//注意是n + 1;
+*例如:
+*n = 8; num[] = { 1, 1, 2, 1, 1, 1, 1, 2, $ }; 注意num最后一位为0,其他大于0
+*sa[] = { 8, 3, 4, 5, 0, 6, 1, 7, 2 }; sa[1 ~ n]为有效值,sa[0]必定为n是无效值
+*rnk[] = { 4, 6, 8, 1, 2, 3, 5, 7, 0 }; rnk[0 ~ n - 1]为有效值,rnk[n]必定为0无效值
+*height[]= { 0, 0, 3, 2, 3, 1, 2, 0, 1 }; height[2 ~ n]为有效值
+*/
+//DC3 O(n)
+#define N 2005
+#define F(x) ((x)/3+((x)%3==1?0:tb))
+#define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
+int wa[N * 3], wb[N * 3], wv[N * 3], wss[N * 3];
+int c0(int *r, int a, int b) {
+	return r[a] == r[b] && r[a + 1] == r[b + 1] && r[a + 2] == r[b + 2];
+}
+
+int c12(int k, int *r, int a, int b) {
+	if (k == 2) { return r[a] < r[b] || (r[a] == r[b] && c12(1, r, a + 1, b + 1)); }
+	else { return r[a] < r[b] || (r[a] == r[b] && wv[a + 1] < wv[b + 1]); }
+}
+
+void Sort(int *r, int *a, int *b, int n, int m) {
+	for (int i = 0; i < n; i++) { wv[i] = r[a[i]]; }
+	for (int i = 0; i < m; i++) { wss[i] = 0; }
+	for (int i = 0; i < n; i++) { wss[wv[i]]++; }
+	for (int i = 1; i < m; i++) { wss[i] += wss[i - 1]; }
+	for (int i = n - 1; i >= 0; i--) { b[--wss[wv[i]]] = a[i]; }
+}
+
+void dc3(int *r, int *sa, int n, int m) {
+	int i, j, *rn = r + n;
+	int *san = sa + n, ta = 0, tb = (n + 1) / 3, tbc = 0, p;
+	r[n] = r[n + 1] = 0;
+	for (i = 0; i < n; i++) { if (i % 3 != 0) { wa[tbc++] = i; } }
+	Sort(r + 2, wa, wb, tbc, m);
+	Sort(r + 1, wb, wa, tbc, m);
+	Sort(r, wa, wb, tbc, m);
+	for (p = 1, rn[F(wb[0])] = 0, i = 1; i < tbc; i++) {
+		rn[F(wb[i])] = c0(r, wb[i - 1], wb[i]) ? p - 1 : p++;
+	}
+	if (p < tbc) { dc3(rn, san, tbc, p); }
+	else { for (i = 0; i < tbc; i++) { san[rn[i]] = i; } }
+	for (i = 0; i < tbc; i++) { if (san[i] < tb) { wb[ta++] = san[i] * 3; } }
+	if (n % 3 == 1) { wb[ta++] = n - 1; }
+	Sort(r, wb, wa, ta, m);
+	for (i = 0; i < tbc; i++) { wv[wb[i] = G(san[i])] = i; }
+	for (i = 0, j = 0, p = 0; i < ta && j < tbc; p++) {
+		sa[p] = c12(wb[j] % 3, r, wa[i], wb[j]) ? wa[i++] : wb[j++];
+	}
+	for (; i < ta; p++) { sa[p] = wa[i++]; }
+	for (; j < tbc; p++) { sa[p] = wb[j++]; }
+}
+//str和sa也要三倍
+void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
+	for (int i = n; i < n * 3; i++) { str[i] = 0; }
+	dc3(str, sa, n + 1, m);
+	int i, j, k = 0;
+	for (i = 0; i <= n; i++) { rnk[sa[i]] = i; }
+	for (i = 0; i < n; i++) {
+		if (k) { k--; }
+		j = sa[rnk[i] - 1];
+		while (str[i + k] == str[j + k]) { k++; }
+		height[rnk[i]] = k;
+	}
+}
+
+//后缀自动机
+#define N 250005
+struct SAM_Node {
+	SAM_Node *fa, *next[26];
+	int len;
+	int id, pos;
+	SAM_Node() {}
+	SAM_Node(int _len) : len(_len), fa(NULL) { memset(next, 0, sizeof(next)); }
+};
+SAM_Node SAM_node[N * 2], *SAM_root, *SAM_last;
+int SAM_size;
+
+SAM_Node *newSAM_Node(int len) {
+	SAM_node[SAM_size] = SAM_Node(len);
+	SAM_node[SAM_size].id = SAM_size;
+	return &SAM_node[SAM_size++];
+}
+
+SAM_Node *newSAM_Node(SAM_Node *p) {
+	SAM_node[SAM_size] = *p;
+	SAM_node[SAM_size].id = SAM_size;
+	return &SAM_node[SAM_size++];
+}
+
+void SAM_init() {
+	SAM_size = 0; SAM_node[0].pos = 0;
+	SAM_root = SAM_last = newSAM_Node(0);
+}
+
+void SAM_add(int x, int len) {
+	SAM_Node *p = SAM_last, *np = newSAM_Node(p->len + 1);
+	np->pos = len;
+	SAM_last = np;
+	for (; p && !p->next[x]; p = p->fa) { p->next[x] = np; }
+	if (!p) { np->fa = SAM_root; return; }
+	SAM_Node *q = p->next[x];
+	if (q->len == p->len + 1) { np->fa = q; return; }
+	SAM_Node *nq = newSAM_Node(q);
+	nq->len = p->len + 1;
+	q->fa = nq;
+	np->fa = nq;
+	for (; p && p->next[x] == q; p = p->fa) { p->next[x] = nq; }
+}
+
+void SAM_build(char *s) {
+	SAM_init();
+	for (int i = 0; i < s[i]; i++) { SAM_add(s[i] - 'a', i + 1); }
+}
+
+//加入串后进行拓扑排序
+char str[N];
+int topocnt[N];
+SAM_Node *topsam[N * 2];
+int n = strlen(str);
+SAM_build(str);
+memset(topocnt, 0, sizeof(topocnt));
+for (int i = 0; i < SAM_size; i++) { topocnt[SAM_node[i].len]++; }
+for (int i = 1; i <= n; i++) { topocnt[i] += topocnt[i - 1]; }
+for (int i = 0; i < SAM_size; i++) { topsam[--topocnt[SAM_node[i].len]] = &SAM_node[i]; }
+//多串的建立,注意SAM_init()的调用
+void SAM_build(char *s) {
+	int len = strlen(s);
+	SAM_last = SAM_root;
+	for (int i = 0; i < len; i++) {
+		if (!SAM_last->next[s[i] - '0'] || !(SAM_last->next[s[i] - '0']->len == i + 1)) {
+			SAM_add(s[i] - '0', i + 1);
+		} else { SAM_last = SAM_last->next[s[i] - '0']; }
+	}
+}
+
+//回文自动机
+char buf[M];
+struct PalindromicTree {
+	int Next[N][26], Fail[N], cnt[N], len[N];
+	int num[N]; //以i节点为回文串的末尾字符结尾的但不包含本条路径上的回文串的数目
+	int tol, S[N];
+	int root, L;
+	int newnode(int l) {
+		memset(Next[L], 0, sizeof(Next[L]));
+		cnt[L] = 0; num[L] = 0; len[L] = l;
+		return L++;
+	}
+	void init() {
+		L = 0; tol = 0; S[tol] = -1;
+		root = newnode(0); Fail[root] = newnode(-1);
+	}
+	int getFail(int x) {
+		while (S[tol - len[x] - 1] != S[tol]) { x = Fail[x]; }
+		return x;
+	}
+	void Insert(char buf[]) {
+		int len = strlen(buf);
+		int cur = root, now;
+		for (int i = 0; i < len; i++) {
+			int c = buf[i] - 'a';
+			S[++tol] = c;
+			cur = getFail(cur);
+			if (Next[cur][c] == 0) {
+				now = newnode(len[cur] + 2);
+				Fail[now] = Next[getFail(Fail[cur])][c];
+				Next[cur][c] = now;
+				num[now] = num[Fail[now]] + 1;
+			}
+			cur = Next[cur][c];
+			cnt[cur]++;
+		}
+		for (int i = L - 1; i >= 0; --i) { cnt[Fail[i]] += cnt[i]; }
+	}
+} pa;
