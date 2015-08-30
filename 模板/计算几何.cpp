@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 //³£Á¿Çø
 const double INF        = 1e10;     // ÎŞÇî´ó
-const double EPS        = 1e-15;    // ¼ÆËã¾«¶È
+const double EPS        = 1e-8;    // ¼ÆËã¾«¶È
 const int LEFT          = 0;        // µãÔÚÖ±Ïß×ó±ß
 const int RIGHT         = 1;        // µãÔÚÖ±ÏßÓÒ±ß
 const int ONLINE        = 2;        // µãÔÚÖ±ÏßÉÏ
@@ -67,12 +67,6 @@ typedef vector<Point3D> Points3D;   // ÈıÎ¬µã¼¯
 
 ///////////////////////////////////////////////////////////////////
 //»ù±¾º¯ÊıÇø
-inline double max(double x, double y) {
-	return x > y ? x : y;
-}
-inline double min(double x, double y) {
-	return x > y ? y : x;
-}
 inline bool ZERO(double x) {            // x == 0
 	return (fabs(x) < EPS);
 }
@@ -114,17 +108,14 @@ inline double FIX(double x) {
 /////////////////////////////////////////////////////////////////////////////////////
 //¶şÎ¬Ê¸Á¿ÔËËã
 bool operator==(Point p1, Point p2) {
-	return (EQ(p1.x, p2.x) &&  EQ(p1.y, p2.y));
+	return (EQ(p1.x, p2.x) && EQ(p1.y, p2.y));
 }
 bool operator!=(Point p1, Point p2) {
-	return (NEQ(p1.x, p2.x) ||  NEQ(p1.y, p2.y));
+	return (NEQ(p1.x, p2.x) || NEQ(p1.y, p2.y));
 }
 bool operator<(Point p1, Point p2) {
-	if (NEQ(p1.x, p2.x)) {
-		return (p1.x < p2.x);
-	} else {
-		return (p1.y < p2.y);
-	}
+	if (NEQ(p1.x, p2.x)) { return (p1.x < p2.x); }
+	else { return (p1.y < p2.y); }
 }
 Point operator+(Point p1, Point p2) {
 	return Point(p1.x + p2.x, p1.y + p2.y);
@@ -158,13 +149,9 @@ bool operator==(Point3D p1, Point3D p2) {
 	return (EQ(p1.x, p2.x) && EQ(p1.y, p2.y) && EQ(p1.z, p2.z));
 }
 bool operator<(Point3D p1, Point3D p2) {
-	if (NEQ(p1.x, p2.x)) {
-		return (p1.x < p2.x);
-	} else if (NEQ(p1.y, p2.y)) {
-		return (p1.y < p2.y);
-	} else {
-		return (p1.z < p2.z);
-	}
+	if (NEQ(p1.x, p2.x)) { return (p1.x < p2.x); }
+	else if (NEQ(p1.y, p2.y)) { return (p1.y < p2.y); }
+	else { return (p1.z < p2.z); }
 }
 Point3D operator+(Point3D p1, Point3D p2) {
 	return Point3D(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
@@ -173,9 +160,7 @@ Point3D operator-(Point3D p1, Point3D p2) {
 	return Point3D(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
 }
 Point3D operator*(Point3D p1, Point3D p2) { // ¼ÆËã²æ³Ë p1 x p2
-	return Point3D(p1.y * p2.z - p1.z * p2.y,
-	               p1.z * p2.x - p1.x * p2.z,
-	               p1.x * p2.y - p1.y * p2.x);
+	return Point3D(p1.y * p2.z - p1.z * p2.y, p1.z * p2.x - p1.x * p2.z, p1.x * p2.y - p1.y * p2.x);
 }
 double operator&(Point3D p1, Point3D p2) { // ¼ÆËãµã»ı p1¡¤p2
 	return (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z);
@@ -239,13 +224,9 @@ bool OnLine(Point3D p, Line3D L) { // ÅĞ¶ÏÈıÎ¬¿Õ¼äÖĞµãpÊÇ·ñÔÚÖ±ÏßLÉÏ
 }
 int Relation(Point p, Line L) { // ¼ÆËãµãpÓëÖ±ÏßLµÄÏà¶Ô¹ØÏµ ,·µ»ØONLINE,LEFT,RIGHT
 	double res = (L.p2 - L.p1) * (p - L.p1);
-	if (EQ(res, 0)) {
-		return ONLINE;
-	} else if (res > 0) {
-		return LEFT;
-	} else {
-		return RIGHT;
-	}
+	if (EQ(res, 0)) { return ONLINE; }
+	else if (res > 0) { return LEFT; }
+	else { return RIGHT; }
 }
 bool SameSide(Point p1, Point p2, Line L) { // ÅĞ¶Ïµãp1, p2ÊÇ·ñÔÚÖ±ÏßLµÄÍ¬²à
 	double m1 = (p1 - L.p1) * (L.p2 - L.p1);
@@ -253,13 +234,10 @@ bool SameSide(Point p1, Point p2, Line L) { // ÅĞ¶Ïµãp1, p2ÊÇ·ñÔÚÖ±ÏßLµÄÍ¬²à
 	return GT(m1 * m2, 0);
 }
 bool OnLineSeg(Point p, Line L) { // ÅĞ¶Ï¶şÎ¬Æ½ÃæÉÏµãpÊÇ·ñÔÚÏß¶ÎlÉÏ
-	return (ZERO((L.p1 - p) * (L.p2 - p)) &&
-	        LEQ((p.x - L.p1.x) * (p.x - L.p2.x), 0) &&
-	        LEQ((p.y - L.p1.y) * (p.y - L.p2.y), 0));
+	return (ZERO((L.p1 - p) * (L.p2 - p)) && LEQ((p.x - L.p1.x) * (p.x - L.p2.x), 0) && LEQ((p.y - L.p1.y) * (p.y - L.p2.y), 0));
 }
 bool OnLineSeg(Point3D p, Line3D L) { // ÅĞ¶ÏÈıÎ¬¿Õ¼äÖĞµãpÊÇ·ñÔÚÏß¶ÎlÉÏ
-	return (ZERO((L.p1 - p) * (L.p2 - p)) &&
-	        EQ(Norm(p - L.p1) + Norm(p - L.p2), Norm(L.p2 - L.p1)));
+	return (ZERO((L.p1 - p) * (L.p2 - p)) && EQ(Norm(p - L.p1) + Norm(p - L.p2), Norm(L.p2 - L.p1)));
 }
 Point SymPoint(Point p, Line L) { // Çó¶şÎ¬Æ½ÃæÉÏµãp¹ØÓÚÖ±ÏßLµÄ¶Ô³Æµã
 	Point result;
@@ -271,13 +249,11 @@ Point SymPoint(Point p, Line L) { // Çó¶şÎ¬Æ½ÃæÉÏµãp¹ØÓÚÖ±ÏßLµÄ¶Ô³Æµã
 	return result;
 }
 bool Coplanar(Points3D points) { // ÅĞ¶ÏÒ»¸öµã¼¯ÖĞµÄµãÊÇ·ñÈ«²¿¹²Ãæ
-	int i;
 	Point3D p;
-
 	if (points.size() < 4) { return true; }
 	p = (points[2] - points[0]) * (points[1] - points[0]);
-	for (i = 3; i < points.size(); i++) {
-		if (! ZERO(p & points[i])) { return false; }
+	for (int i = 3; i < points.size(); i++) {
+		if (!ZERO(p & points[i])) { return false; }
 	}
 	return true;
 }
@@ -308,21 +284,15 @@ bool LineSegIntersect(Line3D L1, Line3D L2) { // ÅĞ¶ÏÈıÎ¬µÄÁ½ÌõÏß¶ÎÊÇ·ñÏà½»
 // ·µ»ØÖµËµÃ÷ÁËÁ½ÌõÖ±ÏßµÄÎ»ÖÃ¹ØÏµ:  COLINE   -- ¹²Ïß  PARALLEL -- Æ½ĞĞ  CROSS    -- Ïà½»
 int CalCrossPoint(Line L1, Line L2, Point &P) {
 	double A1, B1, C1, A2, B2, C2;
-
 	A1 = L1.p2.y - L1.p1.y;
 	B1 = L1.p1.x - L1.p2.x;
 	C1 = L1.p2.x * L1.p1.y - L1.p1.x * L1.p2.y;
-
 	A2 = L2.p2.y - L2.p1.y;
 	B2 = L2.p1.x - L2.p2.x;
 	C2 = L2.p2.x * L2.p1.y - L2.p1.x * L2.p2.y;
-
 	if (EQ(A1 * B2, B1 * A2))    {
-		if (EQ((A1 + B1) * C2, (A2 + B2) * C1)) {
-			return COLINE;
-		} else {
-			return PARALLEL;
-		}
+		if (EQ((A1 + B1) * C2, (A2 + B2) * C1)) { return COLINE; }
+		else { return PARALLEL; }
 	} else {
 		P.x = (B2 * C1 - B1 * C2) / (A2 * B1 - A1 * B2);
 		P.y = (A1 * C2 - A2 * C1) / (A2 * B1 - A1 * B2);
@@ -339,11 +309,9 @@ int CalCrossPoint(Line3D L1, Line3D L2, Point3D &P) {
 Point NearestPointToLine(Point P, Line L) {
 	Point result;
 	double a, b, t;
-
 	a = L.p2.x - L.p1.x;
 	b = L.p2.y - L.p1.y;
 	t = ((P.x - L.p1.x) * a + (P.y - L.p1.y) * b) / (a * a + b * b);
-
 	result.x = L.p1.x + a * t;
 	result.y = L.p1.y + b * t;
 	return result;
@@ -352,27 +320,21 @@ Point NearestPointToLine(Point P, Line L) {
 Point NearestPointToLineSeg(Point P, Line L) {
 	Point result;
 	double a, b, t;
-
 	a = L.p2.x - L.p1.x;
 	b = L.p2.y - L.p1.y;
 	t = ((P.x - L.p1.x) * a + (P.y - L.p1.y) * b) / (a * a + b * b);
-
 	if (GEQ(t, 0) && LEQ(t, 1)) {
 		result.x = L.p1.x + a * t;
 		result.y = L.p1.y + b * t;
 	} else {
-		if (Norm(P - L.p1) < Norm(P - L.p2)) {
-			result = L.p1;
-		} else {
-			result = L.p2;
-		}
+		if (Norm(P - L.p1) < Norm(P - L.p2)) { result = L.p1; }
+		else { result = L.p2; }
 	}
 	return result;
 }
 // ¼ÆËãÏÕ¶ÎL1µ½Ïß¶ÎL2µÄ×î¶Ì¾àÀë
 double MinDistance(Line L1, Line L2) {
 	double d1, d2, d3, d4;
-
 	if (LineSegIntersect(L1, L2)) {
 		return 0;
 	} else {
@@ -380,7 +342,6 @@ double MinDistance(Line L1, Line L2) {
 		d2 = Norm(NearestPointToLineSeg(L1.p2, L2) - L1.p2);
 		d3 = Norm(NearestPointToLineSeg(L2.p1, L1) - L2.p1);
 		d4 = Norm(NearestPointToLineSeg(L2.p2, L1) - L2.p2);
-
 		return min(min(d1, d2), min(d3, d4));
 	}
 }
@@ -402,7 +363,6 @@ double Inclination(Line3D L1, Line3D L2) {
 
 /////////////////////////////////////////////////////////////////////////////
 //¶à±ßĞĞÎÊÌâ:
-//
 // ÅĞ¶ÏµãpÊÇ·ñÔÚÍ¹¶à±ßĞÎpolyÄÚ
 // polyµÄ¶¥µãÊıÄ¿Òª´óÓÚµÈÓÚ3
 // ·µ»ØÖµÎª£º
@@ -413,21 +373,15 @@ int InsideConvex(Point p, const Polygon &poly) { // ÅĞ¶ÏµãpÊÇ·ñÔÚÍ¹¶à±ßĞÎpolyÄÚ
 	Point q(0, 0);
 	Line side;
 	int i, n = poly.size();
-
 	for (i = 0; i < n; i++) {
-		q.x += poly[i].x;
-		q.y += poly[i].y;
+		q.x += poly[i].x; q.y += poly[i].y;
 	}
-	q.x /= n;
-	q.y /= n;
+	q.x /= n; q.y /= n;
 	for (i = 0; i < n; i++) {
 		side.p1 = poly[i];
 		side.p2 = poly[(i + 1) % n];
-		if (OnLineSeg(p, side)) {
-			return BORDER;
-		} else if (!SameSide(p, q, side)) {
-			return OUTSIDE;
-		}
+		if (OnLineSeg(p, side)) { return BORDER; }
+		else if (!SameSide(p, q, side)) { return OUTSIDE; }
 	}
 	return INSIDE;
 }
@@ -436,7 +390,6 @@ int InsideConvex(Point p, const Polygon &poly) { // ÅĞ¶ÏµãpÊÇ·ñÔÚÍ¹¶à±ßĞÎpolyÄÚ
 bool IsConvex(const Polygon &poly) { // ÅĞ¶Ï¶à±ßĞÎpolyÊÇ·ñÊÇÍ¹µÄ
 	int i, n, rel;
 	Line side;
-
 	n = poly.size();
 	if (n < 3) { return false; }
 	side.p1 = poly[0];
@@ -458,24 +411,19 @@ bool IsConvex(const Polygon &poly) { // ÅĞ¶Ï¶à±ßĞÎpolyÊÇ·ñÊÇÍ¹µÄ
 int InsidePolygon(const Polygon &poly, Point p) { // ÅĞ¶ÏµãpÊÇ·ñÔÚ¼òµ¥¶à±ßĞÎpolyÄÚ, ¶à±ßĞÎ¿ÉÒÔÊÇÍ¹µÄ»ò°¼µÄ
 	int i, n, count;
 	Line ray, side;
-
 	n = poly.size();
 	count = 0;
 	ray.p1    = p;
 	ray.p2.y  = p.y;
 	ray.p2.x  = - INF;
-
 	for (i = 0; i < n; i++) {
 		side.p1 = poly[i];
 		side.p2 = poly[(i + 1) % n];
-
 		if (OnLineSeg(p, side)) {
 			return BORDER;
 		}
 		// Èç¹ûsideÆ½ĞĞxÖáÔò²»×÷¿¼ÂÇ
-		if (EQ(side.p1.y, side.p2.y)) {
-			continue;
-		}
+		if (EQ(side.p1.y, side.p2.y)) { continue; }
 		if (OnLineSeg(side.p1, ray)) {
 			if (GT(side.p1.y, side.p2.y)) { count++; }
 		} else if (OnLineSeg(side.p2, ray)) {
@@ -494,17 +442,12 @@ bool InsidePolygon(const Polygon &poly, Line L) { // ÅĞ¶ÏÏß¶ÎÊÇ·ñÔÚ¶à±ßĞÎÄÚ (Ïß¶
 	Points points;
 	Point p;
 	Line side;
-
-	result = ((InsidePolygon(poly, L.p1) != OUTSIDE) &&
-	          (InsidePolygon(poly, L.p2) != OUTSIDE));
-
+	result = ((InsidePolygon(poly, L.p1) != OUTSIDE) && (InsidePolygon(poly, L.p2) != OUTSIDE));
 	if (!result) { return false; }
-
 	n = poly.size();
 	for (i = 0; i < n; i++) {
 		side.p1 = poly[i];
 		side.p2 = poly[(i + 1) % n];
-
 		if (OnLineSeg(L.p1, side)) {
 			points.push_back(L.p1);
 		} else if (OnLineSeg(L.p2, side)) {
@@ -519,7 +462,6 @@ bool InsidePolygon(const Polygon &poly, Line L) { // ÅĞ¶ÏÏß¶ÎÊÇ·ñÔÚ¶à±ßĞÎÄÚ (Ïß¶
 	}
 	// ¶Ô½»µã½øĞĞÅÅĞò
 	sort(points.begin(), points.end());
-
 	for (i = 1; i < points.size(); i++) {
 		if (points[i - 1] != points[i]) {
 			p.x = (points[i - 1].x + points[i].x) / 2.0;
@@ -540,16 +482,12 @@ bool GrahamComp(const Point &left, const Point &right) {
 		return (left.angle < right.angle);
 	}
 }
-
 void GrahamScan(Points &points, Polygon &result) {
 	int i, k, n;
 	Point p;
-
 	n = points.size();
 	result.clear();
-
 	if (n < 3) { return; }
-
 	// Ñ¡È¡pointsÖĞy×ø±ê×îĞ¡µÄµãpoints[k]£¬
 	// Èç¹ûÕâÑùµÄµãÓĞ¶à¸ö£¬ÔòÈ¡×î×ó±ßµÄÒ»¸ö
 	k = 0;
@@ -561,18 +499,15 @@ void GrahamScan(Points &points, Polygon &result) {
 		}
 	}
 	swap(points[0], points[k]);
-
 	// ÏÖÔÚpointsÖĞy×ø±ê×îĞ¡µÄµãÔÚpoints[0]
 	// ¼ÆËãÃ¿¸öµãÏà¶ÔÓÚpoints[0]µÄ¼«½ÇºÍ¾àÀë
 	for (i = 1; i < n; i++) {
 		points[i].angle = atan2(points[i].y - points[0].y, points[i].x - points[0].x);
 		points[i].dis   = Norm(points[i] - points[0]);
 	}
-
 	// ¶Ô¶¥µã°´ÕÕÏà¶Ôpoints[0]µÄ¼«½Ç´ÓĞ¡µ½´ó½øĞĞÅÅĞò
 	// ¶ÔÓÚ¼«½ÇÏàÍ¬µÄ°´ÕÕ¾àpoints[0]µÄ¾àÀë´ÓĞ¡µ½´óÅÅĞò
 	sort(points.begin() + 1, points.end(), GrahamComp);
-
 	// ÏÂÃæ¼ÆËãÍ¹°ü
 	result.push_back(points[0]);
 	for (i = 1; i < n; i++) {
@@ -601,14 +536,12 @@ double CutConvex(const Polygon &poly, const Line &line, Polygon result[3]) {
 	Line side;
 	Point p;
 	int i, n, cur, pre;
-
 	result[LEFT].clear();
 	result[RIGHT].clear();
 	result[ONLINE].clear();
 	n = poly.size();
 	if (n == 0) { return 0; }
 	pre = cur = Relation(poly[0], line);
-
 	for (i = 0; i < n; i++) {
 		cur = Relation(poly[(i + 1) % n], line);
 		if (cur == pre) {
@@ -624,21 +557,15 @@ double CutConvex(const Polygon &poly, const Line &line, Polygon result[3]) {
 			pre = cur;
 		}
 	}
-
 	sort(points.begin(), points.end());
-
-	if (points.size() < 2) {
-		return 0;
-	} else {
-		return Norm(points.front() - points.back());
-	}
+	if (points.size() < 2) { return 0; }
+	else { return Norm(points.front() - points.back()); }
 }
 // Çó¶à±ßĞÎµÄÖØĞÄ£¬ÊÊÓÃÓÚÍ¹µÄ»ò°¼µÄ¼òµ¥¶à±ßĞÎ
 // ¸ÃËã·¨¿ÉÒÔÒ»±ß¶ÁÈë¶à±ßĞÔµÄ¶¥µãÒ»±ß¼ÆËãÖØĞÄ
 Point CenterOfPolygon(const Polygon &poly) {
 	Point p, p0, p1, p2, p3;
 	double m, m0;
-
 	p1 = poly[0];
 	p2 = poly[1];
 	p.x = p.y = m = 0;
@@ -660,8 +587,7 @@ Point CenterOfPolygon(const Polygon &poly) {
 // ÅĞ¶ÏÁ½¸ö¾ØĞÎÊÇ·ñÏà½»
 // Èç¹ûÏàÁÚ²»ËãÏà½»
 bool Intersect(Rect_2 r1, Rect_2 r2) {
-	return (max(r1.xl, r2.xl) < min(r1.xh, r2.xh) &&
-	        max(r1.yl, r2.yl) < min(r1.yh, r2.yh));
+	return (max(r1.xl, r2.xl) < min(r1.xh, r2.xh) && max(r1.yl, r2.yl) < min(r1.yh, r2.yh));
 }
 // ÅĞ¶Ï¾ØĞÎr2ÊÇ·ñ¿ÉÒÔ·ÅÖÃÔÚ¾ØĞÎr1ÄÚ
 // r2¿ÉÒÔÈÎÒâµØĞı×ª
@@ -686,7 +612,6 @@ bool IsContain(Rect r1, Rect r2) {    //¾ØĞÎµÄw>h
 Point Center(const Circle &C) { //Ô²ĞÄ
 	return C.c;
 }
-
 double CommonArea(const Circle &A, const Circle &B) { //Á½¸öÔ²µÄ¹«¹²Ãæ»ı
 	double area = 0.0;
 	const Circle &M = (A.r > B.r) ? A : B;
@@ -707,14 +632,12 @@ double CommonArea(const Circle &A, const Circle &B) { //Á½¸öÔ²µÄ¹«¹²Ãæ»ı
 	}
 	return area;
 }
-
 bool IsInCircle(const Circle &C, const Rect_2 &rect) { //ÅĞ¶ÏÔ²ÊÇ·ñÔÚ¾ØĞÎÄÚ(²»ÔÊĞíÏàÇĞ)
 	return (GT(C.c.x - C.r, rect.xl)
 	        &&  LT(C.c.x + C.r, rect.xh)
 	        &&  GT(C.c.y - C.r, rect.yl)
 	        &&  LT(C.c.y + C.r, rect.yh));
 }
-
 //ÅĞ¶Ï2Ô²µÄÎ»ÖÃ¹ØÏµ
 //·µ»Ø:
 //BAOHAN   = 1;        // ´óÔ²°üº¬Ğ¡Ô²

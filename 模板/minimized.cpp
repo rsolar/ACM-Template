@@ -18,18 +18,14 @@ template<class T> inline bool getInt(T &x) {
 	return true;
 }
 
-int a[N];
+int n, a[N];
 
 int main() {
-	int T, n, m;
-	getInt(T);
-	while (T--) {
-		getInt(n);
-		for (int i = 0; i < n; i++) {
-			getInt(a[i]);
-		}
-
-
-
+	getInt(n);
+	for (int i = 0; i < n; i++) {
+		getInt(a[i]);
 	}
+
+
+
 }

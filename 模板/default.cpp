@@ -36,12 +36,12 @@ template<class T> inline bool getInt(T &x) {
 	return true;
 }
 
-int a[N];
+int n, a[N];
 
 int main() {
-	int T, n, m;
+	int C = 0, T;
 	getInt(T);
-	while (T--) {
+	while (++C <= T) {
 		getInt(n);
 		for (int i = 0; i < n; i++) {
 			getInt(a[i]);

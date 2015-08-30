@@ -11,23 +11,23 @@ template <class T> int BS(const T a[], int L, int R, int x) {
 }
 
 template <class T> int BSup(const T a[], int L, int R) {
-	int l = L, r = R, mid, ans = -1;
-	while (l <= r) {
+	int l = L, r = R, mid;
+	while (l + 1 < r) {
 		mid = l + r >> 1;
-		if (judge(a[mid])) { l = mid + 1; ans = a[mid]; }
-		else { r = mid - 1; }
+		if (judge(a[mid])) { l = mid; }
+		else { r = mid; }
 	}
-	return ans;
+	return l;
 }
 
 template <class T> int BSlow(const T a[], int L, int R) {
-	int l = L, r = R, mid, ans = -1;
-	while (l <= r) {
+	int l = L, r = R, mid;
+	while (l + 1 < r) {
 		mid = l + r >> 1;
-		if (judge(a[mid])) { r = mid - 1; ans = a[mid]; }
-		else { l = mid + 1; }
+		if (judge(a[mid])) { r = mid; }
+		else { l = mid; }
 	}
-	return ans;
+	return r;
 }
 
 //三分 求函数极大值

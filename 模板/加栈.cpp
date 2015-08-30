@@ -10,5 +10,6 @@ __asm__("movl %%eax, %%esp;\n"::"a"(my_stack + sizeof(my_stack) - main_stack):"%
 MAIN();
 __asm__("movl (%%eax), %%esp;\n"::"a"(my_stack):"%esp");
 
+
 //VS C++
 #pragma comment(linker, "/STACK:1024000000,1024000000")
