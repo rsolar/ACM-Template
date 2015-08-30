@@ -175,7 +175,7 @@ struct Trie {
 		}
 		return End[now];
 	}
-} trie;
+} tr;
 
 //AC自动机
 char buf[M];
