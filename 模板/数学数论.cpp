@@ -207,8 +207,8 @@ ll inv(ll a, ll m) {
 }
 
 //利用欧拉函数,mod为素数, 而且a和m互质
-ll inv(ll a, ll M = M) {
-	return fastPowMod(a, M - 2, M);
+ll inv(ll a, ll m = M) {
+	return fastPowMod(a, m - 2, m);
 }
 
 //------------------------------------------------------------------------------

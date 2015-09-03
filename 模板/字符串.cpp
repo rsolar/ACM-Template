@@ -138,6 +138,53 @@ void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[]
 	}
 }
 
+//Sunday
+int Sunday(char x[], int m, char y[], int n) {
+	int next[26] = {0};
+	for (int j = 0; j < 26; j++) {
+		next[j] = m + 1;
+	}
+	for (int j = 0; j < m; j++) {
+		next[x[j] - 'a'] = m - j;
+	}
+	int pos = 0;
+	while (pos <= n - m) {
+		int i = pos, j;
+		for (j = 0; j < m; ++j, ++i) {
+			if (y[i] != x[j]) { pos += next[y[pos + m] - 'a']; break; }
+		}
+		if (j == m) { return pos; }
+	}
+	return -1;
+}
+
+//Rabin-Karp
+#define UNSIGNED(x) ((unsigned char)x)
+#define d 257
+int hashMatch(char *s, int m, char *p, int n) {
+	if (m > n || m == 0 || n == 0) { return -1; }
+	//sv为s子串的hash结果，pv为p的hash结果，base为d的m-1次方
+	unsigned sv = UNSIGNED(s[0]), pv = UNSIGNED(p[0]), base = 1;
+	int i, j;
+	//初始化sv, pv, base
+	for (i = 1; i < m; i++) {
+		pv = pv * d + UNSIGNED(p[i]);
+		sv = sv * d + UNSIGNED(s[i]);
+		base = base * d;
+	}
+	i = m - 1;
+	do {
+		if (!(sv ^ pv)) {
+			for (j = 0; j < m && s[i - m + 1 + j] == p[j]; j++);
+			if (j == m) { return i - m + 1; }
+		}
+		if (++i >= n) { break; }
+		//O(1)时间内更新sv, sv + UNSIGNED(s[i - m]) * (~base + 1)等价于sv - UNSIGNED(s[i - m]) * base
+		sv = (sv + UNSIGNED(s[i - m]) * (~base + 1)) * d + UNSIGNED(s[i]);
+	} while (i < n);
+	return -1;
+}
+
 //------------------------------------------------------------------------------
 
 //Trie
