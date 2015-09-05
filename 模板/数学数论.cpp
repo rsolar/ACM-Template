@@ -9,8 +9,6 @@ ll fastPowMod(ll a, ll b, ll m = M) {
 	return r;
 }
 
-//------------------------------------------------------------------------------
-
 //ËØÊýÉ¸
 bool isprime[N];
 void getPrime() {

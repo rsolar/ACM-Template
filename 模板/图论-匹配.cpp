@@ -240,39 +240,69 @@ int KM() {
 	return res;
 }
 
-//一般图匹配带花树
-int n; //点的个数 点的编号从1到n
+//一般图最大匹配 + 邻接表 O(N * E)
+struct edge_t {
+	int from, to;
+	edge_t *next;
+};
+
+int aug(int n, edge_t *list[], int *match, int *v, int now) {
+	int t, ret = 0; edge_t *e;
+	v[now] = 1;
+	for (e = list[now]; e; e = e->next)
+		if (!v[t = e->to]) {
+			if (match[t] < 0) {
+				match[now] = t, match[t] = now, ret = 1;
+			} else {
+				v[t] = 1;
+				if (aug(n, list, match, v, match[t])) {
+					match[now] = t, match[t] = now, ret = 1;
+				}
+				v[t] = 0;
+			}
+			if (ret) {
+				break;
+			}
+		}
+	v[now] = 0;
+	return ret;
+}
+int graph_match(int n, edge_t *list[], int *match) {
+	int v[MAXN], i, j;
+	for (i = 0; i < n; i++) {
+		v[i] = 0, match[i] = -1;
+	}
+	for (i = 0, j = n; i < n && j >= 2;)
+		if (match[i] < 0 && aug(n, list, match, v, i)) {
+			i = 0, j -= 2;
+		} else {
+			i++;
+		}
+	for (i = j = 0; i < n; i++) {
+		j += (match[i] >= 0);
+	}
+	return j / 2;
+}
+
+
+//一般图匹配带花树 + 邻接矩阵
+int n; //点的编号从1到n
 bool Graph[N][N];
 int Match[N];
 bool InQueue[N], InPath[N], InBlossom[N];
-int Head, Tail;
-int Queue[N];
+int Head, Tail, Queue[N];
 int Start, Finish, NewBase;
 int Father[N], Base[N];
-int Count;//匹配数，匹配对数是Count/2
-void CreateGraph() {
-	int u, v;
-	memset(Graph, false, sizeof(Graph));
-	scanf("%d", &n);
-	while (~scanf("%d%d", &u, &v)) {
-		Graph[u][v] = Graph[v][u] = true;
-	}
+inline void Push(int u) {
+	InQueue[u] = true; Queue[Tail++] = u;
 }
 
-void Push(int u) {
-	Queue[Tail] = u;
-	Tail++;
-	InQueue[u] = true;
-}
-
-int Pop() {
-	int res = Queue[Head];
-	Head++;
-	return res;
+inline int Pop() {
+	return Queue[Head++];
 }
 
 int FindCommonAncestor(int u, int v) {
-	memset(InPath, false, sizeof(InPath));
+	memset(InPath, 0, sizeof(InPath));
 	while (true) {
 		u = Base[u];
 		InPath[u] = true;
@@ -288,9 +318,8 @@ int FindCommonAncestor(int u, int v) {
 }
 
 void ResetTrace(int u) {
-	int v;
 	while (Base[u] != NewBase) {
-		v = Match[u];
+		int v = Match[u];
 		InBlossom[Base[u]] = InBlossom[Base[v]] = true;
 		u = Father[v];
 		if (Base[u] != NewBase) { Father[u] = v; }
@@ -299,20 +328,20 @@ void ResetTrace(int u) {
 
 void BloosomContract(int u, int v) {
 	NewBase = FindCommonAncestor(u, v);
-	memset(InBlossom, false, sizeof(InBlossom));
-	ResetTrace(u);
-	ResetTrace(v);
+	memset(InBlossom, 0, sizeof(InBlossom));
+	ResetTrace(u); ResetTrace(v);
 	if (Base[u] != NewBase) { Father[u] = v; }
 	if (Base[v] != NewBase) { Father[v] = u; }
-	for (int tu = 1; tu <= n; tu++)
+	for (int tu = 1; tu <= n; tu++) {
 		if (InBlossom[Base[tu]]) {
 			Base[tu] = NewBase;
 			if (!InQueue[tu]) { Push(tu); }
 		}
+	}
 }
 
 void FindAugmentingPath() {
-	memset(InQueue, false, sizeof(InQueue));
+	memset(InQueue, 0, sizeof(InQueue));
 	memset(Father, 0, sizeof(Father));
 	for (int i = 1; i <= n; i++) { Base[i] = i; }
 	Head = Tail = 1;
@@ -334,8 +363,7 @@ void FindAugmentingPath() {
 }
 
 void AugmentPath() {
-	int u, v, w;
-	u = Finish;
+	int u = Finish, v, w;
 	while (u > 0) {
 		v = Father[u]; w = Match[v];
 		Match[v] = u; Match[u] = v;
@@ -345,26 +373,28 @@ void AugmentPath() {
 
 void Edmonds() {
 	memset(Match, 0, sizeof(Match));
-	for (int u = 1; u <= n; u++)
+	for (int u = 1; u <= n; u++) {
 		if (Match[u] == 0) {
 			Start = u;
 			FindAugmentingPath();
 			if (Finish > 0) { AugmentPath(); }
 		}
+	}
 }
-
-void PrintMatch() {
-	Count = 0;
-	for (int u = 1; u <= n; u++)
-		if (Match[u] > 0) { Count++; }
+//ural 1099
+int main() {
+	int u, v;
+	scanf("%d", &n);
+	while (~scanf("%d%d", &u, &v)) {
+		Graph[u][v] = Graph[v][u] = true;
+	}
+	Edmonds();
+	int Count = 0;
+	for (int u = 1; u <= n; u++) {
+		Count += (Match[u] > 0);
+	}
 	printf("%d\n", Count);
 	for (int u = 1; u <= n; u++) {
 		if (u < Match[u]) { printf("%d %d\n", u, Match[u]); }
 	}
-}
-
-int main() {
-	CreateGraph();//建图
-	Edmonds();//进行匹配
-	PrintMatch();//输出匹配数和匹配
 }

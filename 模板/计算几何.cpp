@@ -258,7 +258,7 @@ bool Coplanar(Points3D points) { // 判断一个点集中的点是否全部共面
 	return true;
 }
 bool LineIntersect(Line L1, Line L2) { // 判断二维的两直线是否相交
-	return (! ZERO((L1.p1 - L1.p2) * (L2.p1 - L2.p2))); // 是否平行
+	return (!ZERO((L1.p1 - L1.p2) * (L2.p1 - L2.p2))); // 是否平行
 }
 bool LineIntersect(Line3D L1, Line3D L2) { // 判断三维的两直线是否相交
 	Point3D p1 = L1.p1 - L1.p2;
