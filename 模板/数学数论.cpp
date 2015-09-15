@@ -1,6 +1,6 @@
 //快速幂
-ll fastPowMod(ll a, ll b, ll m = M) {
-	ll r = 1;
+ll powMod(ll a, ll b, ll m = M) {
+	ll r = 1; a %= m;
 	while (b) {
 		if (b & 1) { r = r * a % m; }
 		a = a * a % m;
@@ -8,6 +8,28 @@ ll fastPowMod(ll a, ll b, ll m = M) {
 	}
 	return r;
 }
+//模拟大数乘法
+ll mulMod(ll a, ll b, ll m = M) {
+	ll r = 0; a %= m; b %= m;
+	while (b) {
+		if (b & 1) { r = (r + a) % m; }
+		a = (a << 1) % m;
+		b >>= 1;
+	}
+	return r;
+}
+//快速幂 + 模拟大数乘法
+ll powMod(ll a, ll b, ll m = M) {
+	ll r = 1; a %= m;
+	while (b) {
+		if (b & 1) { r = mulMod(r, a, m); }
+		a = mulMod(a, a, m);
+		b >>= 1;
+	}
+	return r;
+}
+
+//------------------------------------------------------------------------------
 
 //素数筛
 bool isprime[N];
@@ -58,28 +80,23 @@ int getFactors(ll x, ll factor[][2] = factor) {
 const int S = 10;
 //计算ret = (a * b) % m
 ll mulMod(ll a, ll b, ll m = M) {
-	a %= m; b %= m;
-	ll ret = 0;
+	ll r = 0; a %= m; b %= m;
 	while (b) {
-		if (b & 1) {
-			ret += a;
-			if (ret > m) { ret -= m; }
-		}
-		a <<= 1;
-		if (a > m) { a -= m; }
+		if (b & 1) { r = (r + a) % m; }
+		a = (a << 1) % m;
 		b >>= 1;
 	}
-	return ret;
+	return r;
 }
 //计算ret = (a^n) % m
 ll powMod(ll a, ll b, ll m = M) {
-	ll ret = 1; a %= m;
+	ll r = 1; a %= m;
 	while (b) {
-		if (b & 1) { ret = mulMod(ret, a, m); }
+		if (b & 1) { r = mulMod(r, a, m); }
 		a = mulMod(a, a, m);
 		b >>= 1;
 	}
-	return ret;
+	return r;
 }
 //通过a^(n - 1) = 1(mod n)来判断n是不是素数
 //n - 1 = x * 2^t 中间使用二次判断
@@ -167,7 +184,6 @@ ll eular(ll n) {
 }
 
 int euler[N];
-
 void getEuler() {
 	euler[1] = 1;
 	for (int i = 2; i < N; i++) {
@@ -183,30 +199,74 @@ void getEuler() {
 //------------------------------------------------------------------------------
 
 //求逆元(ax = 1(mod m)的x值)
-//扩展欧几里得(求ax + by = gcd(a, b)的解)
+//扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
 ll extendGcd(ll a, ll b, ll &x, ll &y) {
 	if (a == 0 && b == 0) { return -1; } //无最大公约数
-	if (b == 0) {x = 1; y = 0; return a;}
+	if (b == 0) { x = 1; y = 0; return a; }
 	ll d = extendGcd(b, a % b, y, x);
 	y -= a / b * x;
 	return d;
 }
-ll modReverse(ll a, ll n) {
+ll modReverse(ll a, ll m) {
 	ll x, y;
-	ll d = extendGcd(a, n, x, y);
-	if (d == 1) { return (x % n + n) % n; }
+	ll d = extendGcd(a, m, x, y);
+	if (d == 1) { return (x % m + m) % m; }
 	else { return -1; }
 }
 
-//只能求0 < a < m的情况，而且必须保证a和m互质
-ll inv(ll a, ll m) {
+//只能求0 < a < m的情况,a和m互质
+ll inv(ll a, ll m = M) {
 	if (a == 1) { return 1; }
 	return inv(m % a, m) * (m - m / a) % m;
 }
 
-//利用欧拉函数,mod为素数, 而且a和m互质
+//费马小定理,m为素数,a和m互质
 ll inv(ll a, ll m = M) {
-	return fastPowMod(a, m - 2, m);
+	return powMod(a, m - 2, m);
+}
+
+//------------------------------------------------------------------------------
+
+//组合数
+ll com(ll n, ll m) {
+	if (n - m > m) { m = n - m; }
+	ll s = 1;
+	for (ll i = 0, j = 1; i < m; i++) {
+		s *= n - i;
+		for (; j <= m && s % j == 0; j++) { s /= j; }
+	}
+	return s;
+}
+
+//组合数取模
+//预处理阶乘
+ll fac[N];
+void getFac(ll p) {
+	fac[0] = 1;
+	for (ll i = 1; i <= p; i++) { fac[i] = (fac[i - 1] * i) % p; }
+}
+//Lucas定理 p <= 10^5
+ll lucas(ll n, ll m, ll p) {
+	if (m > n - m) { m = n - m; }
+	ll res = 1;
+	while (n && m) {
+		ll a = n % p, b = m % p;
+		if (a < b) { return 0; }
+		res = res * fac[a] * powMod(fac[b] * fac[a - b] % p, p - 2, p) % p;
+		n /= p; m /= p;
+	}
+	return res;
+}
+//中国剩余定理
+ll CRT(ll a[], ll m[], int k) {
+	ll mm = 1, ans = 0;
+	for (int i = 0; i < k; i++) { mm *= m[i]; }
+	for (int i = 0; i < k; i++) {
+		ll x, y, t = mm / m[i];
+		ans = (ans + t * inv(t, m[i]) * a[i]) % mm;
+	}
+	if (ans < 0) { ans += mm; }
+	return ans;
 }
 
 //------------------------------------------------------------------------------
@@ -225,7 +285,6 @@ bool solve(int &m0, int &a0, int m, int a) {
 	if (a0 < 0) { a0 += m0; }
 	return true;
 }
-
 //无解返回false,有解返回true;
 //解的形式最后为 a0 + m0 * t (0 <= a0 < m0)
 bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
@@ -235,15 +294,4 @@ bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
 		if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
 	}
 	return flag;
-}
-
-//组合数C(n, r) = C(n, n - r)
-int com(int n, int r) {
-	if (n - r > r) { r = n - r; }
-	int s = 1;
-	for (int i = 0, j = 1; i < r; i++) {
-		s *= n - i;
-		for (; j <= r && s % j == 0; j++) { s /= j; }
-	}
-	return s;
 }

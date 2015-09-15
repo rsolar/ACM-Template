@@ -1,5 +1,5 @@
 //最小生成树
-//Prim
+//Prim O(V^2)
 #define N 105
 #define INF 0x3f3f3f3f
 int lowc[N];
@@ -27,7 +27,7 @@ int prim(int cost[][N], int n) {
 	return ans;
 }
 
-//Kruskal
+//Kruskal O(E*logE)
 #define N 105
 #define M 10005
 struct Edge {
