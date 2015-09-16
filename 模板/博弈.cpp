@@ -9,15 +9,15 @@
 int SG[N], Hash[N];
 
 void GetSG(int Array[], int n = N - 1) {
-	memset(SG, 0, sizeof(SG));
-	for (int i = 0; i <= n; ++i) {
-		memset(Hash, 0, sizeof(Hash));
-		for (int j = 1; j <= Array[0]; j++) {
-			if (i < Array[j]) { break; }
-			Hash[SG[i - Array[j]]] = 1;
-		}
-		for (int j = 0; j <= n; j++) {
-			if (!Hash[j]) { SG[i] = j; break; }
-		}
-	}
+  memset(SG, 0, sizeof(SG));
+  for (int i = 0; i <= n; ++i) {
+    memset(Hash, 0, sizeof(Hash));
+    for (int j = 1; j <= Array[0]; j++) {
+      if (i < Array[j]) { break; }
+      Hash[SG[i - Array[j]]] = 1;
+    }
+    for (int j = 0; j <= n; j++) {
+      if (!Hash[j]) { SG[i] = j; break; }
+    }
+  }
 }

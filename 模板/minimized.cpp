@@ -8,10 +8,10 @@ typedef long long ll;
 int n, a[N];
 
 int main() {
-	scanf("%d", &n);
-	for (int i = 0; i < n; i++) {
-		scanf("%d", a + i);
-	}
+  scanf("%d", &n);
+  for (int i = 0; i < n; i++) {
+    scanf("%d", &a[i]);
+  }
 
 
 

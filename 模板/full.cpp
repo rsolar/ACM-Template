@@ -29,15 +29,15 @@ typedef long long ll;
 int n, a[N];
 
 int main() {
-	int C = 0, T;
-	scanf("%d", &T);
-	while (++C <= T) {
-		scanf("%d", &n);
-		for (int i = 0; i < n; i++) {
-			scanf("%d", &a[i]);
-		}
+  int C = 0, T;
+  scanf("%d", &T);
+  while (++C <= T) {
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+      scanf("%d", &a[i]);
+    }
 
 
 
-	}
+  }
 }
