@@ -1,24 +1,24 @@
-#include <iostream>
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <cmath>
-#include <climits>
-#include <ctime>
-#include <cctype>
-#include <iomanip>
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <map>
-#include <set>
-#include <queue>
-#include <deque>
-#include <stack>
-#include <list>
-#include <functional>
-#include <numeric>
-//#include <bits/stdc++.h>
+//#include <iostream>
+//#include <cstdio>
+//#include <cstring>
+//#include <cstdlib>
+//#include <cmath>
+//#include <climits>
+//#include <ctime>
+//#include <cctype>
+//#include <iomanip>
+//#include <algorithm>
+//#include <string>
+//#include <vector>
+//#include <map>
+//#include <set>
+//#include <queue>
+//#include <deque>
+//#include <stack>
+//#include <list>
+//#include <functional>
+//#include <numeric>
+#include <bits/stdc++.h>
 using namespace std;
 
 typedef long long ll;

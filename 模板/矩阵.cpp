@@ -1,7 +1,7 @@
 #define fabs(x) ((x)>=0?(x):-(x))
 #define isZero(x) (fabs(x)<1e-10)
 
-template <class T = ll> struct Matrix {
+template <class T> struct Matrix {
   int r, c;
   T m[N][N];
   void init() {
@@ -92,6 +92,14 @@ template <class T = ll> struct Matrix {
       }
     }
     return rt;
+  }
+  void print() {
+    for (int i = 0; i < r; i++) {
+      for (int j = 0; j < c; j++) {
+        printf("%d ", m[i][j]);
+      }
+      putchar('\n');
+    }
   }
 };
 
