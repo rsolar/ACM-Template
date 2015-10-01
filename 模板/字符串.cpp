@@ -70,8 +70,8 @@ int minString(char s[], int m) {
 
 //------------------------------------------------------------------------------
 
-//strstr 在串中查找指定字符串的第一次出现
-char *strstr(char *str1, const char *str2);
+//strstr 在串s1中查找指定字符串s2的第一次出现
+char *strstr(const char *str1, const char *str2);
 
 //KMP O(M+N)
 //Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
@@ -79,11 +79,20 @@ char *strstr(char *str1, const char *str2);
 char x[N], y[N];
 int Next[N];
 
-void getNext(char x[], int m, int Next[] = Next) {
+void getNext(char x[], int m, int Next[]) {
   int i = 0, j = -1; Next[0] = -1;
   while (i < m) {
     while (j != -1 && x[i] != x[j]) { j = Next[j]; }
     Next[++i] = ++j;
+  }
+}
+//改进版
+void getNextv(char x[], int m, int Next[]) {
+  int i = 0, j = -1; Next[0] = -1;
+  while (i < m) {
+    while (j != -1 && x[i] != x[j]) { j = Next[j]; }
+    if (x[++i] == x[++j]) { Next[i] = Next[j]; }
+    else { Next[i] = j; }
   }
 }
 //返回x在y中出现的次数，可以重叠
@@ -122,8 +131,7 @@ void preExtend(char x[], int m, int Next[] = Next) {
   }
 }
 
-void getExtend(char x[], int m, char y[], int n, int Next[] = Next,
-               int Extend[] = Extend) {
+void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[] = Extend) {
   preExtend(x, m);
   int j = 0, k = 0;
   while (j < n && j < m && x[j] == y[j]) { j++; }

@@ -6,19 +6,19 @@
 //单点修改 + 单点查询 + 区间修改 + 区间查询 + 区间最值
 template<typename T> struct BIT {
   int n;
-  T A[N]; //T B[N]; //区间增减 //T num[N]; 维护最值
+  T A[N]; //T B[N]; //区间增减 //T num[N]; //维护最值
   int lowbit(int x) { return x & (-x); }
   void init() {
     memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B));
   }
   //前缀和[0, i)
-  T sum(int i) const {
+  T sum(int i) {
     T ret = 0;
     for (int j = i; j > 0; j -= lowbit(j)) { ret += A[j]; }
     return ret;
   }
   //单点查询
-  T get(int i) const { return sum(i + 1) - sum(i); }
+  T get(int i) { return sum(i + 1) - sum(i); }
   //单点增减
   void add(int i, T v) {
     for (int j = i; j <= n; j += lowbit(j)) { A[j] += v; }
@@ -30,9 +30,8 @@ template<typename T> struct BIT {
   void set(int i, T v) { add(i, v - get(i)); }
 
   //区间和[i, j], sum[]为前缀和
-  T sum(int i, int j, T sum[]) const {
-    return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B,
-           j) + sum(B, i - 1);
+  T sum(int i, int j, T sum[]) {
+    return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B, j) + sum(B, i - 1);
   }
   //区间增减
   void add(int i, int j, T v) {
@@ -42,7 +41,7 @@ template<typename T> struct BIT {
     add(j + 1, -(j + 1) * v, B);
   }
 
-  //维护最值 O(log^2(n))
+  //维护区间最值 O(log^2(n))
   void modify(int x, T v) {
     num[x] = v;
     for (int i = x; i <= n; i += lowbit(i)) {
@@ -60,6 +59,16 @@ template<typename T> struct BIT {
       for (r -= 1; r - l >= lowbit(r); r -= lowbit(r)) { ret = max(ret, A[r]); }
     }
     return ret;
+  }
+
+  //求区间第K大 O(log^2(n))
+  int getK(int l, int r, int k) {
+    while (l <= r) {
+      int mid = l + ((r - l) >> 1);
+      if (sum(mid) >= k) { r = mid - 1; }
+      else { l = mid + 1; }
+    }
+    return l;
   }
 };
 BIT<int> bit;
@@ -102,13 +111,11 @@ template<typename T> struct BIT {
 
   //区间和[x, y]
   T sum1(int x, int y) const {
-    return (x + 1) * (y + 1) * sum(x, y) - (y + 1) * sum(x, y) - (x + 1) * sum(x,
-           y) + sum(x, y);
+    return (x + 1) * (y + 1) * sum(x, y) - (y + 1) * sum(x, y) - (x + 1) * sum(x, y) + sum(x, y);
   }
   //区域和[x1][y1]-[x2][y2]
   T sum(int x1, int y1, int x2, int y2) const {
-    return sum1(x2, y2) - sum1(x1 - 1, y2) - sum1(x2, y1 - 1) + sum1(x1 - 1,
-           y1 - 1);
+    return sum1(x2, y2) - sum1(x1 - 1, y2) - sum1(x2, y1 - 1) + sum1(x1 - 1, y1 - 1);
   }
   //区域增减
   void add(int x1, int y1, int x2, int y2, T v) {
@@ -349,8 +356,7 @@ int getMax() {
 void treaval(int x) {
   if (x != 0) {
     Treaval(ch[x][0]);
-    printf("Node%2d:lson %2d rson %2d size = %2d ,val = %2d\n", x, ch[x][0],
-           ch[x][1], size[x], key[x]);
+    printf("Node%2d:lson %2d rson %2d size = %2d ,val = %2d\n", x, ch[x][0], ch[x][1], size[x], key[x]);
     Treaval(ch[x][1]);
   }
 }
