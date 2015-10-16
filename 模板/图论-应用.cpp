@@ -47,8 +47,8 @@ int euclid_path(int n, int mp[][N], int start, int *path) {
 
 //2-SAT
 //染色法
-#define N 20005
-#define M 100005
+const int N = 20005;
+const int M = 100005;
 struct Edge {
   int to, next;
 } edge[M];
@@ -104,8 +104,8 @@ int main() {
 }
 
 //强连通缩点
-#define N 1005
-#define M 100005
+const int N = 1005;
+const int M = 100005;
 struct Edge {
   int to, next;
 } edge[M];
@@ -244,4 +244,3 @@ int main() {
     } else { printf("bad luck\n"); }
   }
 }
-

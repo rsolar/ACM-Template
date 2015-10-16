@@ -1,9 +1,9 @@
 //http://blog.csdn.net/wjf_wzzc/article/details/22869677
 
 //邻接表
-#define N 100005
-#define M 200005
-#define INF 0x3f3f3f3f
+const int N = 100005;
+const int M = 200005;
+const int INF = 0x3f3f3f3f;
 struct graph {
   int head[N], to[M], next[M], len[M], tot;
   void init() { tot = 0; memset(head, -1, sizeof(head)); }
@@ -11,8 +11,7 @@ struct graph {
 } g;
 
 //Dijkstra + 邻接矩阵 O(V^2)
-int n, mp[N][N], pre[N],
-    dist[N]; //pre[i]记录src到i路径上的父结点，pre[src] = -1
+int n, mp[N][N], pre[N], dist[N]; //pre[i]记录src到i路径上的父结点，pre[src] = -1
 bool vis[N];
 void Dijkstra(int src) {
   memset(dist, 0x3f, sizeof(dist));
@@ -97,7 +96,7 @@ void spfa(int src) {
 //bellman-ford + vector O(V*E)
 //可以处理负边权图
 //可以判断是否存在负环回路,返回true,当且仅当图中不包含从源点可达的负权回路
-#define INF 0x3f3f3f3f
+const int INF = 0x3f3f3f3f;
 int dist[N];
 struct Edge {
   int u, v, cost;

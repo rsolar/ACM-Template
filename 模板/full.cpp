@@ -21,10 +21,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
-#define N 100005
-#define M 1000000007
+typedef long long ll;
+const int N = 100005;
+const int M = 1000000007;
 
 int n, a[N];
 

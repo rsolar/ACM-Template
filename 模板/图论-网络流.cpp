@@ -2,9 +2,9 @@
 
 //最大流
 //ISAP + 邻接表
-#define N 505
-#define M 20005
-#define INF 0x3f3f3f3f
+const int N = 505;
+const int M = 20005;
+const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow;
 } edge[M];
@@ -74,9 +74,9 @@ int sap(int src, int sink, int nodenum) {
 }
 
 //ISAP + bfs + stack + 邻接表
-#define N 505
-#define M 20005
-#define INF 0x3f3f3f3f
+const int N = 505;
+const int M = 20005;
+const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow;
 } edge[M];
@@ -163,9 +163,9 @@ int sap(int src, int sink, int nodenum) {
 }
 
 //Dinic
-#define N 505
-#define M 20005
-#define INF 0x3f3f3f3f
+const int N = 505;
+const int M = 20005;
+const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow;
 } edge[M];
@@ -234,9 +234,9 @@ int dinic() {
 }
 
 //最小费用最大流
-#define N 10005
-#define M 100005
-#define INF 0x3f3f3f3f
+const int N = 10005;
+const int M = 100005;
+const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow, cost;
 } edge[M];

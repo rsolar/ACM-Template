@@ -32,8 +32,7 @@ int weekday(Date a) {
 
 //日期转天数偏移
 int date2int(Date a) {
-  int ret = a.year * 365 + (a.year - 1) / 4 - (a.year - 1) / 100 +
-            (a.year - 1) / 400;
+  int ret = a.year * 365 + (a.year - 1) / 4 - (a.year - 1) / 100 + (a.year - 1) / 400;
   days[1] += leap(a.year);
   for (int i = 0; i < a.month - 1; ret += days[i++]);
   days[1] = 28;
@@ -44,11 +43,9 @@ int date2int(Date a) {
 Date int2date(int a) {
   Date ret;
   ret.year = a / 146097 * 400;
-  for (a %= 146097; a >= 365 + leap(ret.year);
-       a -= 365 + leap(ret.year), ret.year++);
+  for (a %= 146097; a >= 365 + leap(ret.year); a -= 365 + leap(ret.year), ret.year++);
   days[1] += leap(ret.year);
-  for (ret.month = 1; a >= days[ret.month - 1];
-       a -= days[ret.month - 1], ret.month++);
+  for (ret.month = 1; a >= days[ret.month - 1]; a -= days[ret.month - 1], ret.month++);
   days[1] = 28;
   ret.day = a + 1;
   return ret;

@@ -2,8 +2,8 @@
 using namespace std;
 
 typedef long long ll;
-#define N 100005
-#define M 1000000007
+const int N = 100005;
+const int M = 1000000007;
 
 int n, a[N];
 

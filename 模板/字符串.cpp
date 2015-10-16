@@ -170,7 +170,7 @@ int Sunday(char x[], int m, char y[], int n) {
 
 //Rabin-Karp
 #define UNSIGNED(x) ((unsigned char)x)
-#define d 257
+const int d = 257;
 int hashMatch(char *s, int m, char *p, int n) {
   if (m > n || m == 0 || n == 0) { return -1; }
   //sv为s子串的hash结果，pv为p的hash结果，base为d的m-1次方
@@ -312,7 +312,7 @@ struct Trie {
 *height[]= { 0, 0, 3, 2, 3, 1, 2, 0, 1 }; height[2 ~ n]为有效值
 */
 //DC3 O(n)
-#define N 2005
+const int N = 2005;
 #define F(x) ((x)/3+((x)%3==1?0:tb))
 #define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
 int wa[N * 3], wb[N * 3], wv[N * 3], wss[N * 3];
@@ -371,7 +371,7 @@ void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
 }
 
 //后缀自动机
-#define N 250005
+const int N = 250005;
 struct SAM_Node {
   SAM_Node *fa, *next[26];
   int len;

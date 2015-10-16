@@ -97,10 +97,8 @@ bool bfs(int src) {
           flag = true;
           while (~a) {
             int t = match[a];
-            match[a] = b;
-            match[b] = a;
-            a = pre[a];
-            b = t;
+            match[a] = b; match[b] = a;
+            a = pre[a]; b = t;
           }
         }
       }
@@ -120,7 +118,7 @@ int hungary() {
 }
 
 //Hopcroft-Karp + 邻接表 + O(V^0.5*E)
-#define INF 0x3f3f3f3f
+const int INF = 0x3f3f3f3f;
 vector<int> G[N];
 int uN; //左端的顶点数
 int Mx[N], My[N], dx[N], dy[N];
@@ -183,7 +181,7 @@ int MaxMatch() {
 //KM + 邻接矩阵 O(nx*nx*ny)
 //若求最小权匹配,可将权值取相反数,结果取相反数
 //点的编号从0开始
-#define INF 0x3f3f3f3f
+const int INF = 0x3f3f3f3f;
 int nx, ny, g[N][N]; //点数 二分图描述
 int linker[N], lx[N], ly[N]; //y中各点匹配状态, x,y中的点标号
 int slack[N];

@@ -1,7 +1,7 @@
 //最小生成树
 //Prim O(V^2)
-#define N 105
-#define INF 0x3f3f3f3f
+const int N = 105;
+const int INF = 0x3f3f3f3f;
 int lowc[N];
 bool vis[N];
 int prim(int cost[][N], int n) {
@@ -28,8 +28,8 @@ int prim(int cost[][N], int n) {
 }
 
 //Kruskal O(E*logE)
-#define N 105
-#define M 10005
+const int N = 105;
+const int M = 10005;
 struct Edge {
   int u, v, w;
   bool operator<(const Edge &obj) const { return w < obj.w; }

@@ -68,8 +68,7 @@ int gcis(int a[], int la, int b[], int lb, int ans[]) {
   for (mx = 0, i = 1; i <= lb; i++) {
     if (dp[i] > dp[mx]) { mx = i; }
   }
-  for (i = la * lb + la + mx, j = dp[mx]; j;
-       i = f[i / (lb + 1)][i % (lb + 1)], j--) {
+  for (i = la * lb + la + mx, j = dp[mx]; j; i = f[i / (lb + 1)][i % (lb + 1)], j--) {
     ans[j - 1] = b[i % (lb + 1) - 1];
   }
   return dp[mx];
@@ -137,30 +136,25 @@ void initRMQ() {
   for (int i = 1; i <= n; i++) { dpmn[i][0] = dpmx[i][0] = i; }
   for (int j = 1; (1 << j) <= n; j++) {
     for (int i = 1; i + (1 << j) - 1 <= n; i++) {
-      dpmn[i][j] = a[dpmn[i][j - 1]] < a[dpmn[i + (1 << (j - 1))][j - 1]] ? dpmn[i][j
-                   - 1] : dpmn[i + (1 << (j - 1))][j - 1];
-      dpmx[i][j] = a[dpmx[i][j - 1]] > a[dpmx[i + (1 << (j - 1))][j - 1]] ? dpmx[i][j
-                   - 1] : dpmx[i + (1 << (j - 1))][j - 1];
+      dpmn[i][j] = a[dpmn[i][j - 1]] < a[dpmn[i + (1 << (j - 1))][j - 1]] ? dpmn[i][j - 1] : dpmn[i + (1 << (j - 1))][j - 1];
+      dpmx[i][j] = a[dpmx[i][j - 1]] > a[dpmx[i + (1 << (j - 1))][j - 1]] ? dpmx[i][j - 1] : dpmx[i + (1 << (j - 1))][j - 1];
     }
   }
 }
 
 int getMin(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
-  return a[dpmn[l][k]] < a[dpmn[r - (1 << k) + 1][k]] ? dpmn[l][k] : dpmn[r -
-         (1 << k) + 1][k];
+  return a[dpmn[l][k]] < a[dpmn[r - (1 << k) + 1][k]] ? dpmn[l][k] : dpmn[r - (1 << k) + 1][k];
 }
 
 int getMax(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
-  return a[dpmx[l][k]] > a[dpmx[r - (1 << k) + 1][k]] ? dpmx[l][k] : dpmx[r -
-         (1 << k) + 1][k];
+  return a[dpmx[l][k]] > a[dpmx[r - (1 << k) + 1][k]] ? dpmx[l][k] : dpmx[r - (1 << k) + 1][k];
 }
 
 //RMQ 二维
 int n, a[N][N];
-int mm[N], dpmn[N][N][9][9],
-    dpmx[N][N][9][9]; //mm[]为二进制位数减一，使用前初始化
+int mm[N], dpmn[N][N][9][9], dpmx[N][N][9][9]; //mm[]为二进制位数减一，使用前初始化
 void initmm() {
   mm[0] = -1;
   for (int i = 1; i < N; i++) {
@@ -180,15 +174,11 @@ void initRMQ() {
         for (int i = 1; i + (1 << ii) - 1 <= n; i++) {
           for (int j = 1; j + (1 << jj) - 1 <= m; j++) {
             if (ii) {
-              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii - 1][jj],
-                                       dpmn[i + (1 << (ii - 1))][j][ii - 1][jj]);
-              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii - 1][jj],
-                                       dpmx[i + (1 << (ii - 1))][j][ii - 1][jj]);
+              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii - 1][jj], dpmn[i + (1 << (ii - 1))][j][ii - 1][jj]);
+              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii - 1][jj], dpmx[i + (1 << (ii - 1))][j][ii - 1][jj]);
             } else {
-              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii][jj - 1],
-                                       dpmn[i][j + (1 << (jj - 1))][ii][jj - 1]);
-              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii][jj - 1],
-                                       dpmx[i][j + (1 << (jj - 1))][ii][jj - 1]);
+              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii][jj - 1], dpmn[i][j + (1 << (jj - 1))][ii][jj - 1]);
+              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii][jj - 1], dpmx[i][j + (1 << (jj - 1))][ii][jj - 1]);
             }
           }
         }
@@ -200,13 +190,11 @@ void initRMQ() {
 int getMin(int x1, int y1, int x2, int y2) {
   int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
   x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
-  return min(min(dpmn[x1][y1][k1][k2], dpmn[x1][y2][k1][k2]),
-             min(dpmn[x2][y1][k1][k2], dpmn[x2][y2][k1][k2]));
+  return min(min(dpmn[x1][y1][k1][k2], dpmn[x1][y2][k1][k2]), min(dpmn[x2][y1][k1][k2], dpmn[x2][y2][k1][k2]));
 }
 
 int getMax(int x1, int y1, int x2, int y2) {
   int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
   x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
-  return max(max(dpmx[x1][y1][k1][k2], dpmx[x1][y2][k1][k2]),
-             max(dpmx[x2][y1][k1][k2], dpmx[x2][y2][k1][k2]));
+  return max(max(dpmx[x1][y1][k1][k2], dpmx[x1][y2][k1][k2]), max(dpmx[x2][y1][k1][k2], dpmx[x2][y2][k1][k2]));
 }

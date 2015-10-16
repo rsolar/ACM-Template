@@ -28,17 +28,21 @@ template<typename T> struct BIT {
   }
   //单点赋值
   void set(int i, T v) { add(i, v - get(i)); }
-
-  //区间和[i, j], sum[]为前缀和
-  T sum(int i, int j, T sum[]) {
-    return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B, j) + sum(B, i - 1);
+  //区间和[i, j]
+  T sum(int i, int j) {
+    return sum(j) - sum(i - 1);
   }
+
   //区间增减
   void add(int i, int j, T v) {
     add(i, v, A);
     add(j + 1, -v, A);
     add(i, v * i, B);
     add(j + 1, -(j + 1) * v, B);
+  }
+  //使用区间增减时求区间和[i, j], sum[]为前缀和
+  T sum(int i, int j, T sum[]) {
+    return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B, j) + sum(B, i - 1);
   }
 
   //维护区间最值 O(log^2(n))
@@ -132,11 +136,50 @@ template<typename T> struct BIT {
 };
 BIT<int> bit;
 
-//线段树 基本版
-//单点修改 + 单点查询 + 区间修改 + 区间查询 + 区间最值
+//线段树  单点修改 + 单点查询 + 区间查询
+#define lson l, m, rt << 1
+#define rson m + 1, r, rt << 1 | 1
 template<typename T> struct SegmentTree {
-  T sum[N << 2], add[N << 2];
-  //T mx[N << 2]; //区间最值
+  T sum[N << 2]; //T mx[N << 2]; //区间最值
+  void push_up(int rt) {
+    sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
+    //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
+  }
+  //初始化 + 建树
+  void build(int l, int r, int rt) {
+    if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
+    int m = l + r >> 1;
+    build(lson);
+    build(rson);
+    push_up(rt);
+  }
+  //单点修改
+  void update(int p, T val, int l, int r, int rt) {
+    if (l == r) {
+      sum[rt] += val; //mx[rt] = val;
+      return;
+    }
+    int m = l + r >> 1;
+    if (p <= m) { update(p, val, lson); }
+    else { update(p, val, rson); }
+    push_up(rt);
+  }
+  //区间和
+  T query(int L, int R, int l, int r, int rt) {
+    if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
+    int m = l + r >> 1; T ret = 0;
+    if (L <= m) { ret += query(L, R, lson); } //ret = max(ret, query(L, R, lson));
+    if (m < R) { ret += query(L, R, rson); } //ret = max(ret, query(L, R, rson));
+    return ret;
+  }
+};
+SegmentTree<int> st;
+
+//线段树 单点修改 + 单点查询 + 区间修改(延迟标记) + 区间查询
+#define lson l, m, rt << 1
+#define rson m + 1, r, rt << 1 | 1
+template<typename T> struct SegmentTree {
+  T sum[N << 2], add[N << 2]; //T mx[N << 2]; //区间最值
   void push_up(int rt) {
     sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
     //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
@@ -154,22 +197,21 @@ template<typename T> struct SegmentTree {
   void build(int l, int r, int rt) {
     add[rt] = 0;
     if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
-    //if (l == r) { sum[rt] = a[i]; return; }
     int m = l + r >> 1;
-    build(l, m, rt << 1);
-    build(m + 1, r, rt << 1 | 1);
+    build(lson);
+    build(rson);
     push_up(rt);
   }
   //单点修改
   void update(int p, T val, int l, int r, int rt) {
     if (l == r) {
-      sum[rt] = val; //mx[rt] = val;
+      sum[rt] += val; //mx[rt] = val;
       return;
     }
     push_down(rt, r - l + 1);
     int m = l + r >> 1;
-    if (p <= m) { update(p, val, l, m, rt << 1); }
-    else { update(p, val, m + 1, r, rt << 1 | 1); }
+    if (p <= m) { update(p, val, lson); }
+    else { update(p, val, rson); }
     push_up(rt);
   }
   //区间增减
@@ -181,17 +223,17 @@ template<typename T> struct SegmentTree {
     }
     push_down(rt, r - l + 1);
     int m = l + r >> 1;
-    if (L <= m) { update(L, R, val, l, m, rt << 1); }
-    if (m < R) { update(L, R, val, m + 1, r, rt << 1 | 1); }
+    if (L <= m) { update(L, R, val, lson); }
+    if (m < R) { update(L, R, val, rson); }
     push_up(rt);
   }
   //区间和
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
     push_down(rt, r - l + 1);
-    int m = l + r >> 1, ret = 0;
-    if (L <= m) { ret += query(L, R, l, m, rt << 1); } //ret = max(ret, query(L, R, l, m, rt << 1));
-    if (m < R) { ret += query(L, R, m + 1, r, rt << 1 | 1); } //ret = max(ret, query(L, R, m + 1, r, rt << 1 | 1));
+    int m = l + r >> 1; T ret = 0;
+    if (L <= m) { ret += query(L, R, lson); } //ret = max(ret, query(L, R, lson));
+    if (m < R) { ret += query(L, R, rson); } //ret = max(ret, query(L, R, rson));
     return ret;
   }
 };
@@ -201,9 +243,9 @@ SegmentTree<int> st;
 
 !!!
 //实时开节点的线段树 (无需离散化)
-#define N 60005
-#define M 2500005
-#define INF 0x3f3f3f3f
+const int N = 60005;
+const int M = 2500005;
+const int INF = 0x3f3f3f3f;
 int n, a[N];
 struct SegmentTree {
   int ls[M], rs[M], cnt[M], root[N], use[N], tot;
@@ -682,8 +724,8 @@ int main() {
 }
 
 //Splay ver.2
-#define N 500005
-#define INF 0x3f3f3f3f
+const int N = 500005;
+const int INF = 0x3f3f3f3f;
 int n, q;
 struct Splay {
   int pre[N], ch[N][2], key[N], size[N];
@@ -1247,8 +1289,8 @@ int main() {
 }
 
 //可持久化Treap
-#define N 50005
-#define M 5000005;
+const int N = 50005;
+const int M = 5000005;
 int root[N], vs, d;
 struct Treap {
   int tot;

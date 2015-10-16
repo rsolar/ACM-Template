@@ -1,7 +1,7 @@
 //完全大数模板
-#define MAXN 9999
-#define MAXSIZE 1010
-#define DLEN 4
+const int MAXN = 9999;
+const int MAXSIZE = 1010;
+const int DLEN = 4;
 class BigNum {
 private:
   int a[500], len; //控制大数位数 2000位
