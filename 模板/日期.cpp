@@ -1,36 +1,36 @@
-//ÈÕÆÚº¯Êı
+//æ—¥æœŸå‡½æ•°
 int days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 struct Date {
   int year, month, day;
 };
 
-//ÅĞÈòÄê
+//åˆ¤é—°å¹´
 inline int leap(int year) {
   return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
 
-//ÅĞºÏ·¨ĞÔ
+//åˆ¤åˆæ³•æ€§
 inline int legal(Date a) {
   if (a.month < 0 || a.month > 12) { return 0; }
   if (a.month == 2) { return a.day > 0 && a.day <= 28 + leap(a.year); }
   return a.day > 0 && a.day <= days[a.month - 1];
 }
 
-//±È½ÏÈÕÆÚ´óĞ¡
+//æ¯”è¾ƒæ—¥æœŸå¤§å°
 inline int datecmp(Date a, Date b) {
   if (a.year != b.year) { return a.year - b.year; }
   if (a.month != b.month) { return a.month - b.month; }
   return a.day - b.day;
 }
 
-//·µ»ØÖ¸¶¨ÈÕÆÚÊÇĞÇÆÚ¼¸
+//è¿”å›æŒ‡å®šæ—¥æœŸæ˜¯æ˜ŸæœŸå‡ 
 int weekday(Date a) {
   int tm = a.month >= 3 ? (a.month - 2) : (a.month + 10);
   int ty = a.month >= 3 ? a.year : (a.year - 1);
   return (ty + ty / 4 - ty / 100 + t y / 400 + (int)(2.6 * tm - 0.2) + a.day) % 7;
 }
 
-//ÈÕÆÚ×ªÌìÊıÆ«ÒÆ
+//æ—¥æœŸè½¬å¤©æ•°åç§»
 int date2int(Date a) {
   int ret = a.year * 365 + (a.year - 1) / 4 - (a.year - 1) / 100 + (a.year - 1) / 400;
   days[1] += leap(a.year);
@@ -39,7 +39,7 @@ int date2int(Date a) {
   return ret + a.day;
 }
 
-//ÌìÊıÆ«ÒÆ×ªÈÕÆÚ
+//å¤©æ•°åç§»è½¬æ—¥æœŸ
 Date int2date(int a) {
   Date ret;
   ret.year = a / 146097 * 400;
@@ -53,13 +53,13 @@ Date int2date(int a) {
 
 //------------------------------------------------------------------------------
 
-//ÇóÄ³ÌìÊÇĞÇÆÚ¼¸
+//æ±‚æŸå¤©æ˜¯æ˜ŸæœŸå‡ 
 char *DaysOfTheWeek(int y, int m, int d) {
   char *name[] = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
   int a;
-  //1ÔÂ2ÔÂµ±×÷Ç°Ò»ÄêµÄ13,14ÔÂ
+  //1æœˆ2æœˆå½“ä½œå‰ä¸€å¹´çš„13,14æœˆ
   if (m == 1 || m == 2) { m += 12; y--; }
-  //ÅĞ¶ÏÊÇ·ñÔÚ1752Äê9ÔÂ3ÈÕÖ®Ç°
+  //åˆ¤æ–­æ˜¯å¦åœ¨1752å¹´9æœˆ3æ—¥ä¹‹å‰
   if ((y < 1752) || (y == 1752 && m < 9) || (y == 1752 && m == 9 && d < 3)) {
     a = (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 + 5) % 7;
   } else {

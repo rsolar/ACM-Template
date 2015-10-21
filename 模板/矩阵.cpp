@@ -1,7 +1,7 @@
 #define fabs(x) ((x)>=0?(x):-(x))
 #define isZero(x) (fabs(x)<1e-10)
 
-template <class T> struct Matrix {
+template <typename T> struct Matrix {
   int r, c;
   T m[N][N];
   void init() {
@@ -103,7 +103,7 @@ template <class T> struct Matrix {
   }
 };
 
-//ÇóÄæ¾ØÕó
+//æ±‚é€†çŸ©é˜µ
 int inv(Matrix &a) {
   int i, j, k, is[N], js[N];
   double t;
@@ -161,7 +161,7 @@ int inv(Matrix &a) {
   return 1;
 }
 
-//ÇóĞĞÁĞÊ½
+//æ±‚è¡Œåˆ—å¼
 double det(const Matrix &a) {
   int i, j, k, sign = 0;
   double b[N][N], ret = 1, t;

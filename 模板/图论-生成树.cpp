@@ -1,4 +1,4 @@
-//×îĞ¡Éú³ÉÊ÷
+//æœ€å°ç”Ÿæˆæ ‘
 //Prim O(V^2)
 const int N = 105;
 const int INF = 0x3f3f3f3f;
@@ -15,7 +15,7 @@ int prim(int cost[][N], int n) {
       if (!vis[j] && minc > lowc[j]) {
         minc = lowc[j]; p = j;
       }
-    if (minc == INF) { return -1; } //Ô­Í¼²»Á¬Í¨
+    if (minc == INF) { return -1; } //åŸå›¾ä¸è¿é€š
     ans += minc;
     vis[p] = true;
     for (int j = 0; j < n; j++) {
@@ -34,7 +34,7 @@ struct Edge {
   int u, v, w;
   bool operator<(const Edge &obj) const { return w < obj.w; }
 } edge[M];
-int fa[N], tol; //¼Ó±ßÇ°¸³ÖµÎª0
+int fa[N], tol; //åŠ è¾¹å‰èµ‹å€¼ä¸º0
 
 void addedge(int u, int v, int w) {
   edge[tol].u = u; edge[tol].v = v; edge[tol++].w = w;
@@ -58,6 +58,6 @@ int kruskal(int n) {
     }
     if (cnt == n - 1) { break; }
   }
-  if (cnt < n - 1) { return -1; } //²»Á¬Í¨
+  if (cnt < n - 1) { return -1; } //ä¸è¿é€š
   else { return ans; }
 }

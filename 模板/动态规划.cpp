@@ -1,10 +1,10 @@
-//×î³¤ÉÏÉı×ÓĞòÁĞ ·Ç½µÈç×¢ÊÍ
+//æœ€é•¿ä¸Šå‡å­åºåˆ— éé™å¦‚æ³¨é‡Š
 int n, a[N], b[N];
 int BS(int len, int x) {
   int l = 0, r = len - 1, mid;
   while (l <= r) {
     mid = l + r >> 1;
-    if (x > b[mid - 1] && x <= b[mid]) { return mid; } // > && <= »»Îª >= && <
+    if (x > b[mid - 1] && x <= b[mid]) { return mid; } // > && <= æ¢ä¸º >= && <
     else if (x >= b[mid]) { l = mid + 1; }
     else { r = mid - 1; }
   }
@@ -14,18 +14,17 @@ int DP() {
   int len = 1;
   b[0] = a[0];
   for (int i = 1, j; i < n; i++) {
-    if (a[i] <= b[0]) { j = 0; }  // <= »»Îª <
-    else if (a[i] > b[len - 1]) { j = len++; } // > »»Îª >=
+    if (a[i] <= b[0]) { j = 0; }  // <= æ¢ä¸º <
+    else if (a[i] > b[len - 1]) { j = len++; } // > æ¢ä¸º >=
     else { j = BS(len, a[i]); }
     b[j] = a[i];
   }
   return len;
 }
 
-//×î³¤¹«¹²×ÓĞòÁĞ
+//æœ€é•¿å…¬å…±å­åºåˆ—
 int dp[N][N];
-int LCS(const char *s1, const char *s2) {
-  memset(dp, 0, sizeof(dp));
+int LCS(const char *s1, const char *s2, int dp[][N]) {
   int m = strlen(s1), n = strlen(s2);
   for (int i = 1; i <= m; i++) {
     for (int j = 1; j <= n; j++) {
@@ -33,22 +32,21 @@ int LCS(const char *s1, const char *s2) {
       else { dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]); }
     }
   }
-  return a[m][n];
+  return dp[m][n];
 }
 
-void printLCS(const char *s1, const char *s2) {
-  char s[N];
+void printLCS(const char *s1, const char *s2, int dp[][N]) {
+  char s[N] = {0};
   int i = strlen(s1), j = strlen(s2), k = dp[i][j];
-  s[k] = '\0';
   while (i && j) {
-    if (dp[i][j] == dp[i - 1][j - 1] + 1) { s[--k] = s1[i - 1]; i--; j--; }
-    else if (dp[i - 1][j] > dp[i][j - 1]) { i--; }
+    if (s1[i - 1] == s2[j - 1] && dp[i][j] == dp[i - 1][j - 1] + 1) { s[--k] = s1[i - 1]; --i; --j; }
+    else if (s1[i - 1] != s2[j - 1] && dp[i - 1][j] > dp[i][j - 1]) { i--; }
     else { j--; }
   }
   puts(s);
 }
 
-//×î³¤¹«¹²µİÔö×ÓĞòÁĞ
+//æœ€é•¿å…¬å…±é€’å¢å­åºåˆ—
 int f[N][N], dp[N];
 int gcis(int a[], int la, int b[], int lb, int ans[]) {
   //a[1...la], b[1...lb]
@@ -74,10 +72,10 @@ int gcis(int a[], int la, int b[], int lb, int ans[]) {
   return dp[mx];
 }
 
-//×î´ó×Ó¶ÎºÍ
+//æœ€å¤§å­æ®µå’Œ
 int maxSum(int a[], int n, int &st, int &ed) {
-  int ret, sum = 0, s, i;
-  for (ret = a[st = ed = s = i = 0]; i < n; i++, s = (sum > 0 ? s : i)) {
+  int ret, sum, s, i;
+  for (ret = a[sum = st = ed = s = i = 0]; i < n; i++, s = (sum > 0 ? s : i)) {
     if ((sum = (sum > 0 ? sum : 0) + a[i]) > ret) {
       ret = sum; st = s; ed = i;
     }
@@ -85,7 +83,7 @@ int maxSum(int a[], int n, int &st, int &ed) {
   return ret;
 }
 
-//×î´ó×ÓÕóºÍ
+//æœ€å¤§å­é˜µå’Œ
 int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   int asum[N][N], ret, sum, i, j, k, s;
   for (i = 0; i < h; i++) {
@@ -105,8 +103,8 @@ int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   return ret;
 }
 
-//RMQ Ò»Î¬
-//Sparse Table ·µ»ØÖµ
+//RMQ ä¸€ç»´
+//Sparse Table è¿”å›å€¼
 int n, a[N];
 int dpmn[N][30], dpmx[N][30];
 void initRMQ() {
@@ -129,7 +127,7 @@ int getMax(int l, int r) {
   return max(dpmn[l][k], dpmn[r - (1 << k) + 1][k]);
 }
 
-//ST ·µ»ØÏÂ±ê
+//ST è¿”å›ä¸‹æ ‡
 int n, a[N];
 int dpmn[N][30], dpmx[N][30];
 void initRMQ() {
@@ -152,9 +150,9 @@ int getMax(int l, int r) {
   return a[dpmx[l][k]] > a[dpmx[r - (1 << k) + 1][k]] ? dpmx[l][k] : dpmx[r - (1 << k) + 1][k];
 }
 
-//RMQ ¶şÎ¬
+//RMQ äºŒç»´
 int n, a[N][N];
-int mm[N], dpmn[N][N][9][9], dpmx[N][N][9][9]; //mm[]Îª¶ş½øÖÆÎ»Êı¼õÒ»£¬Ê¹ÓÃÇ°³õÊ¼»¯
+int mm[N], dpmn[N][N][9][9], dpmx[N][N][9][9]; //mm[]ä¸ºäºŒè¿›åˆ¶ä½æ•°å‡ä¸€ï¼Œä½¿ç”¨å‰åˆå§‹åŒ–
 void initmm() {
   mm[0] = -1;
   for (int i = 1; i < N; i++) {

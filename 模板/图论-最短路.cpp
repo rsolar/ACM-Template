@@ -1,6 +1,6 @@
 //http://blog.csdn.net/wjf_wzzc/article/details/22869677
 
-//ÁÚ½Ó±í
+//é‚»æ¥è¡¨
 const int N = 100005;
 const int M = 200005;
 const int INF = 0x3f3f3f3f;
@@ -10,8 +10,8 @@ struct graph {
   void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; next[tot] = head[x]; head[x] = tot++; }
 } g;
 
-//Dijkstra + ÁÚ½Ó¾ØÕó O(V^2)
-int n, mp[N][N], pre[N], dist[N]; //pre[i]¼ÇÂ¼srcµ½iÂ·¾¶ÉÏµÄ¸¸½áµã£¬pre[src] = -1
+//Dijkstra + é‚»æ¥çŸ©é˜µ O(V^2)
+int n, mp[N][N], pre[N], dist[N]; //pre[i]è®°å½•srcåˆ°iè·¯å¾„ä¸Šçš„çˆ¶ç»“ç‚¹ï¼Œpre[src] = -1
 bool vis[N];
 void Dijkstra(int src) {
   memset(dist, 0x3f, sizeof(dist));
@@ -33,7 +33,7 @@ void Dijkstra(int src) {
   }
 }
 
-//Dijkstra + priority_queue + ÁÚ½Ó±í O(VE)
+//Dijkstra + priority_queue + é‚»æ¥è¡¨ O(VE)
 int dist[M];
 void dijkstra(int src) {
   memset(dist, 0x3f, sizeof(dist));
@@ -54,7 +54,7 @@ void dijkstra(int src) {
   }
 }
 
-//SPFA + SLF + LLL + ÁÚ½Ó±í O(kE)
+//SPFA + SLF + LLL + é‚»æ¥è¡¨ O(kE)
 int dist[M];
 bool inque[M];
 void spfa(int src) {
@@ -94,8 +94,8 @@ void spfa(int src) {
 }
 
 //bellman-ford + vector O(V*E)
-//¿ÉÒÔ´¦Àí¸º±ßÈ¨Í¼
-//¿ÉÒÔÅĞ¶ÏÊÇ·ñ´æÔÚ¸º»·»ØÂ·,·µ»Øtrue,µ±ÇÒ½öµ±Í¼ÖĞ²»°üº¬´ÓÔ´µã¿É´ïµÄ¸ºÈ¨»ØÂ·
+//å¯ä»¥å¤„ç†è´Ÿè¾¹æƒå›¾
+//å¯ä»¥åˆ¤æ–­æ˜¯å¦å­˜åœ¨è´Ÿç¯å›è·¯,è¿”å›true,å½“ä¸”ä»…å½“å›¾ä¸­ä¸åŒ…å«ä»æºç‚¹å¯è¾¾çš„è´Ÿæƒå›è·¯
 const int INF = 0x3f3f3f3f;
 int dist[N];
 struct Edge {
@@ -103,7 +103,7 @@ struct Edge {
   Edge(int _u = 0, int _v = 0, int _cost = 0): u(_u), v(_v), cost(_cost) {}
 };
 vector<Edge> E;
-bool bellman_ford(int start, int n) { //µãµÄ±àºÅ´Ó1¿ªÊ¼
+bool bellman_ford(int start, int n) { //ç‚¹çš„ç¼–å·ä»1å¼€å§‹
   for (int i = 1; i <= n; i++) { dist[i] = INF; }
   dist[start] = 0;
   for (int i = 1; i < n; i++) {
@@ -115,15 +115,15 @@ bool bellman_ford(int start, int n) { //µãµÄ±àºÅ´Ó1¿ªÊ¼
         flag = true;
       }
     }
-    if (!flag) { return true; } //Ã»ÓĞ¸º»·»ØÂ·
+    if (!flag) { return true; } //æ²¡æœ‰è´Ÿç¯å›è·¯
   }
   for (size_t j = 0; j < E.size(); j++) {
-    if (dist[E[j].v] > dist[E[j].u] + E[j].cost) { return false; } //ÓĞ¸º»·»ØÂ·
+    if (dist[E[j].v] > dist[E[j].u] + E[j].cost) { return false; } //æœ‰è´Ÿç¯å›è·¯
   }
-  return true; //Ã»ÓĞ¸º»·»ØÂ·
+  return true; //æ²¡æœ‰è´Ÿç¯å›è·¯
 }
 
-//floyd ´øÂ·¾¶¼ÇÂ¼ O(V^3)
+//floyd å¸¦è·¯å¾„è®°å½• O(V^3)
 int n, mp[N][N], dist[N][N], pre[N][N];
 void floyd() {
   for (int i = 0; i < n; i++) {

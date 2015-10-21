@@ -1,73 +1,73 @@
 //http://www.cppblog.com/abilitytao/archive/2009/08/04/92171.html
 
 ///////////////////////////////////////////////////////////////////
-//³£Á¿Çø
-const double INF        = 1e10;     // ÎŞÇî´ó
-const double EPS        = 1e-8;    // ¼ÆËã¾«¶È
-const int LEFT          = 0;        // µãÔÚÖ±Ïß×ó±ß
-const int RIGHT         = 1;        // µãÔÚÖ±ÏßÓÒ±ß
-const int ONLINE        = 2;        // µãÔÚÖ±ÏßÉÏ
-const int CROSS         = 0;        // Á½Ö±ÏßÏà½»
-const int COLINE        = 1;        // Á½Ö±Ïß¹²Ïß
-const int PARALLEL      = 2;        // Á½Ö±ÏßÆ½ĞĞ
-const int NOTCOPLANAR   = 3;        // Á½Ö±Ïß²»¹²Ãæ
-const int INSIDE        = 1;        // µãÔÚÍ¼ĞÎÄÚ²¿
-const int OUTSIDE       = 2;        // µãÔÚÍ¼ĞÎÍâ²¿
-const int BORDER        = 3;        // µãÔÚÍ¼ĞÎ±ß½ç
-const int BAOHAN        = 1;        // ´óÔ²°üº¬Ğ¡Ô²
-const int NEIQIE        = 2;        // ÄÚÇĞ
-const int XIANJIAO      = 3;        // Ïà½»
-const int WAIQIE        = 4;        // ÍâÇĞ
-const int XIANLI        = 5;        // ÏàÀë
+//å¸¸é‡åŒº
+const double INF        = 1e10;     // æ— ç©·å¤§
+const double EPS        = 1e-8;    // è®¡ç®—ç²¾åº¦
+const int LEFT          = 0;        // ç‚¹åœ¨ç›´çº¿å·¦è¾¹
+const int RIGHT         = 1;        // ç‚¹åœ¨ç›´çº¿å³è¾¹
+const int ONLINE        = 2;        // ç‚¹åœ¨ç›´çº¿ä¸Š
+const int CROSS         = 0;        // ä¸¤ç›´çº¿ç›¸äº¤
+const int COLINE        = 1;        // ä¸¤ç›´çº¿å…±çº¿
+const int PARALLEL      = 2;        // ä¸¤ç›´çº¿å¹³è¡Œ
+const int NOTCOPLANAR   = 3;        // ä¸¤ç›´çº¿ä¸å…±é¢
+const int INSIDE        = 1;        // ç‚¹åœ¨å›¾å½¢å†…éƒ¨
+const int OUTSIDE       = 2;        // ç‚¹åœ¨å›¾å½¢å¤–éƒ¨
+const int BORDER        = 3;        // ç‚¹åœ¨å›¾å½¢è¾¹ç•Œ
+const int BAOHAN        = 1;        // å¤§åœ†åŒ…å«å°åœ†
+const int NEIQIE        = 2;        // å†…åˆ‡
+const int XIANJIAO      = 3;        // ç›¸äº¤
+const int WAIQIE        = 4;        // å¤–åˆ‡
+const int XIANLI        = 5;        // ç›¸ç¦»
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-//ÀàĞÍ¶¨ÒåÇø
-struct Point {              // ¶şÎ¬µã»òÊ¸Á¿
+//ç±»å‹å®šä¹‰åŒº
+struct Point {              // äºŒç»´ç‚¹æˆ–çŸ¢é‡
   double x, y;
   double angle, dis;
   Point() {}
   Point(double x0, double y0): x(x0), y(y0) {}
 };
-struct Point3D {            //ÈıÎ¬µã»òÊ¸Á¿
+struct Point3D {            //ä¸‰ç»´ç‚¹æˆ–çŸ¢é‡
   double x, y, z;
   Point3D() {}
   Point3D(double x0, double y0, double z0): x(x0), y(y0), z(z0) {}
 };
-struct Line {               // ¶şÎ¬µÄÖ±Ïß»òÏß¶Î
+struct Line {               // äºŒç»´çš„ç›´çº¿æˆ–çº¿æ®µ
   Point p1, p2;
   Line() {}
   Line(Point p10, Point p20): p1(p10), p2(p20) {}
 };
-struct Line3D {             // ÈıÎ¬µÄÖ±Ïß»òÏß¶Î
+struct Line3D {             // ä¸‰ç»´çš„ç›´çº¿æˆ–çº¿æ®µ
   Point3D p1, p2;
   Line3D() {}
   Line3D(Point3D p10, Point3D p20): p1(p10), p2(p20) {}
 };
-struct Rect {              // ÓÃ³¤¿í±íÊ¾¾ØĞÎµÄ·½·¨ w, h·Ö±ğ±íÊ¾¿í¶ÈºÍ¸ß¶È
+struct Rect {              // ç”¨é•¿å®½è¡¨ç¤ºçŸ©å½¢çš„æ–¹æ³• w, håˆ†åˆ«è¡¨ç¤ºå®½åº¦å’Œé«˜åº¦
   double w, h;
   Rect() {}
   Rect(double _w, double _h) : w(_w), h(_h) {}
 };
-struct Rect_2 {             // ±íÊ¾¾ØĞÎ£¬×óÏÂ½Ç×ø±êÊÇ(xl, yl)£¬ÓÒÉÏ½Ç×ø±êÊÇ(xh, yh)
+struct Rect_2 {             // è¡¨ç¤ºçŸ©å½¢ï¼Œå·¦ä¸‹è§’åæ ‡æ˜¯(xl, yl)ï¼Œå³ä¸Šè§’åæ ‡æ˜¯(xh, yh)
   double xl, yl, xh, yh;
   Rect_2() {}
   Rect_2(double _xl, double _yl, double _xh, double _yh) : xl(_xl), yl(_yl),
     xh(_xh), yh(_yh) {}
 };
-struct Circle {            //Ô²
+struct Circle {            //åœ†
   Point c;
   double r;
   Circle() {}
   Circle(Point _c, double _r) : c(_c), r(_r) {}
 };
-typedef vector<Point> Polygon;      // ¶şÎ¬¶à±ßĞÎ
-typedef vector<Point> Points;       // ¶şÎ¬µã¼¯
-typedef vector<Point3D> Points3D;   // ÈıÎ¬µã¼¯
+typedef vector<Point> Polygon;      // äºŒç»´å¤šè¾¹å½¢
+typedef vector<Point> Points;       // äºŒç»´ç‚¹é›†
+typedef vector<Point3D> Points3D;   // ä¸‰ç»´ç‚¹é›†
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-//»ù±¾º¯ÊıÇø
+//åŸºæœ¬å‡½æ•°åŒº
 inline bool ZERO(double x) {            // x == 0
   return (fabs(x) < EPS);
 }
@@ -95,19 +95,19 @@ inline bool LEQ(double x, double y) {   // less equal, x <= y
 inline bool GEQ(double x, double y) {   // greater equal, x >= y
   return (EQ(x, y) || (x > y));
 }
-// ×¢Òâ£¡£¡£¡
-// Èç¹ûÊÇÒ»¸öºÜĞ¡µÄ¸ºµÄ¸¡µãÊı
-// ±£ÁôÓĞĞ§Î»ÊıÊä³öµÄÊ±ºò»á³öÏÖ-0.000ÕâÑùµÄĞÎÊ½£¬
-// Ç°Ãæ¶àÁËÒ»¸ö¸ººÅ
-// Õâ¾Í»áµ¼ÖÂ´íÎó£¡£¡£¡£¡£¡£¡
-// Òò´ËÔÚÊä³ö¸¡µãÊıÖ®Ç°£¬Ò»¶¨Òªµ÷ÓÃ´Îº¯Êı½øĞĞĞŞÕı£¡
+// æ³¨æ„ï¼ï¼ï¼
+// å¦‚æœæ˜¯ä¸€ä¸ªå¾ˆå°çš„è´Ÿçš„æµ®ç‚¹æ•°
+// ä¿ç•™æœ‰æ•ˆä½æ•°è¾“å‡ºçš„æ—¶å€™ä¼šå‡ºç°-0.000è¿™æ ·çš„å½¢å¼ï¼Œ
+// å‰é¢å¤šäº†ä¸€ä¸ªè´Ÿå·
+// è¿™å°±ä¼šå¯¼è‡´é”™è¯¯ï¼ï¼ï¼ï¼ï¼ï¼
+// å› æ­¤åœ¨è¾“å‡ºæµ®ç‚¹æ•°ä¹‹å‰ï¼Œä¸€å®šè¦è°ƒç”¨æ¬¡å‡½æ•°è¿›è¡Œä¿®æ­£ï¼
 inline double FIX(double x) {
   return (fabs(x) < EPS) ? 0 : x;
 }
 //////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////
-//¶şÎ¬Ê¸Á¿ÔËËã
+//äºŒç»´çŸ¢é‡è¿ç®—
 bool operator==(Point p1, Point p2) {
   return (EQ(p1.x, p2.x) && EQ(p1.y, p2.y));
 }
@@ -124,18 +124,18 @@ Point operator+(Point p1, Point p2) {
 Point operator-(Point p1, Point p2) {
   return Point(p1.x - p2.x, p1.y - p2.y);
 }
-double operator*(Point p1, Point p2) { // ¼ÆËã²æ³Ë p1 ¡Á p2
+double operator*(Point p1, Point p2) { // è®¡ç®—å‰ä¹˜ p1 Ã— p2
   return (p1.x * p2.y - p2.x * p1.y);
 }
-double operator&(Point p1, Point p2) { // ¼ÆËãµã»ı p1¡¤p2
+double operator&(Point p1, Point p2) { // è®¡ç®—ç‚¹ç§¯ p1Â·p2
   return (p1.x * p2.x + p1.y * p2.y);
 }
-double Norm(Point p) { // ¼ÆËãÊ¸Á¿pµÄÄ£
+double Norm(Point p) { // è®¡ç®—çŸ¢é‡pçš„æ¨¡
   return sqrt(p.x * p.x + p.y * p.y);
 }
-// °ÑÊ¸Á¿pĞı×ª½Ç¶Èangle (»¡¶È±íÊ¾)
-// angle > 0±íÊ¾ÄæÊ±ÕëĞı×ª
-// angle < 0±íÊ¾Ë³Ê±ÕëĞı×ª
+// æŠŠçŸ¢é‡pæ—‹è½¬è§’åº¦angle (å¼§åº¦è¡¨ç¤º)
+// angle > 0è¡¨ç¤ºé€†æ—¶é’ˆæ—‹è½¬
+// angle < 0è¡¨ç¤ºé¡ºæ—¶é’ˆæ—‹è½¬
 Point Rotate(Point p, double angle) {
   Point result;
   result.x = p.x * cos(angle) - p.y * sin(angle);
@@ -145,7 +145,7 @@ Point Rotate(Point p, double angle) {
 //////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////
-//ÈıÎ¬Ê¸Á¿ÔËËã
+//ä¸‰ç»´çŸ¢é‡è¿ç®—
 bool operator==(Point3D p1, Point3D p2) {
   return (EQ(p1.x, p2.x) && EQ(p1.y, p2.y) && EQ(p1.z, p2.z));
 }
@@ -160,38 +160,38 @@ Point3D operator+(Point3D p1, Point3D p2) {
 Point3D operator-(Point3D p1, Point3D p2) {
   return Point3D(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
 }
-Point3D operator*(Point3D p1, Point3D p2) { // ¼ÆËã²æ³Ë p1 x p2
+Point3D operator*(Point3D p1, Point3D p2) { // è®¡ç®—å‰ä¹˜ p1 x p2
   return Point3D(p1.y * p2.z - p1.z * p2.y, p1.z * p2.x - p1.x * p2.z,
                  p1.x * p2.y - p1.y * p2.x);
 }
-double operator&(Point3D p1, Point3D p2) { // ¼ÆËãµã»ı p1¡¤p2
+double operator&(Point3D p1, Point3D p2) { // è®¡ç®—ç‚¹ç§¯ p1Â·p2
   return (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z);
 }
-double Norm(Point3D p) { // ¼ÆËãÊ¸Á¿pµÄÄ£
+double Norm(Point3D p) { // è®¡ç®—çŸ¢é‡pçš„æ¨¡
   return sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////
-//¼¸ºÎÌâÃæ»ı¼ÆËã
+//å‡ ä½•é¢˜é¢ç§¯è®¡ç®—
 //
-// ¸ù¾İÈı¸ö¶¥µã×ø±ê¼ÆËãÈı½ÇĞÎÃæ»ı
-// Ãæ»ıµÄÕı¸º°´ÕÕÓÒÊÖĞı¹æÔòÈ·¶¨
-double Area(Point A, Point B, Point C) { //Èı½ÇĞÎÃæ»ı
+// æ ¹æ®ä¸‰ä¸ªé¡¶ç‚¹åæ ‡è®¡ç®—ä¸‰è§’å½¢é¢ç§¯
+// é¢ç§¯çš„æ­£è´ŸæŒ‰ç…§å³æ‰‹æ—‹è§„åˆ™ç¡®å®š
+double Area(Point A, Point B, Point C) { //ä¸‰è§’å½¢é¢ç§¯
   return ((B - A) * (C - A) / 2.0);
 }
-// ¸ù¾İÈıÌõ±ß³¤¼ÆËãÈı½ÇĞÎÃæ»ı
-double Area(double a, double b, double c) { //Èı½ÇĞÎÃæ»ı
+// æ ¹æ®ä¸‰æ¡è¾¹é•¿è®¡ç®—ä¸‰è§’å½¢é¢ç§¯
+double Area(double a, double b, double c) { //ä¸‰è§’å½¢é¢ç§¯
   double s = (a + b + c) / 2.0;
   return sqrt(s * (s - a) * (s - b) * (s - c));
 }
 double Area(const Circle &C) {
   return M_PI * C.r * C.r;
 }
-// ¼ÆËã¶à±ßĞÎÃæ»ı
-// Ãæ»ıµÄÕı¸º°´ÕÕÓÒÊÖĞı¹æÔòÈ·¶¨
-double Area(const Polygon &poly) { //¶à±ßĞÎÃæ»ı
+// è®¡ç®—å¤šè¾¹å½¢é¢ç§¯
+// é¢ç§¯çš„æ­£è´ŸæŒ‰ç…§å³æ‰‹æ—‹è§„åˆ™ç¡®å®š
+double Area(const Polygon &poly) { //å¤šè¾¹å½¢é¢ç§¯
   double res = 0;
   int n = poly.size();
   if (n < 3) { return 0; }
@@ -204,55 +204,55 @@ double Area(const Polygon &poly) { //¶à±ßĞÎÃæ»ı
 /////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////
-//µã.Ïß¶Î.Ö±ÏßÎÊÌâ
+//ç‚¹.çº¿æ®µ.ç›´çº¿é—®é¢˜
 //
-double Distance(Point p1, Point p2) { //2µã¼äµÄ¾àÀë
+double Distance(Point p1, Point p2) { //2ç‚¹é—´çš„è·ç¦»
   return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
-double Distance(Point3D p1, Point3D p2) { //2µã¼äµÄ¾àÀë,ÈıÎ¬
+double Distance(Point3D p1, Point3D p2) { //2ç‚¹é—´çš„è·ç¦»,ä¸‰ç»´
   return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) +
               (p1.z - p2.z) * (p1.z - p2.z));
 }
-double Distance(Point p, Line L) { // Çó¶şÎ¬Æ½ÃæÉÏµãµ½Ö±ÏßµÄ¾àÀë
+double Distance(Point p, Line L) { // æ±‚äºŒç»´å¹³é¢ä¸Šç‚¹åˆ°ç›´çº¿çš„è·ç¦»
   return (fabs((p - L.p1) * (L.p2 - L.p1)) / Norm(L.p2 - L.p1));
 }
 double Distance(Point3D p,
-                Line3D L) { // ÇóÈıÎ¬¿Õ¼äÖĞµãµ½Ö±ÏßµÄ¾àÀë
+                Line3D L) { // æ±‚ä¸‰ç»´ç©ºé—´ä¸­ç‚¹åˆ°ç›´çº¿çš„è·ç¦»
   return (Norm((p - L.p1) * (L.p2 - L.p1)) / Norm(L.p2 - L.p1));
 }
-bool OnLine(Point p, Line L) { // ÅĞ¶Ï¶şÎ¬Æ½ÃæÉÏµãpÊÇ·ñÔÚÖ±ÏßLÉÏ
+bool OnLine(Point p, Line L) { // åˆ¤æ–­äºŒç»´å¹³é¢ä¸Šç‚¹pæ˜¯å¦åœ¨ç›´çº¿Lä¸Š
   return ZERO((p - L.p1) * (L.p2 - L.p1));
 }
 bool OnLine(Point3D p, Line3D
-            L) { // ÅĞ¶ÏÈıÎ¬¿Õ¼äÖĞµãpÊÇ·ñÔÚÖ±ÏßLÉÏ
+            L) { // åˆ¤æ–­ä¸‰ç»´ç©ºé—´ä¸­ç‚¹pæ˜¯å¦åœ¨ç›´çº¿Lä¸Š
   return ZERO((p - L.p1) * (L.p2 - L.p1));
 }
 int Relation(Point p, Line
-             L) { // ¼ÆËãµãpÓëÖ±ÏßLµÄÏà¶Ô¹ØÏµ ,·µ»ØONLINE,LEFT,RIGHT
+             L) { // è®¡ç®—ç‚¹pä¸ç›´çº¿Lçš„ç›¸å¯¹å…³ç³» ,è¿”å›ONLINE,LEFT,RIGHT
   double res = (L.p2 - L.p1) * (p - L.p1);
   if (EQ(res, 0)) { return ONLINE; }
   else if (res > 0) { return LEFT; }
   else { return RIGHT; }
 }
 bool SameSide(Point p1, Point p2,
-              Line L) { // ÅĞ¶Ïµãp1, p2ÊÇ·ñÔÚÖ±ÏßLµÄÍ¬²à
+              Line L) { // åˆ¤æ–­ç‚¹p1, p2æ˜¯å¦åœ¨ç›´çº¿Lçš„åŒä¾§
   double m1 = (p1 - L.p1) * (L.p2 - L.p1);
   double m2 = (p2 - L.p1) * (L.p2 - L.p1);
   return GT(m1 * m2, 0);
 }
 bool OnLineSeg(Point p, Line
-               L) { // ÅĞ¶Ï¶şÎ¬Æ½ÃæÉÏµãpÊÇ·ñÔÚÏß¶ÎlÉÏ
+               L) { // åˆ¤æ–­äºŒç»´å¹³é¢ä¸Šç‚¹pæ˜¯å¦åœ¨çº¿æ®µlä¸Š
   return (ZERO((L.p1 - p) * (L.p2 - p))
           && LEQ((p.x - L.p1.x) * (p.x - L.p2.x), 0)
           && LEQ((p.y - L.p1.y) * (p.y - L.p2.y), 0));
 }
 bool OnLineSeg(Point3D p,
-               Line3D L) { // ÅĞ¶ÏÈıÎ¬¿Õ¼äÖĞµãpÊÇ·ñÔÚÏß¶ÎlÉÏ
+               Line3D L) { // åˆ¤æ–­ä¸‰ç»´ç©ºé—´ä¸­ç‚¹pæ˜¯å¦åœ¨çº¿æ®µlä¸Š
   return (ZERO((L.p1 - p) * (L.p2 - p))
           && EQ(Norm(p - L.p1) + Norm(p - L.p2), Norm(L.p2 - L.p1)));
 }
 Point SymPoint(Point p, Line
-               L) { // Çó¶şÎ¬Æ½ÃæÉÏµãp¹ØÓÚÖ±ÏßLµÄ¶Ô³Æµã
+               L) { // æ±‚äºŒç»´å¹³é¢ä¸Šç‚¹på…³äºç›´çº¿Lçš„å¯¹ç§°ç‚¹
   Point result;
   double a = L.p2.x - L.p1.x;
   double b = L.p2.y - L.p1.y;
@@ -262,7 +262,7 @@ Point SymPoint(Point p, Line
   return result;
 }
 bool Coplanar(Points3D
-              points) { // ÅĞ¶ÏÒ»¸öµã¼¯ÖĞµÄµãÊÇ·ñÈ«²¿¹²Ãæ
+              points) { // åˆ¤æ–­ä¸€ä¸ªç‚¹é›†ä¸­çš„ç‚¹æ˜¯å¦å…¨éƒ¨å…±é¢
   Point3D p;
   if (points.size() < 4) { return true; }
   p = (points[2] - points[0]) * (points[1] - points[0]);
@@ -271,20 +271,20 @@ bool Coplanar(Points3D
   }
   return true;
 }
-bool LineIntersect(Line L1, Line L2) { // ÅĞ¶Ï¶şÎ¬µÄÁ½Ö±ÏßÊÇ·ñÏà½»
-  return (!ZERO((L1.p1 - L1.p2) * (L2.p1 - L2.p2))); // ÊÇ·ñÆ½ĞĞ
+bool LineIntersect(Line L1, Line L2) { // åˆ¤æ–­äºŒç»´çš„ä¸¤ç›´çº¿æ˜¯å¦ç›¸äº¤
+  return (!ZERO((L1.p1 - L1.p2) * (L2.p1 - L2.p2))); // æ˜¯å¦å¹³è¡Œ
 }
 bool LineIntersect(Line3D L1,
-                   Line3D L2) { // ÅĞ¶ÏÈıÎ¬µÄÁ½Ö±ÏßÊÇ·ñÏà½»
+                   Line3D L2) { // åˆ¤æ–­ä¸‰ç»´çš„ä¸¤ç›´çº¿æ˜¯å¦ç›¸äº¤
   Point3D p1 = L1.p1 - L1.p2;
   Point3D p2 = L2.p1 - L2.p2;
   Point3D p  = p1 * p2;
-  if (ZERO(p)) { return false; }      // ÊÇ·ñÆ½ĞĞ
+  if (ZERO(p)) { return false; }      // æ˜¯å¦å¹³è¡Œ
   p = (L2.p1 - L1.p2) * (L1.p1 - L1.p2);
-  return ZERO(p & L2.p2);         // ÊÇ·ñ¹²Ãæ
+  return ZERO(p & L2.p2);         // æ˜¯å¦å…±é¢
 }
 bool LineSegIntersect(Line L1,
-                      Line L2) { // ÅĞ¶Ï¶şÎ¬µÄÁ½ÌõÏß¶ÎÊÇ·ñÏà½»
+                      Line L2) { // åˆ¤æ–­äºŒç»´çš„ä¸¤æ¡çº¿æ®µæ˜¯å¦ç›¸äº¤
   return (GEQ(max(L1.p1.x, L1.p2.x), min(L2.p1.x, L2.p2.x)) &&
           GEQ(max(L2.p1.x, L2.p2.x), min(L1.p1.x, L1.p2.x)) &&
           GEQ(max(L1.p1.y, L1.p2.y), min(L2.p1.y, L2.p2.y)) &&
@@ -295,12 +295,12 @@ bool LineSegIntersect(Line L1,
               0));
 }
 bool LineSegIntersect(Line3D L1,
-                      Line3D L2) { // ÅĞ¶ÏÈıÎ¬µÄÁ½ÌõÏß¶ÎÊÇ·ñÏà½»
+                      Line3D L2) { // åˆ¤æ–­ä¸‰ç»´çš„ä¸¤æ¡çº¿æ®µæ˜¯å¦ç›¸äº¤
   // todo
   return true;
 }
-// ¼ÆËãÁ½Ìõ¶şÎ¬Ö±ÏßµÄ½»µã£¬½á¹ûÔÚ²ÎÊıPÖĞ·µ»Ø
-// ·µ»ØÖµËµÃ÷ÁËÁ½ÌõÖ±ÏßµÄÎ»ÖÃ¹ØÏµ:  COLINE   -- ¹²Ïß  PARALLEL -- Æ½ĞĞ  CROSS    -- Ïà½»
+// è®¡ç®—ä¸¤æ¡äºŒç»´ç›´çº¿çš„äº¤ç‚¹ï¼Œç»“æœåœ¨å‚æ•°Pä¸­è¿”å›
+// è¿”å›å€¼è¯´æ˜äº†ä¸¤æ¡ç›´çº¿çš„ä½ç½®å…³ç³»:  COLINE   -- å…±çº¿  PARALLEL -- å¹³è¡Œ  CROSS    -- ç›¸äº¤
 int CalCrossPoint(Line L1, Line L2, Point &P) {
   double A1, B1, C1, A2, B2, C2;
   A1 = L1.p2.y - L1.p1.y;
@@ -318,13 +318,13 @@ int CalCrossPoint(Line L1, Line L2, Point &P) {
     return CROSS;
   }
 }
-// ¼ÆËãÁ½ÌõÈıÎ¬Ö±ÏßµÄ½»µã£¬½á¹ûÔÚ²ÎÊıPÖĞ·µ»Ø
-// ·µ»ØÖµËµÃ÷ÁËÁ½ÌõÖ±ÏßµÄÎ»ÖÃ¹ØÏµ COLINE   -- ¹²Ïß  PARALLEL -- Æ½ĞĞ  CROSS    -- Ïà½»  NONCOPLANAR -- ²»¹«Ãæ
+// è®¡ç®—ä¸¤æ¡ä¸‰ç»´ç›´çº¿çš„äº¤ç‚¹ï¼Œç»“æœåœ¨å‚æ•°Pä¸­è¿”å›
+// è¿”å›å€¼è¯´æ˜äº†ä¸¤æ¡ç›´çº¿çš„ä½ç½®å…³ç³» COLINE   -- å…±çº¿  PARALLEL -- å¹³è¡Œ  CROSS    -- ç›¸äº¤  NONCOPLANAR -- ä¸å…¬é¢
 int CalCrossPoint(Line3D L1, Line3D L2, Point3D &P) {
   // todo
   return 0;
 }
-// ¼ÆËãµãPµ½Ö±ÏßLµÄ×î½üµã
+// è®¡ç®—ç‚¹Påˆ°ç›´çº¿Lçš„æœ€è¿‘ç‚¹
 Point NearestPointToLine(Point P, Line L) {
   Point result;
   double a, b, t;
@@ -335,7 +335,7 @@ Point NearestPointToLine(Point P, Line L) {
   result.y = L.p1.y + b * t;
   return result;
 }
-// ¼ÆËãµãPµ½Ïß¶ÎLµÄ×î½üµã
+// è®¡ç®—ç‚¹Påˆ°çº¿æ®µLçš„æœ€è¿‘ç‚¹
 Point NearestPointToLineSeg(Point P, Line L) {
   Point result;
   double a, b, t;
@@ -351,7 +351,7 @@ Point NearestPointToLineSeg(Point P, Line L) {
   }
   return result;
 }
-// ¼ÆËãÏÕ¶ÎL1µ½Ïß¶ÎL2µÄ×î¶Ì¾àÀë
+// è®¡ç®—é™©æ®µL1åˆ°çº¿æ®µL2çš„æœ€çŸ­è·ç¦»
 double MinDistance(Line L1, Line L2) {
   double d1, d2, d3, d4;
   if (LineSegIntersect(L1, L2)) {
@@ -364,15 +364,15 @@ double MinDistance(Line L1, Line L2) {
     return min(min(d1, d2), min(d3, d4));
   }
 }
-// Çó¶şÎ¬Á½Ö±ÏßµÄ¼Ğ½Ç£¬
-// ·µ»ØÖµÊÇ0~PiÖ®¼äµÄ»¡¶È
+// æ±‚äºŒç»´ä¸¤ç›´çº¿çš„å¤¹è§’ï¼Œ
+// è¿”å›å€¼æ˜¯0~Piä¹‹é—´çš„å¼§åº¦
 double Inclination(Line L1, Line L2) {
   Point u = L1.p2 - L1.p1;
   Point v = L2.p2 - L2.p1;
   return acos((u & v) / (Norm(u) * Norm(v)));
 }
-// ÇóÈıÎ¬Á½Ö±ÏßµÄ¼Ğ½Ç£¬
-// ·µ»ØÖµÊÇ0~PiÖ®¼äµÄ»¡¶È
+// æ±‚ä¸‰ç»´ä¸¤ç›´çº¿çš„å¤¹è§’ï¼Œ
+// è¿”å›å€¼æ˜¯0~Piä¹‹é—´çš„å¼§åº¦
 double Inclination(Line3D L1, Line3D L2) {
   Point3D u = L1.p2 - L1.p1;
   Point3D v = L2.p2 - L2.p1;
@@ -381,15 +381,15 @@ double Inclination(Line3D L1, Line3D L2) {
 /////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
-//¶à±ßĞĞÎÊÌâ:
-// ÅĞ¶ÏµãpÊÇ·ñÔÚÍ¹¶à±ßĞÎpolyÄÚ
-// polyµÄ¶¥µãÊıÄ¿Òª´óÓÚµÈÓÚ3
-// ·µ»ØÖµÎª£º
-// INSIDE  -- µãÔÚpolyÄÚ
-// BORDER  -- µãÔÚpoly±ß½çÉÏ
-// OUTSIDE -- µãÔÚpolyÍâ
+//å¤šè¾¹è¡Œé—®é¢˜:
+// åˆ¤æ–­ç‚¹pæ˜¯å¦åœ¨å‡¸å¤šè¾¹å½¢polyå†…
+// polyçš„é¡¶ç‚¹æ•°ç›®è¦å¤§äºç­‰äº3
+// è¿”å›å€¼ä¸ºï¼š
+// INSIDE  -- ç‚¹åœ¨polyå†…
+// BORDER  -- ç‚¹åœ¨polyè¾¹ç•Œä¸Š
+// OUTSIDE -- ç‚¹åœ¨polyå¤–
 int InsideConvex(Point p,
-                 const Polygon &poly) { // ÅĞ¶ÏµãpÊÇ·ñÔÚÍ¹¶à±ßĞÎpolyÄÚ
+                 const Polygon &poly) { // åˆ¤æ–­ç‚¹pæ˜¯å¦åœ¨å‡¸å¤šè¾¹å½¢polyå†…
   Point q(0, 0);
   Line side;
   int i, n = poly.size();
@@ -406,8 +406,8 @@ int InsideConvex(Point p,
   return INSIDE;
 }
 
-// ÅĞ¶Ï¶à±ßĞÎpolyÊÇ·ñÊÇÍ¹µÄ
-bool IsConvex(const Polygon &poly) { // ÅĞ¶Ï¶à±ßĞÎpolyÊÇ·ñÊÇÍ¹µÄ
+// åˆ¤æ–­å¤šè¾¹å½¢polyæ˜¯å¦æ˜¯å‡¸çš„
+bool IsConvex(const Polygon &poly) { // åˆ¤æ–­å¤šè¾¹å½¢polyæ˜¯å¦æ˜¯å‡¸çš„
   int i, n, rel;
   Line side;
   n = poly.size();
@@ -422,14 +422,14 @@ bool IsConvex(const Polygon &poly) { // ÅĞ¶Ï¶à±ßĞÎpolyÊÇ·ñÊÇÍ¹µÄ
   }
   return true;
 }
-// ÅĞ¶ÏµãpÊÇ·ñÔÚ¼òµ¥¶à±ßĞÎpolyÄÚ, ¶à±ßĞÎ¿ÉÒÔÊÇÍ¹µÄ»ò°¼µÄ
-// polyµÄ¶¥µãÊıÄ¿Òª´óÓÚµÈÓÚ3
-// ·µ»ØÖµÎª£º
-// INSIDE  -- µãÔÚpolyÄÚ
-// BORDER  -- µãÔÚpoly±ß½çÉÏ
-// OUTSIDE -- µãÔÚpolyÍâ
+// åˆ¤æ–­ç‚¹pæ˜¯å¦åœ¨ç®€å•å¤šè¾¹å½¢polyå†…, å¤šè¾¹å½¢å¯ä»¥æ˜¯å‡¸çš„æˆ–å‡¹çš„
+// polyçš„é¡¶ç‚¹æ•°ç›®è¦å¤§äºç­‰äº3
+// è¿”å›å€¼ä¸ºï¼š
+// INSIDE  -- ç‚¹åœ¨polyå†…
+// BORDER  -- ç‚¹åœ¨polyè¾¹ç•Œä¸Š
+// OUTSIDE -- ç‚¹åœ¨polyå¤–
 int InsidePolygon(const Polygon &poly,
-                  Point p) { // ÅĞ¶ÏµãpÊÇ·ñÔÚ¼òµ¥¶à±ßĞÎpolyÄÚ, ¶à±ßĞÎ¿ÉÒÔÊÇÍ¹µÄ»ò°¼µÄ
+                  Point p) { // åˆ¤æ–­ç‚¹pæ˜¯å¦åœ¨ç®€å•å¤šè¾¹å½¢polyå†…, å¤šè¾¹å½¢å¯ä»¥æ˜¯å‡¸çš„æˆ–å‡¹çš„
   int i, n, count;
   Line ray, side;
   n = poly.size();
@@ -443,7 +443,7 @@ int InsidePolygon(const Polygon &poly,
     if (OnLineSeg(p, side)) {
       return BORDER;
     }
-    // Èç¹ûsideÆ½ĞĞxÖáÔò²»×÷¿¼ÂÇ
+    // å¦‚æœsideå¹³è¡Œxè½´åˆ™ä¸ä½œè€ƒè™‘
     if (EQ(side.p1.y, side.p2.y)) { continue; }
     if (OnLineSeg(side.p1, ray)) {
       if (GT(side.p1.y, side.p2.y)) { count++; }
@@ -455,10 +455,10 @@ int InsidePolygon(const Polygon &poly,
   }
   return ((count % 2 == 1) ? INSIDE : OUTSIDE);
 }
-// ÅĞ¶ÏÏß¶ÎÊÇ·ñÔÚ¶à±ßĞÎÄÚ (Ïß¶ÎµÄµã¿ÉÄÜÔÚ¶à±ßĞÎÉÏ)
-// ¶à±ßĞÎ¿ÉÒÔÊÇÈÎÒâ¼òµ¥¶à±ßĞÎ
+// åˆ¤æ–­çº¿æ®µæ˜¯å¦åœ¨å¤šè¾¹å½¢å†… (çº¿æ®µçš„ç‚¹å¯èƒ½åœ¨å¤šè¾¹å½¢ä¸Š)
+// å¤šè¾¹å½¢å¯ä»¥æ˜¯ä»»æ„ç®€å•å¤šè¾¹å½¢
 bool InsidePolygon(const Polygon &poly,
-                   Line L) { // ÅĞ¶ÏÏß¶ÎÊÇ·ñÔÚ¶à±ßĞÎÄÚ (Ïß¶ÎµÄµã¿ÉÄÜÔÚ¶à±ßĞÎÉÏ)
+                   Line L) { // åˆ¤æ–­çº¿æ®µæ˜¯å¦åœ¨å¤šè¾¹å½¢å†… (çº¿æ®µçš„ç‚¹å¯èƒ½åœ¨å¤šè¾¹å½¢ä¸Š)
   bool result;
   int n, i;
   Points points;
@@ -483,7 +483,7 @@ bool InsidePolygon(const Polygon &poly,
       return false;
     }
   }
-  // ¶Ô½»µã½øĞĞÅÅĞò
+  // å¯¹äº¤ç‚¹è¿›è¡Œæ’åº
   sort(points.begin(), points.end());
   for (i = 1; i < points.size(); i++) {
     if (points[i - 1] != points[i]) {
@@ -496,8 +496,8 @@ bool InsidePolygon(const Polygon &poly,
   }
   return true;
 }
-// Ñ°ÕÒÍ¹°ü graham É¨Ãè·¨
-// Éú³ÉµÄ¶à±ßĞÎ¶¥µã°´ÄæÊ±Õë·½ÏòÅÅÁĞ
+// å¯»æ‰¾å‡¸åŒ… graham æ‰«ææ³•
+// ç”Ÿæˆçš„å¤šè¾¹å½¢é¡¶ç‚¹æŒ‰é€†æ—¶é’ˆæ–¹å‘æ’åˆ—
 bool GrahamComp(const Point &left, const Point &right) {
   if (EQ(left.angle, right.angle)) {
     return (left.dis < right.dis);
@@ -511,8 +511,8 @@ void GrahamScan(Points &points, Polygon &result) {
   n = points.size();
   result.clear();
   if (n < 3) { return; }
-  // Ñ¡È¡pointsÖĞy×ø±ê×îĞ¡µÄµãpoints[k]£¬
-  // Èç¹ûÕâÑùµÄµãÓĞ¶à¸ö£¬ÔòÈ¡×î×ó±ßµÄÒ»¸ö
+  // é€‰å–pointsä¸­yåæ ‡æœ€å°çš„ç‚¹points[k]ï¼Œ
+  // å¦‚æœè¿™æ ·çš„ç‚¹æœ‰å¤šä¸ªï¼Œåˆ™å–æœ€å·¦è¾¹çš„ä¸€ä¸ª
   k = 0;
   for (i = 1; i < n; i++) {
     if (EQ(points[i].y, points[k].y)) {
@@ -522,19 +522,19 @@ void GrahamScan(Points &points, Polygon &result) {
     }
   }
   swap(points[0], points[k]);
-  // ÏÖÔÚpointsÖĞy×ø±ê×îĞ¡µÄµãÔÚpoints[0]
-  // ¼ÆËãÃ¿¸öµãÏà¶ÔÓÚpoints[0]µÄ¼«½ÇºÍ¾àÀë
+  // ç°åœ¨pointsä¸­yåæ ‡æœ€å°çš„ç‚¹åœ¨points[0]
+  // è®¡ç®—æ¯ä¸ªç‚¹ç›¸å¯¹äºpoints[0]çš„æè§’å’Œè·ç¦»
   for (i = 1; i < n; i++) {
     points[i].angle = atan2(points[i].y - points[0].y, points[i].x - points[0].x);
     points[i].dis   = Norm(points[i] - points[0]);
   }
-  // ¶Ô¶¥µã°´ÕÕÏà¶Ôpoints[0]µÄ¼«½Ç´ÓĞ¡µ½´ó½øĞĞÅÅĞò
-  // ¶ÔÓÚ¼«½ÇÏàÍ¬µÄ°´ÕÕ¾àpoints[0]µÄ¾àÀë´ÓĞ¡µ½´óÅÅĞò
+  // å¯¹é¡¶ç‚¹æŒ‰ç…§ç›¸å¯¹points[0]çš„æè§’ä»å°åˆ°å¤§è¿›è¡Œæ’åº
+  // å¯¹äºæè§’ç›¸åŒçš„æŒ‰ç…§è·points[0]çš„è·ç¦»ä»å°åˆ°å¤§æ’åº
   sort(points.begin() + 1, points.end(), GrahamComp);
-  // ÏÂÃæ¼ÆËãÍ¹°ü
+  // ä¸‹é¢è®¡ç®—å‡¸åŒ…
   result.push_back(points[0]);
   for (i = 1; i < n; i++) {
-    // Èç¹ûÓĞ¼«½ÇÏàÍ¬µÄµã£¬Ö»È¡Ïà¶ÔÓÚpoints[0]×îÔ¶µÄÒ»¸ö
+    // å¦‚æœæœ‰æè§’ç›¸åŒçš„ç‚¹ï¼Œåªå–ç›¸å¯¹äºpoints[0]æœ€è¿œçš„ä¸€ä¸ª
     if ((i + 1 < n) && EQ(points[i].angle, points[i + 1].angle)) { continue; }
     if (result.size() >= 3) {
       p = result[result.size() - 2];
@@ -546,14 +546,14 @@ void GrahamScan(Points &points, Polygon &result) {
     result.push_back(points[i]);
   }
 }
-// ÓÃÓĞÏòÖ±ÏßlineÇĞ¸îÍ¹¶à±ßĞÎ£¬
-// result[LEFT]ºÍresult[RIGHT]·Ö±ğ±£´æ±»ÇĞ¸îºólineµÄ×ó±ßºÍÓÒ±ß²¿·Ö
-// result[ONLINE]Ã»ÓĞÓÃµ½£¬Ö»ÊÇÓÃÀ´×÷Îª¸¨Öú¿Õ¼ä
-// ·µ»ØÖµÊÇÇĞ¸î¶à±ßĞÎµÄÇĞ¿ÚµÄ³¤¶È£¬
-// Èç¹û·µ»ØÖµÊÇ0 ÔòËµÃ÷Î´×÷ÇĞ¸î¡£
-// µ±Î´×÷ÇĞ¸îÊ±£¬Èç¹û¶à±ßĞÎÔÚ¸ÃÖ±ÏßµÄÓÒ²à£¬Ôòresult[RIGHT]µÈÓÚ¸Ã¶à±ßĞÎ£¬·ñÔòresult[LEFT]µÈÓÚ¸Ã¶à±ßĞÎ
-// ×¢Òâ£º±»ÇĞ¸îµÄ¶à±ßĞÎÒ»¶¨ÒªÊÇÍ¹¶à±ßĞÎ£¬¶¥µã°´ÕÕÄæÊ±ÕëÅÅÁĞ
-// ¿ÉÀûÓÃÕâ¸öº¯ÊıÀ´Çó¶à±ßĞÎµÄºË£¬³õÊ¼µÄºËÉèÎªÒ»¸öºÜ´óµÄ¾ØĞÎ£¬È»ºóÒÀ´ÎÓÃ¶à±ßĞÎµÄÃ¿Ìõ±ßÈ¥¸î
+// ç”¨æœ‰å‘ç›´çº¿lineåˆ‡å‰²å‡¸å¤šè¾¹å½¢ï¼Œ
+// result[LEFT]å’Œresult[RIGHT]åˆ†åˆ«ä¿å­˜è¢«åˆ‡å‰²ålineçš„å·¦è¾¹å’Œå³è¾¹éƒ¨åˆ†
+// result[ONLINE]æ²¡æœ‰ç”¨åˆ°ï¼Œåªæ˜¯ç”¨æ¥ä½œä¸ºè¾…åŠ©ç©ºé—´
+// è¿”å›å€¼æ˜¯åˆ‡å‰²å¤šè¾¹å½¢çš„åˆ‡å£çš„é•¿åº¦ï¼Œ
+// å¦‚æœè¿”å›å€¼æ˜¯0 åˆ™è¯´æ˜æœªä½œåˆ‡å‰²ã€‚
+// å½“æœªä½œåˆ‡å‰²æ—¶ï¼Œå¦‚æœå¤šè¾¹å½¢åœ¨è¯¥ç›´çº¿çš„å³ä¾§ï¼Œåˆ™result[RIGHT]ç­‰äºè¯¥å¤šè¾¹å½¢ï¼Œå¦åˆ™result[LEFT]ç­‰äºè¯¥å¤šè¾¹å½¢
+// æ³¨æ„ï¼šè¢«åˆ‡å‰²çš„å¤šè¾¹å½¢ä¸€å®šè¦æ˜¯å‡¸å¤šè¾¹å½¢ï¼Œé¡¶ç‚¹æŒ‰ç…§é€†æ—¶é’ˆæ’åˆ—
+// å¯åˆ©ç”¨è¿™ä¸ªå‡½æ•°æ¥æ±‚å¤šè¾¹å½¢çš„æ ¸ï¼Œåˆå§‹çš„æ ¸è®¾ä¸ºä¸€ä¸ªå¾ˆå¤§çš„çŸ©å½¢ï¼Œç„¶åä¾æ¬¡ç”¨å¤šè¾¹å½¢çš„æ¯æ¡è¾¹å»å‰²
 double CutConvex(const Polygon &poly, const Line &line, Polygon result[3]) {
   vector<Point> points;
   Line side;
@@ -584,8 +584,8 @@ double CutConvex(const Polygon &poly, const Line &line, Polygon result[3]) {
   if (points.size() < 2) { return 0; }
   else { return Norm(points.front() - points.back()); }
 }
-// Çó¶à±ßĞÎµÄÖØĞÄ£¬ÊÊÓÃÓÚÍ¹µÄ»ò°¼µÄ¼òµ¥¶à±ßĞÎ
-// ¸ÃËã·¨¿ÉÒÔÒ»±ß¶ÁÈë¶à±ßĞÔµÄ¶¥µãÒ»±ß¼ÆËãÖØĞÄ
+// æ±‚å¤šè¾¹å½¢çš„é‡å¿ƒï¼Œé€‚ç”¨äºå‡¸çš„æˆ–å‡¹çš„ç®€å•å¤šè¾¹å½¢
+// è¯¥ç®—æ³•å¯ä»¥ä¸€è¾¹è¯»å…¥å¤šè¾¹æ€§çš„é¡¶ç‚¹ä¸€è¾¹è®¡ç®—é‡å¿ƒ
 Point CenterOfPolygon(const Polygon &poly) {
   Point p, p0, p1, p2, p3;
   double m, m0;
@@ -599,7 +599,7 @@ Point CenterOfPolygon(const Polygon &poly) {
     m0 = p1.x * p2.y + p2.x * p3.y + p3.x * p1.y - p1.y * p2.x - p2.y * p3.x - p3.y
          * p1.x;
     if (ZERO(m + m0)) {
-      m0 += EPS;  // ÎªÁË·ÀÖ¹³ı0Òç³ö£¬¶Ôm0×öÒ»µãµãĞŞÕı
+      m0 += EPS;  // ä¸ºäº†é˜²æ­¢é™¤0æº¢å‡ºï¼Œå¯¹m0åšä¸€ç‚¹ç‚¹ä¿®æ­£
     }
     p.x = (m * p.x + m0 * p0.x) / (m + m0);
     p.y = (m * p.y + m0 * p0.y) / (m + m0);
@@ -608,17 +608,17 @@ Point CenterOfPolygon(const Polygon &poly) {
   }
   return p;
 }
-// ÅĞ¶ÏÁ½¸ö¾ØĞÎÊÇ·ñÏà½»
-// Èç¹ûÏàÁÚ²»ËãÏà½»
+// åˆ¤æ–­ä¸¤ä¸ªçŸ©å½¢æ˜¯å¦ç›¸äº¤
+// å¦‚æœç›¸é‚»ä¸ç®—ç›¸äº¤
 bool Intersect(Rect_2 r1, Rect_2 r2) {
   return (max(r1.xl, r2.xl) < min(r1.xh, r2.xh)
           && max(r1.yl, r2.yl) < min(r1.yh, r2.yh));
 }
-// ÅĞ¶Ï¾ØĞÎr2ÊÇ·ñ¿ÉÒÔ·ÅÖÃÔÚ¾ØĞÎr1ÄÚ
-// r2¿ÉÒÔÈÎÒâµØĞı×ª
-//·¢ÏÖÔ­À´µÄ¸ø³öµÄ·½·¨¹ı²»ÁËOJÉÏµÄÎŞ¹éÖ®ÊÒÕâÌâ£¬
-//ËùÒÔÓÃÁË×Ô¼ºµÄ´úÂë
-bool IsContain(Rect r1, Rect r2) {    //¾ØĞÎµÄw>h
+// åˆ¤æ–­çŸ©å½¢r2æ˜¯å¦å¯ä»¥æ”¾ç½®åœ¨çŸ©å½¢r1å†…
+// r2å¯ä»¥ä»»æ„åœ°æ—‹è½¬
+//å‘ç°åŸæ¥çš„ç»™å‡ºçš„æ–¹æ³•è¿‡ä¸äº†OJä¸Šçš„æ— å½’ä¹‹å®¤è¿™é¢˜ï¼Œ
+//æ‰€ä»¥ç”¨äº†è‡ªå·±çš„ä»£ç 
+bool IsContain(Rect r1, Rect r2) {    //çŸ©å½¢çš„w>h
   if (r1.w > r2.w && r1.h > r2.h) { return true; }
   else {
     double r = sqrt(r2.w * r2.w + r2.h * r2.h) / 2.0;
@@ -633,11 +633,11 @@ bool IsContain(Rect r1, Rect r2) {    //¾ØĞÎµÄw>h
 ////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////
-//Ô²
-Point Center(const Circle &C) { //Ô²ĞÄ
+//åœ†
+Point Center(const Circle &C) { //åœ†å¿ƒ
   return C.c;
 }
-double CommonArea(const Circle &A, const Circle &B) { //Á½¸öÔ²µÄ¹«¹²Ãæ»ı
+double CommonArea(const Circle &A, const Circle &B) { //ä¸¤ä¸ªåœ†çš„å…¬å…±é¢ç§¯
   double area = 0.0;
   const Circle &M = (A.r > B.r) ? A : B;
   const Circle &N = (A.r > B.r) ? B : A;
@@ -658,20 +658,20 @@ double CommonArea(const Circle &A, const Circle &B) { //Á½¸öÔ²µÄ¹«¹²Ãæ»ı
   return area;
 }
 bool IsInCircle(const Circle &C,
-                const Rect_2 &rect) { //ÅĞ¶ÏÔ²ÊÇ·ñÔÚ¾ØĞÎÄÚ(²»ÔÊĞíÏàÇĞ)
+                const Rect_2 &rect) { //åˆ¤æ–­åœ†æ˜¯å¦åœ¨çŸ©å½¢å†…(ä¸å…è®¸ç›¸åˆ‡)
   return (GT(C.c.x - C.r, rect.xl)
           &&  LT(C.c.x + C.r, rect.xh)
           &&  GT(C.c.y - C.r, rect.yl)
           &&  LT(C.c.y + C.r, rect.yh));
 }
-//ÅĞ¶Ï2Ô²µÄÎ»ÖÃ¹ØÏµ
-//·µ»Ø:
-//BAOHAN   = 1;        // ´óÔ²°üº¬Ğ¡Ô²
-//NEIQIE   = 2;        // ÄÚÇĞ
-//XIANJIAO = 3;        // Ïà½»
-//WAIQIE   = 4;        // ÍâÇĞ
-//XIANLI   = 5;        // ÏàÀë
-int CirCir(const Circle &c1, const Circle &c2) { //ÅĞ¶Ï2Ô²µÄÎ»ÖÃ¹ØÏµ
+//åˆ¤æ–­2åœ†çš„ä½ç½®å…³ç³»
+//è¿”å›:
+//BAOHAN   = 1;        // å¤§åœ†åŒ…å«å°åœ†
+//NEIQIE   = 2;        // å†…åˆ‡
+//XIANJIAO = 3;        // ç›¸äº¤
+//WAIQIE   = 4;        // å¤–åˆ‡
+//XIANLI   = 5;        // ç›¸ç¦»
+int CirCir(const Circle &c1, const Circle &c2) { //åˆ¤æ–­2åœ†çš„ä½ç½®å…³ç³»
   double dis = Distance(c1.c, c2.c);
   if (LT(dis, fabs(c1.r - c2.r))) { return BAOHAN; }
   if (EQ(dis, fabs(c1.r - c2.r))) { return NEIQIE; }

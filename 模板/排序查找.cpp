@@ -1,5 +1,5 @@
-//¶ş·Ö
-template <class T> int BS(const T a[], int L, int R, int x) {
+//äºŒåˆ†
+template <typename T> int BS(const T a[], int L, int R, int x) {
   int l = L, r = R, mid;
   while (l <= r) {
     mid = l + r >> 1;
@@ -10,7 +10,7 @@ template <class T> int BS(const T a[], int L, int R, int x) {
   return a[mid] == x ? mid : -1;
 }
 
-template <class T> int BSup(const T a[], int L, int R) {
+template <typename T> int BSup(const T a[], int L, int R) {
   int l = L, r = R, mid;
   while (l + 1 < r) {
     mid = l + r >> 1;
@@ -20,7 +20,7 @@ template <class T> int BSup(const T a[], int L, int R) {
   return l;
 }
 
-template <class T> int BSlow(const T a[], int L, int R) {
+template <typename T> int BSlow(const T a[], int L, int R) {
   int l = L, r = R, mid;
   while (l + 1 < r) {
     mid = l + r >> 1;
@@ -30,7 +30,7 @@ template <class T> int BSlow(const T a[], int L, int R) {
   return r;
 }
 
-//Èı·Ö Çóº¯Êı¼«´óÖµ
+//ä¸‰åˆ† æ±‚å‡½æ•°æå¤§å€¼
 double TS(double l, double r) {
   double mid, midmid, midv, midmidv;
   while (r - l > EPS) {
@@ -43,13 +43,13 @@ double TS(double l, double r) {
   return l;
 }
 
-//¹é²¢ÅÅĞò ÇóÄæĞòÊı
+//å½’å¹¶æ’åº æ±‚é€†åºæ•°
 ll cnt;
-template <class T> void mergeSort(const T a[], int l, int r) {
+template <typename T> void mergeSort(T a[], int l, int r) {
   if (l >= r) { return; }
   int mid = (l + r) >> 1;
-  mergesort(a, l, mid);
-  mergesort(a, mid + 1, r);
+  mergeSort(a, l, mid);
+  mergeSort(a, mid + 1, r);
   vector<T> res;
   int i = l, j = mid + 1;
   while (i <= mid && j <= r) {
@@ -62,11 +62,11 @@ template <class T> void mergeSort(const T a[], int l, int r) {
   }
   while (i <= mid) { res.push_back(a[i++]); }
   while (j <= r) { res.push_back(a[j++]); }
-  for (int k = l; k <= r; k++) { a[k].b = res[k - l]; }
+  for (int k = l; k <= r; k++) { a[k] = res[k - l]; }
 }
 
-//¿ìÅÅ
-template <class T> void quickSort(const T a[], int l, int r) {
+//å¿«æ’
+template <typename T> void quickSort(const T a[], int l, int r) {
   if (l >= h) { return; }
   int i = l, j = r, v = a[l];
   while (i < j) {

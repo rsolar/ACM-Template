@@ -1,11 +1,11 @@
-//Nim²©ÞÄ
-//¼ÆËã´Ó1-n·¶Î§ÄÚµÄSGÖµ
-//Array´æ´¢¿ÉÒÔ×ßµÄ²½Êý£¬Array[0]±íÊ¾¿ÉÒÔÓÐ¶àÉÙÖÖ×ß·¨
-//Array[]ÐèÒª´ÓÐ¡µ½´óÅÅÐò
-//HDU1847 ²©ÞÄSGº¯Êý
-//1.¿ÉÑ¡²½ÊýÎª1-mµÄÁ¬ÐøÕûÊý£¬Ö±½ÓÈ¡Ä£¼´¿É£¬SG(x) = x % (m + 1);
-//2.¿ÉÑ¡²½ÊýÎªÈÎÒâ²½£¬SG(x) = x;
-//3.¿ÉÑ¡²½ÊýÎªÒ»ÏµÁÐ²»Á¬ÐøµÄÊý£¬ÓÃGetSG(¼ÆËã)
+//Nimåšå¼ˆ
+//è®¡ç®—ä»Ž1-nèŒƒå›´å†…çš„SGå€¼
+//Arrayå­˜å‚¨å¯ä»¥èµ°çš„æ­¥æ•°ï¼ŒArray[0]è¡¨ç¤ºå¯ä»¥æœ‰å¤šå°‘ç§èµ°æ³•
+//Array[]éœ€è¦ä»Žå°åˆ°å¤§æŽ’åº
+//HDU1847 åšå¼ˆSGå‡½æ•°
+//1.å¯é€‰æ­¥æ•°ä¸º1-mçš„è¿žç»­æ•´æ•°ï¼Œç›´æŽ¥å–æ¨¡å³å¯ï¼ŒSG(x) = x % (m + 1);
+//2.å¯é€‰æ­¥æ•°ä¸ºä»»æ„æ­¥ï¼ŒSG(x) = x;
+//3.å¯é€‰æ­¥æ•°ä¸ºä¸€ç³»åˆ—ä¸è¿žç»­çš„æ•°ï¼Œç”¨GetSG(è®¡ç®—)
 int SG[N], Hash[N];
 
 void GetSG(int Array[], int n = N - 1) {

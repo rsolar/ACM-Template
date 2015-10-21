@@ -1,7 +1,7 @@
 //http://blog.csdn.net/wjf_wzzc/article/details/24820525
 
-//×î´óÁ÷
-//ISAP + ÁÚ½Ó±í
+//æœ€å¤§æµ
+//ISAP + é‚»æ¥è¡¨
 const int N = 505;
 const int M = 20005;
 const int INF = 0x3f3f3f3f;
@@ -73,7 +73,7 @@ int sap(int src, int sink, int nodenum) {
   return ans;
 }
 
-//ISAP + bfs + stack + ÁÚ½Ó±í
+//ISAP + bfs + stack + é‚»æ¥è¡¨
 const int N = 505;
 const int M = 20005;
 const int INF = 0x3f3f3f3f;
@@ -233,7 +233,7 @@ int dinic() {
   return ret;
 }
 
-//×îĞ¡·ÑÓÃ×î´óÁ÷
+//æœ€å°è´¹ç”¨æœ€å¤§æµ
 const int N = 10005;
 const int M = 100005;
 const int INF = 0x3f3f3f3f;
@@ -284,7 +284,7 @@ bool spfa(int s, int t) {
   if (pre[t] == -1) { return false; }
   else { return true; }
 }
-//·µ»ØµÄÊÇ×î´óÁ÷£¬cost´æµÄÊÇ×îĞ¡·ÑÓÃ
+//è¿”å›çš„æ˜¯æœ€å¤§æµï¼Œcostå­˜çš„æ˜¯æœ€å°è´¹ç”¨
 int minCostMaxflow(int s, int t, int &cost) {
   int flow = 0; cost = 0;
   while (spfa(s, t)) {

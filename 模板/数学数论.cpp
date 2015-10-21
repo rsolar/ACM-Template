@@ -1,4 +1,4 @@
-//¿ìËÙÃİ
+//å¿«é€Ÿå¹‚
 ll powMod(ll a, ll b, ll m = M) {
   ll r = 1; a %= m;
   while (b) {
@@ -8,7 +8,7 @@ ll powMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//Ä£Äâ´óÊı³Ë·¨
+//æ¨¡æ‹Ÿå¤§æ•°ä¹˜æ³•
 ll mulMod(ll a, ll b, ll m = M) {
   ll r = 0; a %= m; b %= m;
   while (b) {
@@ -18,7 +18,7 @@ ll mulMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//¿ìËÙÃİ + Ä£Äâ´óÊı³Ë·¨
+//å¿«é€Ÿå¹‚ + æ¨¡æ‹Ÿå¤§æ•°ä¹˜æ³•
 ll powMod(ll a, ll b, ll m = M) {
   ll r = 1; a %= m;
   while (b) {
@@ -31,7 +31,7 @@ ll powMod(ll a, ll b, ll m = M) {
 
 //------------------------------------------------------------------------------
 
-//ËØÊıÉ¸
+//ç´ æ•°ç­›
 bool isprime[N];
 void getPrime() {
   memset(isprime, -1, sizeof(isprime));
@@ -54,7 +54,7 @@ void getPrime() {
 
 //------------------------------------------------------------------------------
 
-//ºÏÊı·Ö½â
+//åˆæ•°åˆ†è§£
 ll factor[100][2];
 int getFactors(ll x, ll factor[][2] = factor) {
   int fatCnt = 0;
@@ -76,9 +76,9 @@ int getFactors(ll x, ll factor[][2] = factor) {
   return fatCnt;
 }
 
-//Miller RabinËØÊı²âÊÔ
-const int S = 10;
-//¼ÆËãret = (a * b) % m
+//Miller Rabinç´ æ•°æµ‹è¯•
+const int S = 7;
+//è®¡ç®—ret = (a * b) % m
 ll mulMod(ll a, ll b, ll m = M) {
   ll r = 0; a %= m; b %= m;
   while (b) {
@@ -88,7 +88,7 @@ ll mulMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//¼ÆËãret = (a^n) % m
+//è®¡ç®—ret = (a^n) % m
 ll powMod(ll a, ll b, ll m = M) {
   ll r = 1; a %= m;
   while (b) {
@@ -98,8 +98,8 @@ ll powMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//Í¨¹ıa^(n - 1) = 1(mod n)À´ÅĞ¶ÏnÊÇ²»ÊÇËØÊı
-//n - 1 = x * 2^t ÖĞ¼äÊ¹ÓÃ¶ş´ÎÅĞ¶Ï
+//é€šè¿‡a^(n - 1) = 1(mod n)æ¥åˆ¤æ–­næ˜¯ä¸æ˜¯ç´ æ•°
+//n - 1 = x * 2^t ä¸­é—´ä½¿ç”¨äºŒæ¬¡åˆ¤æ–­
 bool check(ll a, ll n, ll x, ll t) {
   ll ret = powMod(a, x, n), last = ret;
   for (int i = 1; i <= t; i++) {
@@ -125,9 +125,9 @@ bool Miller_Rabin(ll n) {
   return true;
 }
 
-//pollard rhoÖÊÒòËØ·Ö½â
-ll factor[100]; //ÖÊÒòËØ·Ö½â½á¹û(·µ»ØÊ±ÎŞĞò)
-int tol; //ÖÊÒòËØµÄ¸öÊı
+//pollard rhoè´¨å› ç´ åˆ†è§£
+ll factor[100]; //è´¨å› ç´ åˆ†è§£ç»“æœ(è¿”å›æ—¶æ— åº)
+int tol; //è´¨å› ç´ çš„ä¸ªæ•°
 
 ll gcd(ll a, ll b) {
   while (b != 0) {
@@ -137,7 +137,7 @@ ll gcd(ll a, ll b) {
   }
   return a >= 0 ? a : -a;
 }
-//ÕÒ³öÒ»¸öÒò×Ó
+//æ‰¾å‡ºä¸€ä¸ªå› å­
 ll pollard_rho(ll x, ll c) {
   srand(time(NULL));
   ll i = 1, k = 2, x0 = rand() % (x - 1) + 1, y = x0;
@@ -150,20 +150,20 @@ ll pollard_rho(ll x, ll c) {
     if (i == k) {y = x0; k += k;}
   }
 }
-//¶Ôn½øĞĞËØÒò×Ó·Ö½â,´æÈëfactor,kÉèÖÃÎª107×óÓÒ¼´¿É
+//å¯¹nè¿›è¡Œç´ å› å­åˆ†è§£,å­˜å…¥factor,kè®¾ç½®ä¸º107å·¦å³å³å¯
 void findfac(ll n, int k = 107) {
   if (n == 1) { return; }
   if (Miller_Rabin(n)) { factor[tol++] = n; return; }
   ll p = n;
   int c = k;
-  while (p >= n) { p = pollard_rho(p, c--); } //Öµ±ä»¯£¬·ÀÖ¹ËÀÑ­»·k
+  while (p >= n) { p = pollard_rho(p, c--); } //å€¼å˜åŒ–ï¼Œé˜²æ­¢æ­»å¾ªç¯k
   findfac(p, k);
   findfac(n / p, k);
 }
 
 //------------------------------------------------------------------------------
 
-//Å·À­º¯Êı
+//æ¬§æ‹‰å‡½æ•°
 int getFacEul(ll n, ll factor[][2] = factor) {
   int fatCnt = getFactors(n);
   for (int i = 0; i < fatCnt; i++) {
@@ -198,10 +198,10 @@ void getEuler() {
 
 //------------------------------------------------------------------------------
 
-//ÇóÄæÔª(ax = 1(mod m)µÄxÖµ)
-//À©Õ¹Å·¼¸ÀïµÃ(Çóax + by = gcd(a, b)µÄ½â),Çó³öµÄxÎªa¶ÔbµÄÄ£ÄæÔª
+//æ±‚é€†å…ƒ(ax = 1(mod m)çš„xå€¼)
+//æ‰©å±•æ¬§å‡ é‡Œå¾—(æ±‚ax + by = gcd(a, b)çš„è§£),æ±‚å‡ºçš„xä¸ºaå¯¹bçš„æ¨¡é€†å…ƒ
 ll extendGcd(ll a, ll b, ll &x, ll &y) {
-  if (a == 0 && b == 0) { return -1; } //ÎŞ×î´ó¹«Ô¼Êı
+  if (a == 0 && b == 0) { return -1; } //æ— æœ€å¤§å…¬çº¦æ•°
   if (b == 0) { x = 1; y = 0; return a; }
   ll d = extendGcd(b, a % b, y, x);
   y -= a / b * x;
@@ -214,20 +214,20 @@ ll modReverse(ll a, ll m) {
   else { return -1; }
 }
 
-//Ö»ÄÜÇó0 < a < mµÄÇé¿ö,aºÍm»¥ÖÊ
+//åªèƒ½æ±‚0 < a < mçš„æƒ…å†µ,aå’Œmäº’è´¨
 ll inv(ll a, ll m = M) {
   if (a == 1) { return 1; }
   return inv(m % a, m) * (m - m / a) % m;
 }
 
-//·ÑÂíĞ¡¶¨Àí,mÎªËØÊı,aºÍm»¥ÖÊ
+//è´¹é©¬å°å®šç†,mä¸ºç´ æ•°,aå’Œmäº’è´¨
 ll inv(ll a, ll m = M) {
   return powMod(a, m - 2, m);
 }
 
 //------------------------------------------------------------------------------
 
-//×éºÏÊı
+//ç»„åˆæ•°
 ll com(ll n, ll m) {
   if (n - m > m) { m = n - m; }
   ll s = 1;
@@ -238,14 +238,14 @@ ll com(ll n, ll m) {
   return s;
 }
 
-//×éºÏÊıÈ¡Ä£
-//Ô¤´¦Àí½×³Ë
+//ç»„åˆæ•°å–æ¨¡
+//é¢„å¤„ç†é˜¶ä¹˜
 ll fac[N];
 void getFac(ll p) {
   fac[0] = 1;
   for (ll i = 1; i <= p; i++) { fac[i] = (fac[i - 1] * i) % p; }
 }
-//Lucas¶¨Àí p <= 10^5
+//Lucaså®šç† p <= 10^5
 ll lucas(ll n, ll m, ll p) {
   if (m > n - m) { m = n - m; }
   ll res = 1;
@@ -257,12 +257,12 @@ ll lucas(ll n, ll m, ll p) {
   }
   return res;
 }
-//ÖĞ¹úÊ£Óà¶¨Àí
+//ä¸­å›½å‰©ä½™å®šç†
 ll CRT(ll a[], ll m[], int k) {
   ll mm = 1, ans = 0;
   for (int i = 0; i < k; i++) { mm *= m[i]; }
   for (int i = 0; i < k; i++) {
-    ll x, y, t = mm / m[i];
+    ll t = mm / m[i];
     ans = (ans + t * inv(t, m[i]) * a[i]) % mm;
   }
   if (ans < 0) { ans += mm; }
@@ -271,8 +271,8 @@ ll CRT(ll a[], ll m[], int k) {
 
 //------------------------------------------------------------------------------
 
-//Ä£ÏßĞÔ·½³Ì×é
-int m[10], a[10]; //Ä£ÊıÎªm,ÓàÊıÎªa, X % m = a
+//æ¨¡çº¿æ€§æ–¹ç¨‹ç»„
+int m[10], a[10]; //æ¨¡æ•°ä¸ºm,ä½™æ•°ä¸ºa, X % m = a
 bool solve(int &m0, int &a0, int m, int a) {
   ll y, x;
   int g = extendGcd(m0, m, x, y);
@@ -285,9 +285,9 @@ bool solve(int &m0, int &a0, int m, int a) {
   if (a0 < 0) { a0 += m0; }
   return true;
 }
-//ÎŞ½â·µ»Øfalse,ÓĞ½â·µ»Øtrue;
-//½âµÄĞÎÊ½×îºóÎª a0 + m0 * t (0 <= a0 < m0)
-bool MLES(int &m0 , int &a0, int n) { //½âÎªX = a0 + m0 * k
+//æ— è§£è¿”å›false,æœ‰è§£è¿”å›true;
+//è§£çš„å½¢å¼æœ€åä¸º a0 + m0 * t (0 <= a0 < m0)
+bool MLES(int &m0 , int &a0, int n) { //è§£ä¸ºX = a0 + m0 * k
   bool flag = true;
   m0 = 1; a0 = 0;
   for (int i = 0; i < n; i++) {

@@ -2,50 +2,50 @@
 //http://blog.csdn.net/wjf_wzzc/article/details/24560117
 //http://blog.csdn.net/wjf_wzzc/article/details/38646837
 
-//Ò»Î¬Ê÷×´Êı×é
-//µ¥µãĞŞ¸Ä + µ¥µã²éÑ¯ + Çø¼äĞŞ¸Ä + Çø¼ä²éÑ¯ + Çø¼ä×îÖµ
+//ä¸€ç»´æ ‘çŠ¶æ•°ç»„
+//å•ç‚¹ä¿®æ”¹ + å•ç‚¹æŸ¥è¯¢ + åŒºé—´ä¿®æ”¹ + åŒºé—´æŸ¥è¯¢ + åŒºé—´æœ€å€¼
 template<typename T> struct BIT {
   int n;
-  T A[N]; //T B[N]; //Çø¼äÔö¼õ //T num[N]; //Î¬»¤×îÖµ
+  T A[N]; //T B[N]; //åŒºé—´å¢å‡ //T num[N]; //ç»´æŠ¤æœ€å€¼
   int lowbit(int x) { return x & (-x); }
   void init() {
     memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B));
   }
-  //Ç°×ººÍ[0, i)
+  //å‰ç¼€å’Œ[0, i)
   T sum(int i) {
     T ret = 0;
     for (int j = i; j > 0; j -= lowbit(j)) { ret += A[j]; }
     return ret;
   }
-  //µ¥µã²éÑ¯
+  //å•ç‚¹æŸ¥è¯¢
   T get(int i) { return sum(i + 1) - sum(i); }
-  //µ¥µãÔö¼õ
+  //å•ç‚¹å¢å‡
   void add(int i, T v) {
     for (int j = i; j <= n; j += lowbit(j)) { A[j] += v; }
   }
   void add(int i, T v, T a[]) {
     for (int j = i; j <= n; j += lowbit(j)) { a[j] += v; }
   }
-  //µ¥µã¸³Öµ
+  //å•ç‚¹èµ‹å€¼
   void set(int i, T v) { add(i, v - get(i)); }
-  //Çø¼äºÍ[i, j]
+  //åŒºé—´å’Œ[i, j]
   T sum(int i, int j) {
     return sum(j) - sum(i - 1);
   }
 
-  //Çø¼äÔö¼õ
+  //åŒºé—´å¢å‡
   void add(int i, int j, T v) {
     add(i, v, A);
     add(j + 1, -v, A);
     add(i, v * i, B);
     add(j + 1, -(j + 1) * v, B);
   }
-  //Ê¹ÓÃÇø¼äÔö¼õÊ±ÇóÇø¼äºÍ[i, j], sum[]ÎªÇ°×ººÍ
+  //ä½¿ç”¨åŒºé—´å¢å‡æ—¶æ±‚åŒºé—´å’Œ[i, j], sum[]ä¸ºå‰ç¼€å’Œ
   T sum(int i, int j, T sum[]) {
     return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B, j) + sum(B, i - 1);
   }
 
-  //Î¬»¤Çø¼ä×îÖµ O(log^2(n))
+  //ç»´æŠ¤åŒºé—´æœ€å€¼ O(log^2(n))
   void modify(int x, T v) {
     num[x] = v;
     for (int i = x; i <= n; i += lowbit(i)) {
@@ -65,7 +65,7 @@ template<typename T> struct BIT {
     return ret;
   }
 
-  //ÇóÇø¼äµÚK´ó O(log^2(n))
+  //æ±‚åŒºé—´ç¬¬Kå¤§ O(log^2(n))
   int getK(int l, int r, int k) {
     while (l <= r) {
       int mid = l + ((r - l) >> 1);
@@ -77,17 +77,17 @@ template<typename T> struct BIT {
 };
 BIT<int> bit;
 
-//¶şÎ¬Ê÷×´Êı×é
-//µ¥µãĞŞ¸Ä + µ¥µãÇóºÍ + ÇøÓòĞŞ¸Ä + ÇøÓòÇóºÍ
+//äºŒç»´æ ‘çŠ¶æ•°ç»„
+//å•ç‚¹ä¿®æ”¹ + å•ç‚¹æ±‚å’Œ + åŒºåŸŸä¿®æ”¹ + åŒºåŸŸæ±‚å’Œ
 template<typename T> struct BIT {
   int n, m;
-  T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //ÇøÓòÇóºÍ
+  T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //åŒºåŸŸæ±‚å’Œ
   int lowbit(int x) { return x & (-x); }
   void init() {
     memset(A, 0, sizeof(
              A)); //memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));
   }
-  //ÇøÓòºÍ[1][1]-[x][y]
+  //åŒºåŸŸå’Œ[1][1]-[x][y]
   T sum(int x, int y) const {
     T ret = 0;
     for (i = x; i > 0; i -= lowbit(i)) {
@@ -95,11 +95,11 @@ template<typename T> struct BIT {
     }
     return ret;
   }
-  //µ¥µã²éÑ¯
+  //å•ç‚¹æŸ¥è¯¢
   T sumv(int x, int y) const {
     return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y);
   }
-  //µ¥µãÔö¼õ
+  //å•ç‚¹å¢å‡
   void add(int x, int y, T v) {
     for (int i = x; i <= n; i += lowbit(i)) {
       for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; }
@@ -110,18 +110,18 @@ template<typename T> struct BIT {
       for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; }
     }
   }
-  //µ¥µã¸³Öµ
+  //å•ç‚¹èµ‹å€¼
   void set(int x, int y, T v) { add(x, y, v - sum(x, y)); }
 
-  //Çø¼äºÍ[x, y]
+  //åŒºé—´å’Œ[x, y]
   T sum1(int x, int y) const {
     return (x + 1) * (y + 1) * sum(x, y) - (y + 1) * sum(x, y) - (x + 1) * sum(x, y) + sum(x, y);
   }
-  //ÇøÓòºÍ[x1][y1]-[x2][y2]
+  //åŒºåŸŸå’Œ[x1][y1]-[x2][y2]
   T sum(int x1, int y1, int x2, int y2) const {
     return sum1(x2, y2) - sum1(x1 - 1, y2) - sum1(x2, y1 - 1) + sum1(x1 - 1, y1 - 1);
   }
-  //ÇøÓòÔö¼õ
+  //åŒºåŸŸå¢å‡
   void add(int x1, int y1, int x2, int y2, T v) {
     add(x1, y1, v, A); add(x2 + 1, y1, -v, A);
     add(x1, y2 + 1, -v, A); add(x2 + 1, y2 + 1, v, A);
@@ -136,16 +136,16 @@ template<typename T> struct BIT {
 };
 BIT<int> bit;
 
-//Ïß¶ÎÊ÷  µ¥µãĞŞ¸Ä + µ¥µã²éÑ¯ + Çø¼ä²éÑ¯
+//çº¿æ®µæ ‘  å•ç‚¹ä¿®æ”¹ + å•ç‚¹æŸ¥è¯¢ + åŒºé—´æŸ¥è¯¢
 #define lson l, m, rt << 1
 #define rson m + 1, r, rt << 1 | 1
 template<typename T> struct SegmentTree {
-  T sum[N << 2]; //T mx[N << 2]; //Çø¼ä×îÖµ
+  T sum[N << 2]; //T mx[N << 2]; //åŒºé—´æœ€å€¼
   void push_up(int rt) {
     sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
     //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
   }
-  //³õÊ¼»¯ + ½¨Ê÷
+  //åˆå§‹åŒ– + å»ºæ ‘
   void build(int l, int r, int rt) {
     if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
     int m = l + r >> 1;
@@ -153,7 +153,7 @@ template<typename T> struct SegmentTree {
     build(rson);
     push_up(rt);
   }
-  //µ¥µãĞŞ¸Ä
+  //å•ç‚¹ä¿®æ”¹
   void update(int p, T val, int l, int r, int rt) {
     if (l == r) {
       sum[rt] += val; //mx[rt] = val;
@@ -164,7 +164,7 @@ template<typename T> struct SegmentTree {
     else { update(p, val, rson); }
     push_up(rt);
   }
-  //Çø¼äºÍ
+  //åŒºé—´å’Œ
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
     int m = l + r >> 1; T ret = 0;
@@ -175,11 +175,11 @@ template<typename T> struct SegmentTree {
 };
 SegmentTree<int> st;
 
-//Ïß¶ÎÊ÷ µ¥µãĞŞ¸Ä + µ¥µã²éÑ¯ + Çø¼äĞŞ¸Ä(ÑÓ³Ù±ê¼Ç) + Çø¼ä²éÑ¯
+//çº¿æ®µæ ‘ å•ç‚¹ä¿®æ”¹ + å•ç‚¹æŸ¥è¯¢ + åŒºé—´ä¿®æ”¹(å»¶è¿Ÿæ ‡è®°) + åŒºé—´æŸ¥è¯¢
 #define lson l, m, rt << 1
 #define rson m + 1, r, rt << 1 | 1
 template<typename T> struct SegmentTree {
-  T sum[N << 2], add[N << 2]; //T mx[N << 2]; //Çø¼ä×îÖµ
+  T sum[N << 2], add[N << 2]; //T mx[N << 2]; //åŒºé—´æœ€å€¼
   void push_up(int rt) {
     sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
     //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
@@ -193,7 +193,7 @@ template<typename T> struct SegmentTree {
       add[rt] = 0;
     }
   }
-  //³õÊ¼»¯ + ½¨Ê÷
+  //åˆå§‹åŒ– + å»ºæ ‘
   void build(int l, int r, int rt) {
     add[rt] = 0;
     if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
@@ -202,7 +202,7 @@ template<typename T> struct SegmentTree {
     build(rson);
     push_up(rt);
   }
-  //µ¥µãĞŞ¸Ä
+  //å•ç‚¹ä¿®æ”¹
   void update(int p, T val, int l, int r, int rt) {
     if (l == r) {
       sum[rt] += val; //mx[rt] = val;
@@ -214,7 +214,7 @@ template<typename T> struct SegmentTree {
     else { update(p, val, rson); }
     push_up(rt);
   }
-  //Çø¼äÔö¼õ
+  //åŒºé—´å¢å‡
   void update(int L, int R, T val, int l, int r, int rt) {
     if (L <= l && r <= R) {
       add[rt] += val;
@@ -227,7 +227,7 @@ template<typename T> struct SegmentTree {
     if (m < R) { update(L, R, val, rson); }
     push_up(rt);
   }
-  //Çø¼äºÍ
+  //åŒºé—´å’Œ
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
     push_down(rt, r - l + 1);
@@ -242,7 +242,7 @@ SegmentTree<int> st;
 //------------------------------------------------------------------------------
 
 !!!
-//ÊµÊ±¿ª½ÚµãµÄÏß¶ÎÊ÷ (ÎŞĞèÀëÉ¢»¯)
+//å®æ—¶å¼€èŠ‚ç‚¹çš„çº¿æ®µæ ‘ (æ— éœ€ç¦»æ•£åŒ–)
 const int N = 60005;
 const int M = 2500005;
 const int INF = 0x3f3f3f3f;
@@ -262,7 +262,7 @@ struct SegmentTree {
     cnt[rt] = cnt[ls[rt]] + cnt[rs[rt]];
   }
   int lowbit(int x) { return x & -x; }
-  //µ¥µãĞŞ¸Ä
+  //å•ç‚¹ä¿®æ”¹
   void modify(int x, int p, int val) {
     for (int i = x; i <= n; i += lowbit(i)) { update(p, val, 0, INF, root[i]); }
   }
@@ -271,7 +271,7 @@ struct SegmentTree {
     for (int i = x; i > 0; i -= lowbit(i)) { ret += cnt[ls[use[i]]]; }
     return ret;
   }
-  //²éÑ¯Çø¼äµÚK´ó
+  //æŸ¥è¯¢åŒºé—´ç¬¬Kå¤§
   int query(int ss, int tt, int l, int r, int k) {
     for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
     for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
@@ -291,7 +291,7 @@ struct SegmentTree {
     return l;
   }
 } st;
-//BZOJ 1901 Çø¼äµÚk´ó
+//BZOJ 1901 åŒºé—´ç¬¬kå¤§
 int main() {
   int m, l, r, k;
   char op;
@@ -320,8 +320,8 @@ int main() {
 
 //------------------------------------------------------------------------------
 
-//Æ½ºâ¶ş²æÊ÷
-//³£ÓÃ²Ù×÷
+//å¹³è¡¡äºŒå‰æ ‘
+//å¸¸ç”¨æ“ä½œ
 bool find(int v) {
   for (int x = root; x; x = ch[x][key[x] < v]) {
     if (key[x] == v) { return true; }
@@ -394,7 +394,7 @@ int getMax() {
   while (ch[x][1]) { x = ch[x][1]; }
   return x;
 }
-//Debug±éÀú
+//Debugéå†
 void treaval(int x) {
   if (x != 0) {
     Treaval(ch[x][0]);
@@ -409,7 +409,7 @@ void debug() {
   putchar('\n');
 }
 
-//»ùÓÚĞı×ªµÄTreap ÔÊĞíÖØ¸´Öµ
+//åŸºäºæ—‹è½¬çš„Treap å…è®¸é‡å¤å€¼
 struct Treap {
   int tot, root;
   int ch[N][2], key[N], pt[N], cnt[N], size[N];
@@ -465,7 +465,7 @@ struct Treap {
   void erase(int v) { erase(root, v); }
 } treap;
 
-//Size Balanced Tree ²»ÔÊĞíÖØ¸´Öµ
+//Size Balanced Tree ä¸å…è®¸é‡å¤å€¼
 struct SBT {
   int root, tot;
   int ch[N][2], key[N], size[N];
@@ -732,10 +732,10 @@ struct Splay {
   int root, tot1;
   int sum[N], rev[N], same[N];
   int lx[N], rx[N], mx[N];
-  int s[N], tot2; //ÄÚ´æ³ØºÍÈİÁ¿
+  int s[N], tot2; //å†…å­˜æ± å’Œå®¹é‡
   int a[N];
   void NewNode(int &r, int father, int k) {
-    if (tot2) { r = s[tot2--]; } //È¡µÄÊ±ºòÊÇtot2--,´æµÄÊ±ºò¾ÍÊÇ++tot2
+    if (tot2) { r = s[tot2--]; } //å–çš„æ—¶å€™æ˜¯tot2--,å­˜çš„æ—¶å€™å°±æ˜¯++tot2
     else { r = ++tot1; }
     pre[r] = father;
     ch[r][0] = ch[r][1] = 0;
@@ -801,7 +801,7 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //Ğı×ª,0Îª×óĞı£¬1ÎªÓÒĞı
+  //æ—‹è½¬,0ä¸ºå·¦æ—‹ï¼Œ1ä¸ºå³æ—‹
   void Rotate(int x, int kind) {
     int y = pre[x];
     push_down(y);
@@ -814,7 +814,7 @@ struct Splay {
     pre[y] = x;
     push_up(y);
   }
-  //Splayµ÷Õû£¬½«r½áµãµ÷Õûµ½goalÏÂÃæ
+  //Splayè°ƒæ•´ï¼Œå°†rç»“ç‚¹è°ƒæ•´åˆ°goalä¸‹é¢
   void Splay(int r, int goal) {
     push_down(r);
     while (pre[r] != goal) {
@@ -847,7 +847,7 @@ struct Splay {
     if (t > k) { return Get_kth(ch[r][0], k); }
     else { return Get_kth(ch[r][1], k - t); }
   }
-  //ÔÚµÚpos¸öÊıºóÃæ²åÈëtot¸öÊı
+  //åœ¨ç¬¬posä¸ªæ•°åé¢æ’å…¥totä¸ªæ•°
   void Insert(int pos, int tot) {
     for (int i = 0; i < tot; i++) { scanf("%d", &a[i]); }
     Splay(Get_kth(root, pos + 1), 0);
@@ -856,14 +856,14 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //É¾³ı×ÓÊ÷
+  //åˆ é™¤å­æ ‘
   void erase(int r) {
     if (!r) { return; }
     s[++tot2] = r;
     erase(ch[r][0]);
     erase(ch[r][1]);
   }
-  //´ÓµÚpos¸öÊı¿ªÊ¼Á¬ĞøÉ¾³ıtot¸öÊı
+  //ä»ç¬¬posä¸ªæ•°å¼€å§‹è¿ç»­åˆ é™¤totä¸ªæ•°
   void Delete(int pos, int tot) {
     Splay(Get_kth(root, pos), 0);
     Splay(Get_kth(root, pos + tot + 1), root);
@@ -873,7 +873,7 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //½«´ÓµÚpos¸öÊı¿ªÊ¼µÄÁ¬ĞøµÄtot¸öÊıĞŞ¸ÄÎªc
+  //å°†ä»ç¬¬posä¸ªæ•°å¼€å§‹çš„è¿ç»­çš„totä¸ªæ•°ä¿®æ”¹ä¸ºc
   void Make_Same(int pos, int tot, int c) {
     Splay(Get_kth(root, pos), 0);
     Splay(Get_kth(root, pos + tot + 1), root);
@@ -881,7 +881,7 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //½«µÚpos¸öÊı¿ªÊ¼µÄÁ¬Ğøtot¸öÊı½øĞĞ·´×ª
+  //å°†ç¬¬posä¸ªæ•°å¼€å§‹çš„è¿ç»­totä¸ªæ•°è¿›è¡Œåè½¬
   void Reverse(int pos, int tot) {
     Splay(Get_kth(root, pos), 0);
     Splay(Get_kth(root, pos + tot + 1), root);
@@ -889,13 +889,13 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //µÃµ½µÚpos¸öÊı¿ªÊ¼µÄtot¸öÊıµÄºÍ
+  //å¾—åˆ°ç¬¬posä¸ªæ•°å¼€å§‹çš„totä¸ªæ•°çš„å’Œ
   int Get_Sum(int pos, int tot) {
     Splay(Get_kth(root, pos), 0);
     Splay(Get_kth(root, pos + tot + 1), root);
     return sum[ch[ch[root][1]][0]];
   }
-  //µÃµ½µÚpos¸öÊı¿ªÊ¼µÄtot¸öÊıÖĞ×î´óµÄ×Ó¶ÎºÍ
+  //å¾—åˆ°ç¬¬posä¸ªæ•°å¼€å§‹çš„totä¸ªæ•°ä¸­æœ€å¤§çš„å­æ®µå’Œ
   int Get_MaxSum(int pos, int tot) {
     Splay(Get_kth(root, pos), 0);
     Splay(Get_kth(root, pos + tot + 1), root);
@@ -939,10 +939,10 @@ int main() {
   }
 }
 
-//Ö÷Ï¯Ê÷
+//ä¸»å¸­æ ‘
 
 
-//Link-Cut Tree ¶¯Ì¬Ê÷
+//Link-Cut Tree åŠ¨æ€æ ‘
 struct LCT {
   int ch[N][2], pre[N], key[N], rev[N];
   int add[N], vmax[N];
@@ -1014,13 +1014,13 @@ struct LCT {
     while (pre[x]) { x = pre[x]; }
     return x;
   }
-  //Èç¹ûu,v²»ÔÚÍ¬Ò»¿Å×ÓÊ÷ÖĞ,ÔòÍ¨¹ıÔÚu,vÖ®¼äÁ¬±ßµÄ·½Ê½,Á¬½ÓÕâÁ½¿Å×ÓÊ÷
+  //å¦‚æœu,vä¸åœ¨åŒä¸€é¢—å­æ ‘ä¸­,åˆ™é€šè¿‡åœ¨u,vä¹‹é—´è¿è¾¹çš„æ–¹å¼,è¿æ¥è¿™ä¸¤é¢—å­æ ‘
   void link(int u, int v) {
     if (find_root(u) == find_root(v)) { puts("-1"); return; }
     evert(u);
     pre[u] = v;
   }
-  //Èç¹ûu,vÔÚÍ¬Ò»¿Å×ÓÊ÷ÖĞ,ÇÒu!=v,Ôò½«uÊÓÎªÕâ¿Å×ÓÊ÷µÄ¸ùÒÔºó,ÇĞ¶ÏvÓëÆä¸¸Ç×½áµãµÄÁ¬½Ó
+  //å¦‚æœu,våœ¨åŒä¸€é¢—å­æ ‘ä¸­,ä¸”u!=v,åˆ™å°†uè§†ä¸ºè¿™é¢—å­æ ‘çš„æ ¹ä»¥å,åˆ‡æ–­vä¸å…¶çˆ¶äº²ç»“ç‚¹çš„è¿æ¥
   void cut(int u, int v) {
     if (u == v || find_root(u) != find_root(v)) { puts("-1"); return; }
     evert(u);
@@ -1030,7 +1030,7 @@ struct LCT {
     ch[v][0] = 0;
     push_up(v);
   }
-  //Èç¹ûu,vÔÚÍ¬Ò»¿Å×ÓÊ÷ÖĞ,Ôò½«u,vÖ®¼äÂ·¾¶ÉÏËùÓĞµãµÄµãÈ¨Ôö¼Ów
+  //å¦‚æœu,våœ¨åŒä¸€é¢—å­æ ‘ä¸­,åˆ™å°†u,vä¹‹é—´è·¯å¾„ä¸Šæ‰€æœ‰ç‚¹çš„ç‚¹æƒå¢åŠ w
   void update(int u, int v, int w) {
     if (find_root(u) != find_root(v)) { puts("-1"); return; }
     evert(u);
@@ -1040,7 +1040,7 @@ struct LCT {
     vmax[v] += w;
     push_down(v);
   }
-  //Èç¹ûu,vÔÚÍ¬Ò»¿Å×ÓÊ÷ÖĞ£¬·µ»Øu,vÖ®¼äÂ·¾¶ÉÏµãÈ¨µÄ×î´óÖµ
+  //å¦‚æœu,våœ¨åŒä¸€é¢—å­æ ‘ä¸­ï¼Œè¿”å›u,vä¹‹é—´è·¯å¾„ä¸Šç‚¹æƒçš„æœ€å¤§å€¼
   void query(int u, int v) {
     if (find_root(u) != find_root(v)) { puts("-1"); return; }
     evert(u);
@@ -1117,7 +1117,7 @@ int main() {
   }
 }
 
-//²»»ùÓÚĞı×ªµÄTreap
+//ä¸åŸºäºæ—‹è½¬çš„Treap
 int num[N];
 struct Treap {
   int tot, root;
@@ -1288,7 +1288,7 @@ int main() {
   }
 }
 
-//¿É³Ö¾Ã»¯Treap
+//å¯æŒä¹…åŒ–Treap
 const int N = 50005;
 const int M = 5000005;
 int root[N], vs, d;
@@ -1406,20 +1406,20 @@ int main() {
 }
 
 
-//Ê÷Á´ÆÊ·Ö
+//æ ‘é“¾å‰–åˆ†
 
 
 //KD-Tree
 
 
-//»®·ÖÊ÷
-int part[20][N]; //±íÊ¾Ã¿²ãÃ¿¸öÎ»ÖÃµÄÖµ
-int sorted[N]; //ÒÑ¾­ÅÅĞòºÃµÄÊı
-int tol[20][N]; //tol[p][i] ±íÊ¾µÚi²ã´Ó1µ½iÓĞÊı·ÖÈë×ó±ß
+//åˆ’åˆ†æ ‘
+int part[20][N]; //è¡¨ç¤ºæ¯å±‚æ¯ä¸ªä½ç½®çš„å€¼
+int sorted[N]; //å·²ç»æ’åºå¥½çš„æ•°
+int tol[20][N]; //tol[p][i] è¡¨ç¤ºç¬¬iå±‚ä»1åˆ°iæœ‰æ•°åˆ†å…¥å·¦è¾¹
 void build(int l, int r, int dep) {
   if (l == r) { return; }
   int m = l + r >> 1, cnt = m - l +
-                            1; //±íÊ¾µÈÓÚÖĞ¼äÖµ¶øÇÒ±»·ÖÈë×ó±ßµÄ¸öÊı
+                            1; //è¡¨ç¤ºç­‰äºä¸­é—´å€¼è€Œä¸”è¢«åˆ†å…¥å·¦è¾¹çš„ä¸ªæ•°
   for (int i = l; i <= r; ++i) {
     if (part[dep][i] < sorted[m]) { --cnt; }
   }
@@ -1438,7 +1438,7 @@ void build(int l, int r, int dep) {
   build(l, m, dep + 1);
   build(m + 1, r, dep + 1);
 }
-//ÀëÏß²éÑ¯Çø¼äµÚk´óµÄÊı, [L, R]ÊÇÒª²éÑ¯µÄĞ¡Çø¼ä, [l, r]ÊÇ´óÇø¼ä
+//ç¦»çº¿æŸ¥è¯¢åŒºé—´ç¬¬kå¤§çš„æ•°, [L, R]æ˜¯è¦æŸ¥è¯¢çš„å°åŒºé—´, [l, r]æ˜¯å¤§åŒºé—´
 int query(int L, int R, int k, int l, int r, int dep) {
   if (L == R) { return part[dep][L]; }
   int m = l + r >> 1, cnt = tol[dep][R] - tol[dep][L - 1];
@@ -1451,7 +1451,7 @@ int query(int L, int R, int k, int l, int r, int dep) {
   }
 }
 
-//×óÆ«Ê÷
+//å·¦åæ ‘
 int val[N], ls[N], rs[N], dep[N], fa[N];
 void init(int n) {
   for (int i = 1; i <= n; ++i) {
@@ -1518,5 +1518,5 @@ int main() {
   }
 }
 
-//µÑ¿¨¶ûÊ÷
+//ç¬›å¡å°”æ ‘
 

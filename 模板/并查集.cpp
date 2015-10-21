@@ -29,7 +29,7 @@ inline void unite(int x, int y) {
   }
 }
 
-//ÖÖÀà²¢²é¼¯ ans = ¼Ù»°ÊıÁ¿
+//ç§ç±»å¹¶æŸ¥é›† ans = å‡è¯æ•°é‡
 int ta = findfa(a), ta1 = findfa(a + n), ta2 = findfa(a + n + n),
     tb = findfa(b), tb1 = findfa(b + n), tb2 = findfa(b + n + n);
 if (d == 1) {

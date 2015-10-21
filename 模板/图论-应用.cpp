@@ -1,4 +1,4 @@
-//ÍØÆËÅÅĞò + ÁÚ½ÓÕó O(n^2)
+//æ‹“æ‰‘æ’åº + é‚»æ¥é˜µ O(n^2)
 bool topoSort(int n, int mp[][N], int *ret) {
   int d[N], i, j, k;
   for (i = 0; i < n; i++) {
@@ -14,10 +14,10 @@ bool topoSort(int n, int mp[][N], int *ret) {
   return true;
 }
 
-//Å·À­»ØÂ· + ÁÚ½ÓÕó O(n^2)
-//ÇóÅ·À­»ØÂ·»òÅ·À­Â·
-//·µ»ØÂ·¾¶³¤¶È,path·µ»ØÂ·¾¶(ÓĞÏòÍ¼Ê±µÃµ½µÄÊÇ·´ÏòÂ·¾¶)
-//¿ÉÒÔÓĞ×Ô»·ÓëÖØ±ß,·ÖÎªÎŞÏòÍ¼ºÍÓĞÏòÍ¼
+//æ¬§æ‹‰å›è·¯ + é‚»æ¥é˜µ O(n^2)
+//æ±‚æ¬§æ‹‰å›è·¯æˆ–æ¬§æ‹‰è·¯
+//è¿”å›è·¯å¾„é•¿åº¦,pathè¿”å›è·¯å¾„(æœ‰å‘å›¾æ—¶å¾—åˆ°çš„æ˜¯åå‘è·¯å¾„)
+//å¯ä»¥æœ‰è‡ªç¯ä¸é‡è¾¹,åˆ†ä¸ºæ— å‘å›¾å’Œæœ‰å‘å›¾
 void find_path_u(int n, int mp[][N], int now, int &step, int *path) {
   for (int i = n - 1; i >= 0; i--) {
     while (mp[now][i]) {
@@ -46,15 +46,15 @@ int euclid_path(int n, int mp[][N], int start, int *path) {
 }
 
 //2-SAT
-//È¾É«·¨
+//æŸ“è‰²æ³•
 const int N = 20005;
 const int M = 100005;
 struct Edge {
   int to, next;
 } edge[M];
 int head[N], tot;
-bool vis[N]; //È¾É«±ê¼Ç
-int S[N], top; //Õ»
+bool vis[N]; //æŸ“è‰²æ ‡è®°
+int S[N], top; //æ ˆ
 void init() {
   tot = 0; memset(head, -1, sizeof(head));
 }
@@ -103,7 +103,7 @@ int main() {
   }
 }
 
-//Ç¿Á¬Í¨Ëõµã
+//å¼ºè¿é€šç¼©ç‚¹
 const int N = 1005;
 const int M = 100005;
 struct Edge {
@@ -117,7 +117,7 @@ void addedge(int u, int v) {
   edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
 }
 
-int Low[N], DFN[N], Stack[N], Belong[N]; //BelongÊı×éµÄÖµ1~scc
+int Low[N], DFN[N], Stack[N], Belong[N]; //Belongæ•°ç»„çš„å€¼1~scc
 int Index, top;
 int scc;
 bool Instack[N];
@@ -147,7 +147,7 @@ void Tarjan(int u) {
   }
 }
 
-bool solvable(int n) { //nÊÇ×Ü¸öÊı,ĞèÒªÑ¡ÔñÒ»°ë
+bool solvable(int n) { //næ˜¯æ€»ä¸ªæ•°,éœ€è¦é€‰æ‹©ä¸€åŠ
   memset(DFN, 0, sizeof(DFN));
   memset(Instack, false, sizeof(Instack));
   memset(num, 0, sizeof(num));
@@ -160,11 +160,11 @@ bool solvable(int n) { //nÊÇ×Ü¸öÊı,ĞèÒªÑ¡ÔñÒ»°ë
   }
   return true;
 }
-//ÍØÆËÅÅĞòÇóÈÎÒâÒ»×é½â²¿·Ö
+//æ‹“æ‰‘æ’åºæ±‚ä»»æ„ä¸€ç»„è§£éƒ¨åˆ†
 queue<int>q1, q2;
-vector<vector<int> > dag; //ËõµãºóµÄÄæÏòDAGÍ¼
-char color[N]; //È¾É«£¬Îª'R'ÊÇÑ¡ÔñµÄ
-int indeg[N]; //Èë¶È
+vector<vector<int> > dag; //ç¼©ç‚¹åçš„é€†å‘DAGå›¾
+char color[N]; //æŸ“è‰²ï¼Œä¸º'R'æ˜¯é€‰æ‹©çš„
+int indeg[N]; //å…¥åº¦
 int cf[N];
 void solve(int n) {
   dag.assign(scc + 1, vector<int>());
@@ -235,7 +235,7 @@ int main() {
     if (solvable(2 * n)) {
       solve(2 * n);
       for (int i = 1; i < n; i++) {
-        //×¢ÒâÕâÒ»¶¨ÊÇÅĞ¶Ïcolor[Belong[
+        //æ³¨æ„è¿™ä¸€å®šæ˜¯åˆ¤æ–­color[Belong[
         if (color[Belong[2 * i]] == 'R') { printf("%dw", i); }
         else { printf("%dh", i); }
         if (i < n - 1) { printf(" "); }

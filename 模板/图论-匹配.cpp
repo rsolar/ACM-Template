@@ -1,6 +1,6 @@
-//¶ş·ÖÍ¼×î´óÈ¨Æ¥Åä
-//Hungary + dfs + ÁÚ½Ó¾ØÕó O(V*E)
-int uN, vN; //µã,±ßµÄÊıÄ¿, Ê¹ÓÃÇ°¸³Öµ
+//äºŒåˆ†å›¾æœ€å¤§æƒåŒ¹é…
+//Hungary + dfs + é‚»æ¥çŸ©é˜µ O(V*E)
+int uN, vN; //ç‚¹,è¾¹çš„æ•°ç›®, ä½¿ç”¨å‰èµ‹å€¼
 int g[N][N];
 int linker[N];
 bool used[N];
@@ -26,7 +26,7 @@ int hungary() {
   return res;
 }
 
-//Hungary + dfs + ÁÚ½Ó±í O(V*E)
+//Hungary + dfs + é‚»æ¥è¡¨ O(V*E)
 struct Edge {
   int to, next;
 } edge[M];
@@ -64,7 +64,7 @@ int hungary() {
   return res;
 }
 
-//Hungary + bfs + ÁÚ½Ó±í O(V*E)
+//Hungary + bfs + é‚»æ¥è¡¨ O(V*E)
 struct Edge {
   int to, next;
 } edge[M];
@@ -117,10 +117,10 @@ int hungary() {
   return ret;
 }
 
-//Hopcroft-Karp + ÁÚ½Ó±í + O(V^0.5*E)
+//Hopcroft-Karp + é‚»æ¥è¡¨ + O(V^0.5*E)
 const int INF = 0x3f3f3f3f;
 vector<int> G[N];
-int uN; //×ó¶ËµÄ¶¥µãÊı
+int uN; //å·¦ç«¯çš„é¡¶ç‚¹æ•°
 int Mx[N], My[N], dx[N], dy[N];
 int dis;
 bool used[N];
@@ -177,13 +177,13 @@ int MaxMatch() {
   return res;
 }
 
-//¶ş·ÖÍ¼×î¼ÑÆ¥Åä
-//KM + ÁÚ½Ó¾ØÕó O(nx*nx*ny)
-//ÈôÇó×îĞ¡È¨Æ¥Åä,¿É½«È¨ÖµÈ¡Ïà·´Êı,½á¹ûÈ¡Ïà·´Êı
-//µãµÄ±àºÅ´Ó0¿ªÊ¼
+//äºŒåˆ†å›¾æœ€ä½³åŒ¹é…
+//KM + é‚»æ¥çŸ©é˜µ O(nx*nx*ny)
+//è‹¥æ±‚æœ€å°æƒåŒ¹é…,å¯å°†æƒå€¼å–ç›¸åæ•°,ç»“æœå–ç›¸åæ•°
+//ç‚¹çš„ç¼–å·ä»0å¼€å§‹
 const int INF = 0x3f3f3f3f;
-int nx, ny, g[N][N]; //µãÊı ¶ş·ÖÍ¼ÃèÊö
-int linker[N], lx[N], ly[N]; //yÖĞ¸÷µãÆ¥Åä×´Ì¬, x,yÖĞµÄµã±êºÅ
+int nx, ny, g[N][N]; //ç‚¹æ•° äºŒåˆ†å›¾æè¿°
+int linker[N], lx[N], ly[N]; //yä¸­å„ç‚¹åŒ¹é…çŠ¶æ€, x,yä¸­çš„ç‚¹æ ‡å·
 int slack[N];
 bool visx[N], visy[N];
 bool dfs(int x) {
@@ -238,7 +238,7 @@ int KM() {
   return res;
 }
 
-//Ò»°ãÍ¼×î´óÆ¥Åä + ÁÚ½Ó±í O(N * E)
+//ä¸€èˆ¬å›¾æœ€å¤§åŒ¹é… + é‚»æ¥è¡¨ O(N * E)
 struct edge_t {
   int from, to;
   edge_t *next;
@@ -283,8 +283,8 @@ int graph_match(int n, edge_t *list[], int *match) {
 }
 
 
-//Ò»°ãÍ¼Æ¥Åä´ø»¨Ê÷ + ÁÚ½Ó¾ØÕó
-int n; //µãµÄ±àºÅ´Ó1µ½n
+//ä¸€èˆ¬å›¾åŒ¹é…å¸¦èŠ±æ ‘ + é‚»æ¥çŸ©é˜µ
+int n; //ç‚¹çš„ç¼–å·ä»1åˆ°n
 bool Graph[N][N];
 int Match[N];
 bool InQueue[N], InPath[N], InBlossom[N];

@@ -1,4 +1,4 @@
-//ÊäÈëÒ»¸öÕûÊı
+//è¾“å…¥ä¸€ä¸ªæ•´æ•°
 //G++ ONLY?
 template <typename T> inline void getInt(T &x) {
   char c = 0;
@@ -16,7 +16,7 @@ template <typename T> inline void getInt(T &x) {
   x *= sign;
 }
 
-//¿Õ¸ñ×÷Îª·Ö¸ô ¶ÁÈ¡Ò»ĞĞµÄÕûÊı
+//ç©ºæ ¼ä½œä¸ºåˆ†éš” è¯»å–ä¸€è¡Œçš„æ•´æ•°
 void getLine(int a[]) {
   int i = 0;
   gets(buf);
@@ -25,7 +25,7 @@ void getLine(int a[]) {
   }
 }
 
-//Êä³öÒ»¸öÕûÊı
+//è¾“å‡ºä¸€ä¸ªæ•´æ•°
 template <typename T> inline void printInt(T x) {
   if (x > 9) { printInt(x / 10); }
   putchar(x % 10 + '0');

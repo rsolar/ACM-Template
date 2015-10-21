@@ -1,4 +1,4 @@
-//Joseph ÎÊÌâ
+//Joseph é—®é¢˜
 int Joseph(int n, int m) {
   int ret = 0;
   for (int i = 2; i <= n; i++) {
