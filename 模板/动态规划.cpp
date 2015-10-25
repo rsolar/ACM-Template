@@ -9,7 +9,6 @@ int BS(int len, int x) {
     else { r = mid - 1; }
   }
 }
-
 int DP() {
   int len = 1;
   b[0] = a[0];
@@ -21,7 +20,6 @@ int DP() {
   }
   return len;
 }
-
 //最长公共子序列
 int dp[N][N];
 int LCS(const char *s1, const char *s2, int dp[][N]) {
@@ -34,7 +32,6 @@ int LCS(const char *s1, const char *s2, int dp[][N]) {
   }
   return dp[m][n];
 }
-
 void printLCS(const char *s1, const char *s2, int dp[][N]) {
   char s[N] = {0};
   int i = strlen(s1), j = strlen(s2), k = dp[i][j];
@@ -45,7 +42,6 @@ void printLCS(const char *s1, const char *s2, int dp[][N]) {
   }
   puts(s);
 }
-
 //最长公共递增子序列
 int f[N][N], dp[N];
 int gcis(int a[], int la, int b[], int lb, int ans[]) {
@@ -71,7 +67,6 @@ int gcis(int a[], int la, int b[], int lb, int ans[]) {
   }
   return dp[mx];
 }
-
 //最大子段和
 int maxSum(int a[], int n, int &st, int &ed) {
   int ret, sum, s, i;
@@ -82,7 +77,6 @@ int maxSum(int a[], int n, int &st, int &ed) {
   }
   return ret;
 }
-
 //最大子阵和
 int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   int asum[N][N], ret, sum, i, j, k, s;
@@ -102,7 +96,6 @@ int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   }
   return ret;
 }
-
 //RMQ 一维
 //Sparse Table 返回值
 int n, a[N];
@@ -124,9 +117,8 @@ int getMin(int l, int r) {
 
 int getMax(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
-  return max(dpmn[l][k], dpmn[r - (1 << k) + 1][k]);
+  return max(dpmx[l][k], dpmx[r - (1 << k) + 1][k]);
 }
-
 //ST 返回下标
 int n, a[N];
 int dpmn[N][30], dpmx[N][30];
@@ -139,17 +131,14 @@ void initRMQ() {
     }
   }
 }
-
 int getMin(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
   return a[dpmn[l][k]] < a[dpmn[r - (1 << k) + 1][k]] ? dpmn[l][k] : dpmn[r - (1 << k) + 1][k];
 }
-
 int getMax(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
   return a[dpmx[l][k]] > a[dpmx[r - (1 << k) + 1][k]] ? dpmx[l][k] : dpmx[r - (1 << k) + 1][k];
 }
-
 //RMQ 二维
 int n, a[N][N];
 int mm[N], dpmn[N][N][9][9], dpmx[N][N][9][9]; //mm[]为二进制位数减一，使用前初始化
@@ -159,7 +148,6 @@ void initmm() {
     mm[i] = ((i & (i - 1)) == 0) ? mm[i - 1] + 1 : mm[i - 1];
   }
 }
-
 void initRMQ() {
   for (int i = 1; i <= n; i++) {
     for (int j = 1; j <= n; j++) {
@@ -184,13 +172,11 @@ void initRMQ() {
     }
   }
 }
-
 int getMin(int x1, int y1, int x2, int y2) {
   int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
   x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
   return min(min(dpmn[x1][y1][k1][k2], dpmn[x1][y2][k1][k2]), min(dpmn[x2][y1][k1][k2], dpmn[x2][y2][k1][k2]));
 }
-
 int getMax(int x1, int y1, int x2, int y2) {
   int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
   x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;

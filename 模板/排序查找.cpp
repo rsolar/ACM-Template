@@ -1,8 +1,8 @@
 //二分
-template <typename T> int BS(const T a[], int L, int R, int x) {
-  int l = L, r = R, mid;
+template <typename T> int BS(const T a[], int l, int r, int x) {
+  int mid;
   while (l <= r) {
-    mid = l + r >> 1;
+    mid = (l + r) >> 1;
     if (a[mid] > x) { mid = r = mid - 1;}
     else if (a[mid] < x) { l = mid + 1;}
     else { break; }
@@ -10,20 +10,20 @@ template <typename T> int BS(const T a[], int L, int R, int x) {
   return a[mid] == x ? mid : -1;
 }
 
-template <typename T> int BSup(const T a[], int L, int R) {
-  int l = L, r = R, mid;
+template <typename T> int BSup(const T a[], int l, int r) {
+  int mid;
   while (l + 1 < r) {
-    mid = l + r >> 1;
+    mid = (l + r) >> 1;
     if (judge(a[mid])) { l = mid; }
     else { r = mid; }
   }
   return l;
 }
 
-template <typename T> int BSlow(const T a[], int L, int R) {
-  int l = L, r = R, mid;
+template <typename T> int BSlow(const T a[], int l, int r) {
+  int mid;
   while (l + 1 < r) {
-    mid = l + r >> 1;
+    mid = (l + r) >> 1;
     if (judge(a[mid])) { r = mid; }
     else { l = mid; }
   }

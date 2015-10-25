@@ -4,14 +4,12 @@ inline size_t __stl_hash_string(const char *__s) {
   for (; *__s; ++__s) { __h = 5 * __h + *__s; }
   return size_t(__h);
 }
-
 //BKDR Hash Function
 inline size_t BKDRHash(char *str) {
   size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
   while (*str) { h = h * seed + (*str++); }
   return (h & 0x7FFFFFFF);
 }
-
 //hash_map<string, XXX>
 //C++: using namespace stdext;
 //G++: using namespace __gnu_cxx;
@@ -20,9 +18,6 @@ struct str_hash {
     return __stl_hash_string(str.c_str());
   }
 };
-
-//------------------------------------------------------------------------------
-
 //Manacher 最长回文子串
 char s[N];
 char Mstr[N << 1];
@@ -49,9 +44,6 @@ int main() {
     printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
   }
 }
-
-//------------------------------------------------------------------------------
-
 //字符串最小表示
 int minString(char s[], int m) {
   int i, j, k;
@@ -67,18 +59,44 @@ int minString(char s[], int m) {
   }
   return min(i, j);
 }
-
-//------------------------------------------------------------------------------
-
+//字符串编辑距离 (Levenshtein距离)
+char S[N], T[N];
+int dp[N][N];
+int LenvDist(char S[], char T[]) {
+  int n = strlen(S), m = strlen(T);
+  for (int i = 0; i <= n; i++) { dp[i][0] = i; }
+  for (int i = 0; i <= m; i++) { dp[0][i] = i; }
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + 1;
+      if (S[i - 1] == T[j - 1]) { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); }
+      else { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1] + 1); }
+    }
+  }
+  return dp[n][m];
+}
+//字符串距离
+//非空格字符的距离定义为它们的ASCII码的差的绝对值, 空格字符与其它任意字符之间的距离为已知的定值k
+char S[N], T[N];
+int dp[N][N];
+int Dist(char S[], char T[], int k) {
+  int n = strlen(S), m = strlen(T);
+  for (int i = 0; i <= n; i++) { dp[i][0] = i * k; }
+  for (int i = 1; i <= m; i++) { dp[0][i] = i * k; }
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      dp[i][j] = min(dp[i - 1][j - 1] + abs(S[i - 1] - T[j - 1]), min(dp[i - 1][j], dp[i][j - 1]) + k);
+    }
+  }
+  return dp[n][m];
+}
 //strstr 在串s1中查找指定字符串s2的第一次出现
 char *strstr(const char *str1, const char *str2);
-
 //KMP O(M+N)
 //Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
 //Next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
 char x[N], y[N];
 int Next[N];
-
 void getNext(char x[], int m, int Next[]) {
   int i = 0, j = -1; Next[0] = -1;
   while (i < m) {
@@ -87,7 +105,7 @@ void getNext(char x[], int m, int Next[]) {
   }
 }
 //改进版
-void getNextv(char x[], int m, int Next[]) {
+void getNext(char x[], int m, int Next[]) {
   int i = 0, j = -1; Next[0] = -1;
   while (i < m) {
     while (j != -1 && x[i] != x[j]) { j = Next[j]; }
@@ -95,10 +113,9 @@ void getNextv(char x[], int m, int Next[]) {
     else { Next[i] = j; }
   }
 }
-//返回x在y中出现的次数，可以重叠
-//x是模式串，y是主串
-int KMP_Count(char x[], int m, char y[], int n,
-              int Next[] = Next/*, int &longest, int &lp*/) {
+//返回x在y中出现的次数, 可以重叠
+//x是模式串, y是主串
+int KMP_Count(char x[], int m, char y[], int n, int Next[] = Next/*, int &longest, int &lp*/) {
   int i = 0, j = 0, ans = 0;
   //longest = 0; lp = 0;
   while (i < n) {
@@ -109,12 +126,10 @@ int KMP_Count(char x[], int m, char y[], int n,
   }
   return ans;
 }
-
 //扩展KMP
 //Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
 //Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
 int Next[N], Extend[N];
-
 void preExtend(char x[], int m, int Next[] = Next) {
   int j = 0, k = 1;
   while (j + 1 < m && x[j] == x[j + 1]) { j++; }
@@ -125,8 +140,7 @@ void preExtend(char x[], int m, int Next[] = Next) {
     else {
       j = max(0, p - i + 1);
       while (i + j < m && x[i + j] == x[j]) { j++; }
-      Next[i] = j;
-      k = i;
+      Next[i] = j; k = i;
     }
   }
 }
@@ -142,21 +156,15 @@ void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[]
     else {
       j = max(0, p - i + 1);
       while (i + j < n && j < m && y[i + j] == x[j]) { j++; }
-      Extend[i] = j;
-      k = i;
+      Extend[i] = j; k = i;
     }
   }
 }
-
 //Sunday
 int Sunday(char x[], int m, char y[], int n) {
   int next[26] = {0};
-  for (int j = 0; j < 26; j++) {
-    next[j] = m + 1;
-  }
-  for (int j = 0; j < m; j++) {
-    next[x[j] - 'a'] = m - j;
-  }
+  for (int j = 0; j < 26; j++) { next[j] = m + 1; }
+  for (int j = 0; j < m; j++) { next[x[j] - 'a'] = m - j; }
   int pos = 0;
   while (pos <= n - m) {
     int i = pos, j;
@@ -167,13 +175,12 @@ int Sunday(char x[], int m, char y[], int n) {
   }
   return -1;
 }
-
 //Rabin-Karp
 #define UNSIGNED(x) ((unsigned char)x)
 const int d = 257;
 int hashMatch(char *s, int m, char *p, int n) {
   if (m > n || m == 0 || n == 0) { return -1; }
-  //sv为s子串的hash结果，pv为p的hash结果，base为d的m-1次方
+  //sv为s子串的hash结果, pv为p的hash结果, base为d的m-1次方
   unsigned sv = UNSIGNED(s[0]), pv = UNSIGNED(p[0]), base = 1;
   int i, j;
   //初始化sv, pv, base
@@ -194,22 +201,16 @@ int hashMatch(char *s, int m, char *p, int n) {
   } while (i < n);
   return -1;
 }
-
-//------------------------------------------------------------------------------
-
 //Trie
 char buf[M];
 struct Trie {
   int Next[N * 10][26], End[N * 10];
   int root, L;
   int newnode() {
-    memset(Next[L], -1, sizeof(Next[L]));
-    End[L] = 0;
+    memset(Next[L], -1, sizeof(Next[L])); End[L] = 0;
     return L++;
   }
-  void init() {
-    L = 0; root = newnode();
-  }
+  void init() { L = 0; root = newnode(); }
   void insert(char buf[]) {
     int len = strlen(buf);
     int now = root;
@@ -233,20 +234,16 @@ struct Trie {
     return End[now];
   }
 } tr;
-
 //AC自动机
 char buf[M];
 struct Trie {
   int Next[N * 20][26], Fail[N * 20], End[N * 20];
   int root, L;
   int newnode() {
-    memset(Next[L], -1, sizeof(Next[L]));
-    End[L] = 0;
+    memset(Next[L], -1, sizeof(Next[L])); End[L] = 0;
     return L++;
   }
-  void init() {
-    L = 0; root = newnode();
-  }
+  void init() { L = 0; root = newnode(); }
   void insert(char buf[]) {
     int len = strlen(buf);
     int now = root;
@@ -299,19 +296,65 @@ struct Trie {
     return res;
   }
 } ac;
-
 //后缀数组
 /*
-*suffix array
-*待排序数组长度为n,放在0~n-1中，在最后面补一个0
-*da(str, n + 1, sa, rnk, height, , );//注意是n + 1;
-*例如:
-*n = 8; num[] = { 1, 1, 2, 1, 1, 1, 1, 2, $ }; 注意num最后一位为0,其他大于0
-*sa[] = { 8, 3, 4, 5, 0, 6, 1, 7, 2 }; sa[1 ~ n]为有效值,sa[0]必定为n是无效值
-*rnk[] = { 4, 6, 8, 1, 2, 3, 5, 7, 0 }; rnk[0 ~ n - 1]为有效值,rnk[n]必定为0无效值
-*height[]= { 0, 0, 3, 2, 3, 1, 2, 0, 1 }; height[2 ~ n]为有效值
+* 倍增算法 O(nlogn)
+* 待排序数组长度为n, 放在0 ~ n - 1中,在最后面补一个0
+* da(str, sa, rnk, height, n + 1, m); //注意是n + 1
+* 例如: n = 8; num[] = { 1, 1, 2, 1, 1, 1, 1, 2, $ }; 注意num最后一位为0, 其他大于0
+* rnk[] = { 4, 6, 8, 1, 2, 3, 5, 7, 0 }; rnk[0 ~ n - 1]为有效值, rnk[n]必定为0无效值
+* sa[] = { 8, 3, 4, 5, 0, 6, 1, 7, 2 }; sa[1 ~ n]为有效值, sa[0]必定为n是无效值
+* height[] = { 0, 0, 3, 2, 3, 1, 2, 0, 1 }; height[2 ~ n]为有效值
 */
-//DC3 O(n)
+const int N = 20010;
+char str[N];
+int rnk[N], height[N], sa[N], t1[N], t2[N], c[N]; //求SA数组需要的中间变量, 不需要赋值
+//待排序的字符串放在str数组中, 从str[0]到str[n-1],长度为n,且最大值小于m,
+//除s[n-1]外的所有s[i]都大于0, r[n-1]=0
+//函数结束以后结果放在sa数组中
+bool cmp(int *r, int a, int b, int l) {
+  return r[a] == r[b] && r[a + l] == r[b + l];
+}
+
+void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
+  int i, j, p, *x = t1, *y = t2; n++;
+  //第一轮基数排序, 如果s的最大值很大, 可改为快速排序
+  for (i = 0; i < m; i++) { c[i] = 0; }
+  for (i = 0; i < n; i++) { c[x[i] = str[i]]++; }
+  for (i = 1; i < m; i++) { c[i] += c[i - 1]; }
+  for (i = n - 1; i >= 0; i--) { sa[--c[x[i]]] = i; }
+  for (j = 1; j <= n; j <<= 1) {
+    p = 0;
+    //利用sa数组排序第二关键字
+    for (i = n - j; i < n; i++) { y[p++] = i; } //后面的j个数第二关键字为空的最小
+    for (i = 0; i < n; i++)if (sa[i] >= j) { y[p++] = sa[i] - j; }
+    //这样数组y保存的就是按照第二关键字排序的结果
+    //基数排序第一关键字
+    for (i = 0; i < m; i++) { c[i] = 0; }
+    for (i = 0; i < n; i++) { c[x[y[i]]]++; }
+    for (i = 1; i < m; i++) { c[i] += c[i - 1]; }
+    for (i = n - 1; i >= 0; i--) { sa[--c[x[y[i]]]] = y[i]; }
+    swap(x, y); p = 1; x[sa[0]] = 0;
+    for (i = 1; i < n; i++) { //根据sa和x数组计算新的x数组
+      x[sa[i]] = cmp(y, sa[i - 1], sa[i], j) ? p - 1 : p++;
+    }
+    if (p >= n) { break; }
+    m = p; //下次基数排序的最大值
+  }
+  int k = 0; n--;
+  for (i = 0; i <= n; i++) { rnk[sa[i]] = i; }
+  for (i = 0; i < n; i++) {
+    if (k) { k--; }
+    j = sa[rnk[i] - 1];
+    while (str[i + k] == str[j + k]) { k++; }
+    height[rnk[i]] = k;
+  }
+}
+/*
+* DC3算法, O(n)
+* 所有的相关数组都要开三倍
+* da(str, sa, rnk, height, n, m);
+*/
 const int N = 2005;
 #define F(x) ((x)/3+((x)%3==1?0:tb))
 #define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
@@ -356,7 +399,7 @@ void dc3(int *r, int *sa, int n, int m) {
   for (; i < ta; p++) { sa[p] = wa[i++]; }
   for (; j < tbc; p++) { sa[p] = wb[j++]; }
 }
-//str和sa也要三倍
+
 void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
   for (int i = n; i < n * 3; i++) { str[i] = 0; }
   dc3(str, sa, n + 1, m);
@@ -369,7 +412,6 @@ void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
     height[rnk[i]] = k;
   }
 }
-
 //后缀自动机
 const int N = 250005;
 struct SAM_Node {
@@ -418,7 +460,6 @@ void SAM_build(char *s) {
   SAM_init();
   for (int i = 0; i < s[i]; i++) { SAM_add(s[i] - 'a', i + 1); }
 }
-
 //加入串后进行拓扑排序
 char str[N];
 int topocnt[N];
@@ -440,7 +481,6 @@ void SAM_build(char *s) {
     } else { SAM_last = SAM_last->next[s[i] - '0']; }
   }
 }
-
 //回文自动机
 char buf[M];
 struct PalindromicTree {
@@ -454,8 +494,7 @@ struct PalindromicTree {
     return L++;
   }
   void init() {
-    L = 0; tol = 0; S[tol] = -1;
-    root = newnode(0); Fail[root] = newnode(-1);
+    L = 0; tol = 0; S[tol] = -1; root = newnode(0); Fail[root] = newnode(-1);
   }
   int getFail(int x) {
     while (S[tol - len[x] - 1] != S[tol]) { x = Fail[x]; }
@@ -479,4 +518,4 @@ struct PalindromicTree {
     }
     for (int i = L - 1; i >= 0; --i) { cnt[Fail[i]] += cnt[i]; }
   }
-} pa;
+} pat;

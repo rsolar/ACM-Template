@@ -11,38 +11,37 @@ template<typename T> struct BIT {
   void init() {
     memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B));
   }
-  //前缀和[0, i)
-  T sum(int i) {
-    T ret = 0;
-    for (int j = i; j > 0; j -= lowbit(j)) { ret += A[j]; }
-    return ret;
-  }
-  //单点查询
-  T get(int i) { return sum(i + 1) - sum(i); }
   //单点增减
-  void add(int i, T v) {
-    for (int j = i; j <= n; j += lowbit(j)) { A[j] += v; }
-  }
+  void add(int i, T v) { while (i <= n) { A[i] += v; i += lowbit(i); } }
   void add(int i, T v, T a[]) {
     for (int j = i; j <= n; j += lowbit(j)) { a[j] += v; }
   }
   //单点赋值
   void set(int i, T v) { add(i, v - get(i)); }
+  //前缀和 [1, i]
+  T sum(int i) {
+    T ret = 0;
+    while (i) { ret += A[i]; i -= lowbit(i); }
+    return ret;
+  }
+  //单点查询
+  T query(int i) { return sum(i) - sum(i - 1); }
   //区间和[i, j]
-  T sum(int i, int j) {
-    return sum(j) - sum(i - 1);
-  }
+  T query(int i, int j) { return sum(j) - sum(i - 1); }
 
-  //区间增减
-  void add(int i, int j, T v) {
-    add(i, v, A);
-    add(j + 1, -v, A);
-    add(i, v * i, B);
-    add(j + 1, -(j + 1) * v, B);
+  //带区间修改时区间修改
+  void add(int x, T v) {
+    for (int i = x; i > 0; i -= lowbit(i)) { A[i] += v; }
+    for (int i = x; i <= n; i += lowbit(i)) { B[i] += x * v; }
   }
-  //使用区间增减时求区间和[i, j], sum[]为前缀和
-  T sum(int i, int j, T sum[]) {
-    return sum[j] - sum[i - 1] + (j + 1) * sum(A, j) - i * (sum(A, i - 1)) - sum(B, j) + sum(B, i - 1);
+  void add(int i, int j, T v) { add(j, v); if (i > 1) { add(i - 1, -v); } }
+  //带区间修改时前缀和 区间求和用query(i, j)
+  T sum(int x) {
+    if (!x) { return 0; }
+    int ret1 = 0, ret2 = 0;
+    for (int i = x; i <= n; i += lowbit(i)) { ret1 += A[i]; }
+    for (int i = x - 1; i > 0; i -= lowbit(i)) { ret2 += B[i]; }
+    return ret1 * x + ret2;
   }
 
   //维护区间最值 O(log^2(n))
@@ -57,7 +56,7 @@ template<typename T> struct BIT {
   }
   T query(int l, int r) {
     int ret = num[r];
-    while (true) {
+    for (;;) {
       ret = max(ret, num[r]);
       if (l == r) { break; }
       for (r -= 1; r - l >= lowbit(r); r -= lowbit(r)) { ret = max(ret, A[r]); }
@@ -65,18 +64,17 @@ template<typename T> struct BIT {
     return ret;
   }
 
-  //求区间第K大 O(log^2(n))
+  //求区间第K大的下标/值 O(log^2(n))
   int getK(int l, int r, int k) {
     while (l <= r) {
       int mid = l + ((r - l) >> 1);
       if (sum(mid) >= k) { r = mid - 1; }
       else { l = mid + 1; }
     }
-    return l;
+    return l; //A[l]
   }
 };
 BIT<int> bit;
-
 //二维树状数组
 //单点修改 + 单点求和 + 区域修改 + 区域求和
 template<typename T> struct BIT {
@@ -84,14 +82,13 @@ template<typename T> struct BIT {
   T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //区域求和
   int lowbit(int x) { return x & (-x); }
   void init() {
-    memset(A, 0, sizeof(
-             A)); //memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));
+    memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));
   }
   //区域和[1][1]-[x][y]
   T sum(int x, int y) const {
     T ret = 0;
-    for (i = x; i > 0; i -= lowbit(i)) {
-      for (j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; }
+    for (int i = x; i > 0; i -= lowbit(i)) {
+      for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; }
     }
     return ret;
   }
@@ -135,20 +132,17 @@ template<typename T> struct BIT {
   }
 };
 BIT<int> bit;
-
 //线段树  单点修改 + 单点查询 + 区间查询
-#define lson l, m, rt << 1
-#define rson m + 1, r, rt << 1 | 1
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
-  T sum[N << 2]; //T mx[N << 2]; //区间最值
-  void push_up(int rt) {
-    sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
-    //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
-  }
-  //初始化 + 建树
+  T data[N << 2];
+  T calc(const int &x, const int &y)const { return x + y; }
+  void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
+  //初始化/建树
   void build(int l, int r, int rt) {
-    if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
-    int m = l + r >> 1;
+    if (l == r) { scanf("%d", &data[rt]); return; }
+    int m = (l + r) >> 1;
     build(lson);
     build(rson);
     push_up(rt);
@@ -156,48 +150,52 @@ template<typename T> struct SegmentTree {
   //单点修改
   void update(int p, T val, int l, int r, int rt) {
     if (l == r) {
-      sum[rt] += val; //mx[rt] = val;
+      data[rt] += val; //data[rt] = val;
       return;
     }
-    int m = l + r >> 1;
+    int m = (l + r) >> 1;
     if (p <= m) { update(p, val, lson); }
     else { update(p, val, rson); }
     push_up(rt);
   }
   //区间和
   T query(int L, int R, int l, int r, int rt) {
-    if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
-    int m = l + r >> 1; T ret = 0;
-    if (L <= m) { ret += query(L, R, lson); } //ret = max(ret, query(L, R, lson));
-    if (m < R) { ret += query(L, R, rson); } //ret = max(ret, query(L, R, rson));
+    if (L <= l && r <= R) { return data[rt]; }
+    int m = (l + r) >> 1; T ret = 0;
+    if (L <= m) { ret = calc(ret, query(L, R, lson)); }
+    if (m < R) { ret = calc(ret, query(L, R, rson)); }
     return ret;
   }
 };
 SegmentTree<int> st;
-
 //线段树 单点修改 + 单点查询 + 区间修改(延迟标记) + 区间查询
-#define lson l, m, rt << 1
-#define rson m + 1, r, rt << 1 | 1
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
-  T sum[N << 2], add[N << 2]; //T mx[N << 2]; //区间最值
-  void push_up(int rt) {
-    sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
-    //mx[rt] = max(mx[rt << 1], mx[rt << 1 | 1]);
-  }
+  T data[N << 2], lazy[N << 2];
+  T calc(const int &x, const int &y)const { return x + y; }
+  void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
+  //区间求和的标记下推
   void push_down(int rt, int len) {
-    if (add[rt]) {
-      add[rt << 1] += add[rt]; add[rt << 1 | 1] += add[rt];
-      sum[rt << 1] += add[rt] * (len - (len >> 1));
-      sum[rt << 1 | 1] += add[rt] * (len >> 1);
-      //mx[rt << 1] += add[rt]; mx[rt << 1 | 1] += add[rt];
-      add[rt] = 0;
+    if (lazy[rt]) {
+      lazy[rt << 1] += lazy[rt]; lazy[rt << 1 | 1] += lazy[rt];
+      data[rt << 1] += lazy[rt] * (len - (len >> 1)); data[rt << 1 | 1] += lazy[rt] * (len >> 1);
+      lazy[rt] = 0;
     }
   }
-  //初始化 + 建树
+  //区间最值的标记下推
+  void push_down(int rt) {
+    if (lazy[rt]) {
+      lazy[rt << 1] += lazy[rt]; data[rt << 1] += lazy[rt];
+      lazy[rt << 1 | 1] += lazy[rt]; data[rt << 1 | 1] += lazy[rt];
+      lazy[rt] = 0;
+    }
+  }
+  //初始化/建树
   void build(int l, int r, int rt) {
-    add[rt] = 0;
-    if (l == r) { scanf("%d", &sum[rt]); return; } //mx[rt] = a[i];
-    int m = l + r >> 1;
+    lazy[rt] = 0;
+    if (l == r) { scanf("%d", &data[rt]); return; } //mx[rt] = a[i];
+    int m = (l + r) >> 1;
     build(lson);
     build(rson);
     push_up(rt);
@@ -205,11 +203,11 @@ template<typename T> struct SegmentTree {
   //单点修改
   void update(int p, T val, int l, int r, int rt) {
     if (l == r) {
-      sum[rt] += val; //mx[rt] = val;
+      data[rt] += val; //data[rt] = val;
       return;
     }
-    push_down(rt, r - l + 1);
-    int m = l + r >> 1;
+    push_down(rt, r - l + 1); //push_down(rt);
+    int m = (l + r) >> 1;
     if (p <= m) { update(p, val, lson); }
     else { update(p, val, rson); }
     push_up(rt);
@@ -217,30 +215,90 @@ template<typename T> struct SegmentTree {
   //区间增减
   void update(int L, int R, T val, int l, int r, int rt) {
     if (L <= l && r <= R) {
-      add[rt] += val;
-      sum[rt] += val * (r - l + 1); //mx[rt] += val;
+      lazy[rt] += val;
+      data[rt] += val * (r - l + 1); //data[rt] += val;
       return;
     }
-    push_down(rt, r - l + 1);
-    int m = l + r >> 1;
+    push_down(rt, r - l + 1); //push_down(rt);
+    int m = (l + r) >> 1;
     if (L <= m) { update(L, R, val, lson); }
     if (m < R) { update(L, R, val, rson); }
     push_up(rt);
   }
   //区间和
   T query(int L, int R, int l, int r, int rt) {
-    if (L <= l && r <= R) { return sum[rt]; } //mx[rt]
-    push_down(rt, r - l + 1);
-    int m = l + r >> 1; T ret = 0;
-    if (L <= m) { ret += query(L, R, lson); } //ret = max(ret, query(L, R, lson));
-    if (m < R) { ret += query(L, R, rson); } //ret = max(ret, query(L, R, rson));
+    if (L <= l && r <= R) { return data[rt]; }
+    push_down(rt, r - l + 1); //push_down(rt);
+    int m = (l + r) >> 1; T ret = 0;
+    if (L <= m) { ret = calc(ret, query(L, R, lson)); }
+    if (m < R) { ret = calc(ret, query(L, R, rson)); }
     return ret;
   }
 };
 SegmentTree<int> st;
-
+//非递归版线段树
+const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
+#define l(x) (x<<1) //x的左儿子，利用堆的性质
+#define r(x) ((x<<1)|1) //x的右儿子，利用堆的性质
+template<typename T> struct SegmentTree {
+  int M; //底层的节点数
+  int dl[N], dr[N]; //节点的左右端点
+  int stack[25], top;//栈
+  T sum[N]; //节点的区间和
+  T add[N]; //延迟标记
+  void pushdown(int rt) {
+    if (add[rt] && rt < M) {
+      add[l(rt)] += add[rt]; sum[l(rt)] += add[rt] * (dr[l(rt)] - dl[l(rt)] + 1);
+      add[r(rt)] += add[rt]; sum[r(rt)] += add[rt] * (dr[r(rt)] - dl[r(rt)] + 1);
+      add[rt] = 0;
+    }
+  }
+  void build(int n) {
+    for (M = 1; M < n + 2; M <<= 1);
+    for (int i = 1; i <= n; i++) { //建树
+      scanf("%d", &sum[M + i]); dl[M + i] = dr[M + i] = i;
+    }
+    for (int i = M - 1; i >= 1; i--) { //预处理节点左右端点
+      sum[i] = sum[l(i)] + sum[r(i)]; dl[i] = dl[l(i)]; dr[i] = dr[r(i)];
+    }
+  }
+  void pushpath(int x) {
+    for (top = 0;; x; x >>= 1) { stack[++top] = x; }
+    while (top--) { pushdown(stack[top]); }
+  }
+  //区间求和
+  T query(int tl , int tr) {
+    T res = 0;
+    for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
+      if (~tl & 1) {
+        if (!insl) { pushpath(insl = tl ^ 1); }
+        res += sum[tl ^ 1];
+      }
+      if (tr & 1) {
+        if (!insr) { pushpath(insr = tl ^ 1); }
+        res += sum[tr ^ 1];
+      }
+    }
+    return res;
+  }
+  //区间修改
+  void update(int tl , int tr , T val) {
+    for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
+      if (~tl & 1) {
+        if (!insl) { pushpath(insl = tl ^ 1); }
+        add[tl ^ 1] += val; sum[tl ^ 1] += val * (dr[tl ^ 1] - dl[tl ^ 1] + 1);
+      }
+      if (tr & 1) {
+        if (!insr) { pushpath(insr = tr ^ 1); }
+        add[tr ^ 1] += val; sum[tr ^ 1] += val * (dr[tr ^ 1] - dl[tr ^ 1] + 1);
+      }
+    }
+    for (int insl = insl >> 1; insl; insl >>= 1) { sum[insl] = sum[l(insl)] + sum[r(insl)]; }
+    for (int insr = insr >> 1; insr; insr >>= 1) { sum[insr] = sum[l(insr)] + sum[r(insr)]; }
+  }
+};
+SegmentTree<int> zkw;
 //------------------------------------------------------------------------------
-
 !!!
 //实时开节点的线段树 (无需离散化)
 const int N = 60005;
@@ -317,9 +375,6 @@ int main() {
     }
   }
 }
-
-//------------------------------------------------------------------------------
-
 //平衡二叉树
 //常用操作
 bool find(int v) {
@@ -408,7 +463,6 @@ void debug() {
   treaval(root);
   putchar('\n');
 }
-
 //基于旋转的Treap 允许重复值
 struct Treap {
   int tot, root;
@@ -464,7 +518,6 @@ struct Treap {
   void insert(int v) { insert(root, v); }
   void erase(int v) { erase(root, v); }
 } treap;
-
 //Size Balanced Tree 不允许重复值
 struct SBT {
   int root, tot;
@@ -520,7 +573,6 @@ struct SBT {
   void insert(int v) { insert(root, v); }
   void erase(int v) { erase(root, v); }
 } sbt;
-
 //Splay ver.1
 int k1, k2, num[N];
 struct Splay {
@@ -722,7 +774,6 @@ int main() {
     }
   }
 }
-
 //Splay ver.2
 const int N = 500005;
 const int INF = 0x3f3f3f3f;
@@ -938,9 +989,7 @@ int main() {
     }
   }
 }
-
 //主席树
-
 
 //Link-Cut Tree 动态树
 struct LCT {
@@ -1116,7 +1165,6 @@ int main() {
     putchar('\n');
   }
 }
-
 //不基于旋转的Treap
 int num[N];
 struct Treap {
@@ -1287,7 +1335,6 @@ int main() {
     }
   }
 }
-
 //可持久化Treap
 const int N = 50005;
 const int M = 5000005;
@@ -1404,13 +1451,9 @@ int main() {
     }
   }
 }
-
-
 //树链剖分
 
-
 //KD-Tree
-
 
 //划分树
 int part[20][N]; //表示每层每个位置的值
@@ -1450,7 +1493,6 @@ int query(int L, int R, int k, int l, int r, int dep) {
     return query(tl, tr, k - cnt, m + 1, r, dep + 1);
   }
 }
-
 //左偏树
 int val[N], ls[N], rs[N], dep[N], fa[N];
 void init(int n) {
@@ -1517,6 +1559,5 @@ int main() {
     }
   }
 }
-
 //笛卡尔树
 

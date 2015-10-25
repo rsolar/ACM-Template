@@ -1,5 +1,5 @@
 //快速幂
-ll powMod(ll a, ll b, ll m = M) {
+ll powMod(ll a, ll b, ll m) {
   ll r = 1; a %= m;
   while (b) {
     if (b & 1) { r = r * a % m; }
@@ -8,39 +8,18 @@ ll powMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//模拟大数乘法
-ll mulMod(ll a, ll b, ll m = M) {
-  ll r = 0; a %= m; b %= m;
-  while (b) {
-    if (b & 1) { r = (r + a) % m; }
-    a = (a << 1) % m;
-    b >>= 1;
-  }
-  return r;
-}
-//快速幂 + 模拟大数乘法
-ll powMod(ll a, ll b, ll m = M) {
-  ll r = 1; a %= m;
-  while (b) {
-    if (b & 1) { r = mulMod(r, a, m); }
-    a = mulMod(a, a, m);
-    b >>= 1;
-  }
-  return r;
-}
-
-//------------------------------------------------------------------------------
-
-//素数筛
+//素数筛 [0, N)
 bool isprime[N];
 void getPrime() {
   memset(isprime, -1, sizeof(isprime));
   isprime[0] = isprime[1] = false;
   for (ll i = 2; i < N; i++) {
-    if (isprime[i]) { for (ll j = i * i; j < N; j += i) { isprime[j] = false; } }
+    if (isprime[i]) {
+      for (ll j = i * i; j < N; j += i) { isprime[j] = false; }
+    }
   }
 }
-
+//素数表 [2, N] prime[0]为个数
 int prime[N + 1];
 void getPrime() {
   for (int i = 2; i <= N; i++) {
@@ -51,12 +30,35 @@ void getPrime() {
     }
   }
 }
-
-//------------------------------------------------------------------------------
-
-//合数分解
+//素数筛 + 素数表 [0, N)
+bool isprime[N];
+int prime[N];
+void getPrime() {
+  memset(isprime, -1, sizeof(isprime));
+  isprime[0] = isprime[1] = false;
+  for (ll i = 2; i < N; i++) {
+    if (isprime[i]) {
+      prime[++prime[0]] = i;
+      for (ll j = i * i; j < N; j += i) { isprime[j] = false; }
+    }
+  }
+}
+//分解质因数 需素数表
+ll factor[100];
+int getFactors(ll x) {
+  int fatCnt = 0;
+  for (int i = 1; prime[i] <= x / prime[i]; i++) {
+    if (x % prime[i] == 0) {
+      factor[fatCnt++] = prime[i];
+      while (x % prime[i] == 0) { x /= prime[i]; }
+    }
+  }
+  if (x != 1) { factor[fatCnt++] = x; }
+  return fatCnt;
+}
+//分解质因数及求个数 需素数表
 ll factor[100][2];
-int getFactors(ll x, ll factor[][2] = factor) {
+int getFactors(ll x) {
   int fatCnt = 0;
   for (int i = 1; prime[i] <= x / prime[i]; i++) {
     factor[fatCnt][1] = 0;
@@ -69,17 +71,13 @@ int getFactors(ll x, ll factor[][2] = factor) {
       fatCnt++;
     }
   }
-  if (x != 1) {
-    factor[fatCnt][0] = x;
-    factor[fatCnt++][1] = 1;
-  }
+  if (x != 1) { factor[fatCnt][0] = x; factor[fatCnt++][1] = 1; }
   return fatCnt;
 }
-
 //Miller Rabin素数测试
-const int S = 7;
-//计算ret = (a * b) % m
-ll mulMod(ll a, ll b, ll m = M) {
+const int Times = 7; //错误概率为1/4^Times
+//大数乘法
+ll mulMod(ll a, ll b, ll m) {
   ll r = 0; a %= m; b %= m;
   while (b) {
     if (b & 1) { r = (r + a) % m; }
@@ -88,8 +86,8 @@ ll mulMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//计算ret = (a^n) % m
-ll powMod(ll a, ll b, ll m = M) {
+//大数快速幂
+ll powMod(ll a, ll b, ll m) {
   ll r = 1; a %= m;
   while (b) {
     if (b & 1) { r = mulMod(r, a, m); }
@@ -98,37 +96,26 @@ ll powMod(ll a, ll b, ll m = M) {
   }
   return r;
 }
-//通过a^(n - 1) = 1(mod n)来判断n是不是素数
-//n - 1 = x * 2^t 中间使用二次判断
-bool check(ll a, ll n, ll x, ll t) {
-  ll ret = powMod(a, x, n), last = ret;
-  for (int i = 1; i <= t; i++) {
-    ret = mulMod(ret, ret, n);
-    if (ret == 1 && last != 1 && last != n - 1) { return true; }
-    last = ret;
-  }
-  if (ret != 1) { return true; }
-  else { return false; }
-}
-
+//Miller Rabin
 bool Miller_Rabin(ll n) {
-  if (n < 2) { return false; }
   if (n == 2) { return true; }
-  if ((n & 1) == 0) { return false; }
-  ll x = n - 1, t = 0;
-  while ((x & 1) == 0) {x >>= 1; t++;}
-  srand(time(NULL));
-  for (int i = 0; i < S; i++) {
-    ll a = rand() % (n - 1) + 1;
-    if (check(a, n, x, t)) { return false; }
+  if (n < 2 || (n & 1) == 0) { return false; }
+  ll m = n - 1; int k = 0;
+  while ((m & 1) == 0) { k++; m >>= 1; }
+  for (int i = 0; i < Times; i++) {
+    ll a = rand() % (n - 1) + 1, x = powMod(a, m, n), y = 0;
+    for (int j = 0; j < k; j++) {
+      y = mulMod(x, x, n);
+      if (y == 1 && x != 1 && x != n - 1) { return false; }
+      x = y;
+    }
+    if (y != 1) { return false; }
   }
   return true;
 }
-
 //pollard rho质因素分解
-ll factor[100]; //质因素分解结果(返回时无序)
-int tol; //质因素的个数
-
+ll factor[100]; //质因素分解结果(无序)
+int tol; //质因素个数
 ll gcd(ll a, ll b) {
   while (b != 0) {
     ll t = a % b;
@@ -160,17 +147,15 @@ void findfac(ll n, int k = 107) {
   findfac(p, k);
   findfac(n / p, k);
 }
-
-//------------------------------------------------------------------------------
-
-//欧拉函数
+//求单个数的欧拉函数+合数分解
 int getFacEul(ll n, ll factor[][2] = factor) {
   int fatCnt = getFactors(n);
   for (int i = 0; i < fatCnt; i++) {
     n = n / factor[i][0] * (factor[i][0] - 1);
   }
+  return fatCnt;
 }
-
+//求单个数的欧拉函数
 ll eular(ll n) {
   ll ans = n;
   for (int i = 2; i * i <= n; i++) {
@@ -182,7 +167,7 @@ ll eular(ll n) {
   if (n > 1) { ans -= ans / n; }
   return ans;
 }
-
+//筛法欧拉函数[1, N)
 int euler[N];
 void getEuler() {
   euler[1] = 1;
@@ -195,9 +180,6 @@ void getEuler() {
     }
   }
 }
-
-//------------------------------------------------------------------------------
-
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
 ll extendGcd(ll a, ll b, ll &x, ll &y) {
@@ -207,27 +189,57 @@ ll extendGcd(ll a, ll b, ll &x, ll &y) {
   y -= a / b * x;
   return d;
 }
+//扩展欧几里得求逆元
 ll modReverse(ll a, ll m) {
   ll x, y;
   ll d = extendGcd(a, m, x, y);
   if (d == 1) { return (x % m + m) % m; }
   else { return -1; }
 }
-
 //只能求0 < a < m的情况,a和m互质
-ll inv(ll a, ll m = M) {
+ll inv(ll a, ll m) {
   if (a == 1) { return 1; }
   return inv(m % a, m) * (m - m / a) % m;
 }
-
-//费马小定理,m为素数,a和m互质
-ll inv(ll a, ll m = M) {
+//费马小定理, m为素数, a与m互质
+ll inv(ll a, ll m) {
   return powMod(a, m - 2, m);
 }
-
-//------------------------------------------------------------------------------
-
-//组合数
+//预处理卡特兰数
+int a[105][105]; //大数
+int b[105]; //长度
+void Catalan() {
+  int i, j, len, carry, temp;
+  a[1][0] = b[1] = len = 1;
+  for (i = 2; i <= 100; i++) {
+    for (j = 0; j < len; j++) { //乘法
+      a[i][j] = a[i - 1][j] * (4 * (i - 1) + 2);
+    }
+    carry = 0;
+    for (j = 0; j < len; j++) { //处理相乘结果
+      temp = a[i][j] + carry;
+      a[i][j] = temp % 10;
+      carry = temp / 10;
+    }
+    while (carry) { //进位处理
+      a[i][len++] = carry % 10;
+      carry /= 10;
+    }
+    carry = 0;
+    for (j = len - 1; j >= 0; j--) { //除法
+      temp = carry * 10 + a[i][j];
+      a[i][j] = temp / (i + 1);
+      carry = temp % (i + 1);
+    }
+    while (!a[i][len - 1]) { len--; } //高位零处理
+    b[i] = len;
+  }
+}
+//输出大数
+void printCatalan(int n) {
+  for (int i = b[n] - 1; i >= 0; i--) { printf("%d", a[n][i]); }
+}
+//求组合数
 ll com(ll n, ll m) {
   if (n - m > m) { m = n - m; }
   ll s = 1;
@@ -237,7 +249,6 @@ ll com(ll n, ll m) {
   }
   return s;
 }
-
 //组合数取模
 //预处理阶乘
 ll fac[N];
@@ -268,11 +279,61 @@ ll CRT(ll a[], ll m[], int k) {
   if (ans < 0) { ans += mm; }
   return ans;
 }
-
-//------------------------------------------------------------------------------
-
-//模线性方程组
-int m[10], a[10]; //模数为m,余数为a, X % m = a
+//求原根
+ll n, factor[100];
+int cnt, prime[N + 1];
+//素数表
+void getPrime() {
+  for (int i = 2; i <= N; i++) {
+    if (!prime[i]) { prime[++prime[0]] = i; }
+    for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+      prime[prime[j] * i] = 1;
+      if (i % prime[j] == 0) { break; }
+    }
+  }
+}
+//快速幂取模
+ll powMod(ll a, ll b, ll m) {
+  ll r = 1; a %= m;
+  while (b) {
+    if (b & 1) { r = r * a % m; }
+    a = a * a % m;
+    b >>= 1;
+  }
+  return r;
+}
+//分解质因数
+void getFactors(ll x) {
+  cnt = 0;
+  for (int i = 1; prime[i] <= x / prime[i]; i++) {
+    if (x % prime[i] == 0) {
+      factor[cnt++] = prime[i];
+      while (x % prime[i] == 0) { x /= prime[i]; }
+    }
+  }
+  if (x != 1) { factor[cnt++] = x; }
+}
+//求原根 51nod 1135
+int main() {
+  getPrime();
+  while (~scanf("%I64d", &n)) {
+    getFactors(n - 1);
+    for (ll g = 2; g < n; g++) {
+      bool flag = true;
+      for (int i = 0; i < cnt; i++) {
+        ll t = (n - 1) / factor[i];
+        if (powMod(g, t, n) == 1) { flag = false; break; }
+      }
+      if (flag) {
+        ll root = g;
+        printf("%I64d\n", root);
+        break; //加上break是求最小的原根
+      }
+    }
+  }
+}
+//模线性方程组 需扩展欧几里得
+int m[10], a[10]; //模数为m, 余数为a, X % m = a
 bool solve(int &m0, int &a0, int m, int a) {
   ll y, x;
   int g = extendGcd(m0, m, x, y);
@@ -285,8 +346,8 @@ bool solve(int &m0, int &a0, int m, int a) {
   if (a0 < 0) { a0 += m0; }
   return true;
 }
-//无解返回false,有解返回true;
-//解的形式最后为 a0 + m0 * t (0 <= a0 < m0)
+//无解返回false, 有解返回true
+//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
 bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
   bool flag = true;
   m0 = 1; a0 = 0;
