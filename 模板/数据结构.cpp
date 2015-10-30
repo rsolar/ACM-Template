@@ -1559,5 +1559,56 @@ int main() {
     }
   }
 }
+//哈夫曼树
+template<typename T> struct Huffman {
+  int lChild[N << 1], rChild[N << 1], parent[N << 1], weight[N << 1], n, tot;
+  char key[N];
+  void init() { n = tot = 0; }
+  void build(char s[], T w[]) {
+    priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > que;
+    pair<int, int> x, y;
+    n = strlen(s); tot = (n << 1) - 1;
+    for (int i = 0; i < n; i++) {
+      weight[i] = w[i]; key[i] = s[i]; lChild[i] = rChild[i] = parent[i] = 0;
+      que.push(make_pair(weight[i], i));
+    }
+    for (int i = n; i < m; i++) {
+      x = que.top(); que.pop(); y = que.top(); que.pop();
+      lChild[i] = x.second; rChild[i] = y.second; weight[i] = x.first + y.first;
+      parent[x.second] = parent[y.second] = i; parent[i] = 0;
+    }
+  }
+  void getCode(vector<string> &code) {
+    code.clear(); code.resize(n);
+    for (int i = 0, pos; i < n; i++) {
+      pos = i;
+      while (pos != tot - 1) {
+        if (pos == lChild[parent[pos]]) { code[i] = '0' + code[i]; }
+        else { code[i] = '1' + code[i]; }
+      }
+    }
+  }
+  char *encode(char s[], const vector<string> &code) {
+    string ret;
+    for (int i = 0, j; s[i]; i++) {
+      for (j = 0; j < n && s[i] != key[j]; j++);
+      ret += code[j];
+    }
+    return ret.c_str();
+  }
+  char *decode(char s[], const vector<string> &code) {
+    string ret;
+    for (int i = 0, pos = tot - 1; s[i]; i++) {
+      if (pos >= n) {
+        if (s[i] == '0') { pos = lChild[pos]; }
+        else { pos = rChild[pos]; }
+      } else {
+        ret += key[pos];
+        pos = tot - 1;
+      }
+    }
+    return ret.c_str();
+  }
+}
 //笛卡尔树
 

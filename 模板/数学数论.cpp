@@ -8,7 +8,7 @@ ll powMod(ll a, ll b, ll m) {
   }
   return r;
 }
-//素数筛 [0, N)
+//素数筛 Eratosthenes [0, N)
 bool isprime[N];
 void getPrime() {
   memset(isprime, -1, sizeof(isprime));
@@ -19,7 +19,7 @@ void getPrime() {
     }
   }
 }
-//素数表 [2, N] prime[0]为个数
+//素数表 Euler [2, N] prime[0]为个数
 int prime[N + 1];
 void getPrime() {
   for (int i = 2; i <= N; i++) {
@@ -30,7 +30,7 @@ void getPrime() {
     }
   }
 }
-//素数筛 + 素数表 [0, N)
+//素数筛 + 素数表 Euler [0, N)
 bool isprime[N];
 int prime[N];
 void getPrime() {
@@ -39,7 +39,10 @@ void getPrime() {
   for (ll i = 2; i < N; i++) {
     if (isprime[i]) {
       prime[++prime[0]] = i;
-      for (ll j = i * i; j < N; j += i) { isprime[j] = false; }
+      for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+        isprime[prime[j] * i] = false;
+        if (i % prime[j]) { break; }
+      }
     }
   }
 }
@@ -239,26 +242,27 @@ void Catalan() {
 void printCatalan(int n) {
   for (int i = b[n] - 1; i >= 0; i--) { printf("%d", a[n][i]); }
 }
-//求组合数
-ll com(ll n, ll m) {
+//组合数
+ll Com(ll n, ll m) {
+  if (m > n) { return 0; }
   if (n - m > m) { m = n - m; }
-  ll s = 1;
+  if (m == 0) { return 1; }
+  ll ret = 1;
   for (ll i = 0, j = 1; i < m; i++) {
-    s *= n - i;
-    for (; j <= m && s % j == 0; j++) { s /= j; }
+    ret *= n - i;
+    for (; j <= m && ret % j == 0; j++) { ret /= j; }
   }
-  return s;
+  return ret;
 }
-//组合数取模
-//预处理阶乘
-ll fac[N];
+//组合数取模 Lucas定理 p <= 10^5 需要预处理阶乘 + 快速幂
+ll fac[N] = { 0 };
 void getFac(ll p) {
-  fac[0] = 1;
   for (ll i = 1; i <= p; i++) { fac[i] = (fac[i - 1] * i) % p; }
 }
-//Lucas定理 p <= 10^5
 ll lucas(ll n, ll m, ll p) {
+  if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }
+  if (m == 0) { return 1; }
   ll res = 1;
   while (n && m) {
     ll a = n % p, b = m % p;
@@ -267,6 +271,22 @@ ll lucas(ll n, ll m, ll p) {
     n /= p; m /= p;
   }
   return res;
+}
+//组合数取模 Lucas定理 p <= 10^9 需要快速幂
+ll Com(ll n, ll m) {
+  if (m > n) { return 0; }
+  if (n - m > m) { m = n - m; }
+  if (m == 0) { return 1; }
+  ll ret = 1;
+  for (ll i = 1; i <= m; i++) {
+    ll a = (n + i - m) % p, b = i % p;
+    ret = ret * (a * powMod(b, p - 2, p) % p) % p;
+  }
+  return ret;
+}
+ll Lucas(ll n, ll m, ll p) {
+  if (m == 0) { return 1; }
+  return C(n % p, m % p) * Lucas(n / p, m / p, p) % p;
 }
 //中国剩余定理
 ll CRT(ll a[], ll m[], int k) {
@@ -313,7 +333,7 @@ void getFactors(ll x) {
   }
   if (x != 1) { factor[cnt++] = x; }
 }
-//求原根 51nod 1135
+//求原根
 int main() {
   getPrime();
   while (~scanf("%I64d", &n)) {
