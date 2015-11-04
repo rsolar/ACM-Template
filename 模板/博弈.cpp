@@ -5,7 +5,6 @@ const double gs = (sqrt(5.0) + 1.0) / 2.0;
 bool Wizov(ll a, ll b) {
   return min(a, b) == (ll)(abs(a - b) * gs);
 }
-
 //威佐夫博弈 1 <= N <= 10^18
 ll fib[N] = { 0, 1 }; //预处理fibonacci数列
 bool s[N];
@@ -21,7 +20,6 @@ bool Wizov(ll a, ll b) {
   }
   return ret == b;
 }
-
 //尼姆博奕 Nimm Game
 //有三堆各若干个物品, 两个人轮流从某一堆取任意多的物品, 规定每次至少取一个, 多者不限, 最后取光者得胜
 //计算从1 - n范围内的SG值
@@ -47,7 +45,6 @@ int SG(int Array[], int n) {
   }
   return sg[n];
 }
-
 //带输出方案
 int a[N], ans[N][2]; //a[]为各堆石子数量
 void printNim(int n) { //石子堆数

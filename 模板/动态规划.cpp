@@ -1,15 +1,15 @@
-//最长上升子序列 非降如注释
+//最长上升子序列 LIS O(nlogn) 非降如注释
 int n, a[N], b[N];
 int BS(int len, int x) {
   int l = 0, r = len - 1, mid;
   while (l <= r) {
-    mid = l + r >> 1;
+    mid = (l + r) >> 1;
     if (x > b[mid - 1] && x <= b[mid]) { return mid; } // > && <= 换为 >= && <
     else if (x >= b[mid]) { l = mid + 1; }
     else { r = mid - 1; }
   }
 }
-int DP() {
+int LIS() {
   int len = 1;
   b[0] = a[0];
   for (int i = 1, j; i < n; i++) {
@@ -20,9 +20,9 @@ int DP() {
   }
   return len;
 }
-//最长公共子序列
+//最长公共子序列 LCS O(n^2)
 int dp[N][N];
-int LCS(const char *s1, const char *s2, int dp[][N]) {
+int LCS(const char *s1, const char *s2) {
   int m = strlen(s1), n = strlen(s2);
   for (int i = 1; i <= m; i++) {
     for (int j = 1; j <= n; j++) {
@@ -32,7 +32,7 @@ int LCS(const char *s1, const char *s2, int dp[][N]) {
   }
   return dp[m][n];
 }
-void printLCS(const char *s1, const char *s2, int dp[][N]) {
+void printLCS(const char *s1, const char *s2) {
   char s[N] = {0};
   int i = strlen(s1), j = strlen(s2), k = dp[i][j];
   while (i && j) {
@@ -42,9 +42,59 @@ void printLCS(const char *s1, const char *s2, int dp[][N]) {
   }
   puts(s);
 }
-//最长公共递增子序列
+//最长公共子串 LCSubstring
+//DP O(n^2)
+int dp[2][N];
+int LCS_dp(const char *s1, const char *s2, int &start1, int &start2) {
+  int m = strlen(s1), n = strlen(s2), longest = 0, cur = 1; start1 = start2 = -1;
+  for (int i = 0; i < m; i++) {
+    cur ^= 1;
+    for (int j = 0; j < n; j++) {
+      if (s1[i] == s2[j]) {
+        if (i == 0 || j == 0) { dp[cur][j] = 1; } else { dp[cur][j] = dp[cur ^ 1][j - 1] + 1; }
+        if (dp[cur][j] > longest) { longest = dp[cur][j]; start1 = i + 1 - longest; start2 = j + 1 - longest; }
+      }
+    }
+  }
+  //outputLCS(s1, longest, start1);
+  return longest;
+}
+//后缀数组 O(nlogn)
+char *suf[N];
+int pstrcmp(const void *p, const void *q) {
+  return strcmp(*(char **)p, *(char **)q);
+}
+int comlen_suf(const char *p, const char *q) {
+  int len = 0;
+  while (*p && *q && *p++ == *q++) {
+    len++;
+    if (*p == '#' || *q == '#') { return len; }
+  }
+  return 0;
+}
+int LCS_suffix(const char *s1, const char *s2) {
+  int m = strlen(s1), n = strlen(s2), longest = 0, suf_index = 0, len_suf = m + n + 1;
+  char *arr = new char[len_suf + 1];
+  strcpy(arr, s1); arr[m] = '#'; strcpy(arr + m + 1, s2);
+  for (int i = 0; i < len_suf; i++) { suf[i] = &arr[i]; }
+  qsort(suf, len_suf, sizeof(char *), pstrcmp);
+  for (int i = 0; i < len_suf - 1; i++) {
+    int len = comlen_suf(suf[i], suf[i + 1]);
+    if (len > longest) { longest = len; suf_index = i; }
+  }
+  //outputLCS(suf[suf_index], longest);
+  return longest;
+}
+void outputLCS(const char *s, int longest, int start = 0) {
+  int i = start;
+  while (longest--) {
+    printf("%c", s[i++]);
+  }
+  puts("");
+}
+//最长公共递增子序列 GCIS O(n^2)
 int f[N][N], dp[N];
-int gcis(int a[], int la, int b[], int lb, int ans[]) {
+int GCIS(int a[], int la, int b[], int lb, int ans[]) {
   //a[1...la], b[1...lb]
   int i, j, k, mx;
   memset(f, 0, sizeof(f));
@@ -67,17 +117,59 @@ int gcis(int a[], int la, int b[], int lb, int ans[]) {
   }
   return dp[mx];
 }
-//最大子段和
+//字符串编辑距离 (Levenshtein距离)
+char S[N], T[N];
+int dp[N][N];
+int LenvDist(char S[], char T[]) {
+  int n = strlen(S), m = strlen(T);
+  for (int i = 0; i <= n; i++) { dp[i][0] = i; }
+  for (int i = 0; i <= m; i++) { dp[0][i] = i; }
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + 1;
+      if (S[i - 1] == T[j - 1]) { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); }
+      else { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1] + 1); }
+    }
+  }
+  return dp[n][m];
+}
+//字符串距离
+//非空格字符的距离定义为它们的ASCII码的差的绝对值, 空格字符与其它任意字符之间的距离为已知的定值k
+char S[N], T[N];
+int dp[N][N];
+int Dist(char S[], char T[], int k) {
+  int n = strlen(S), m = strlen(T);
+  for (int i = 0; i <= n; i++) { dp[i][0] = i * k; }
+  for (int i = 1; i <= m; i++) { dp[0][i] = i * k; }
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      dp[i][j] = min(dp[i - 1][j - 1] + abs(S[i - 1] - T[j - 1]), min(dp[i - 1][j], dp[i][j - 1]) + k);
+    }
+  }
+  return dp[n][m];
+}
+//最大子段和 O(n)
 int maxSum(int a[], int n, int &st, int &ed) {
   int ret, sum, s, i;
   for (ret = a[sum = st = ed = s = i = 0]; i < n; i++, s = (sum > 0 ? s : i)) {
-    if ((sum = (sum > 0 ? sum : 0) + a[i]) > ret) {
-      ret = sum; st = s; ed = i;
-    }
+    if ((sum = (sum > 0 ? sum : 0) + a[i]) > ret) { ret = sum; st = s; ed = i; }
   }
   return ret;
 }
-//最大子阵和
+//如数组首尾相连
+int maxSum_adj(int a[], int n) {
+  int ret_notadj = maxSum(a, n); //不跨界最大子段和
+  if (ret_notadj < 0) { return ret_notadj; }
+  int sum = 0, mnsum = INT_MAX, mntmp = 0;
+  for (int i = 0; i < n; i++) {
+    if (mntmp > 0) { mntmp = a[i]; } else { mntmp += a[i]; }
+    if (mntmp < mnsum) { mnsum = mntmp; }
+    sum += a[i];
+  }
+  int ret_adj = sum - mnsum;
+  return ret_notadj > ret_adj ? ret_notadj : ret_adj;
+}
+//最大子阵和 O(n^3)
 int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   int asum[N][N], ret, sum, i, j, k, s;
   for (i = 0; i < h; i++) {
@@ -109,12 +201,10 @@ void initRMQ() {
     }
   }
 }
-
 int getMin(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
   return min(dpmn[l][k], dpmn[r - (1 << k) + 1][k]);
 }
-
 int getMax(int l, int r) {
   int k = (int)(log(r - l + 1.0) / log(2.0));
   return max(dpmx[l][k], dpmx[r - (1 << k) + 1][k]);

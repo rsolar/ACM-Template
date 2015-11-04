@@ -1,4 +1,4 @@
-//输入一个正整数
+//输入一个非负整数
 //G++ ONLY?
 template<typename T> inline void getInt(T &x) {
   char c; x = 0;

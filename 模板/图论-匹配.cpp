@@ -1,6 +1,6 @@
 //二分图最大权匹配
 //Hungary + dfs + 邻接矩阵 O(V*E)
-int uN, vN; //点,边的数目, 使用前赋值
+int uN, vN; //点, 边的数目, 使用前赋值
 int g[N][N];
 int linker[N];
 bool used[N];
@@ -9,14 +9,13 @@ bool dfs(int u) {
     if (g[u][v] && !used[v]) {
       used[v] = true;
       if (linker[v] == -1 || dfs(linker[v])) {
-        linker[v] = u; return true;
+        linker[v] = u; linker[u] = v; return true;
       }
     }
   }
   return false;
 }
-
-int hungary() {
+int Hungary() {
   int res = 0;
   memset(linker, -1, sizeof(linker));
   for (int u = 0; u < uN; u++) {
@@ -25,7 +24,6 @@ int hungary() {
   }
   return res;
 }
-
 //Hungary + dfs + 邻接表 O(V*E)
 struct Edge {
   int to, next;
@@ -36,25 +34,22 @@ bool used[N];
 void init() {
   tot = 0; memset(head, -1, sizeof(head));
 }
-
 void addedge(int u, int v) {
   edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
 }
-
 bool dfs(int u) {
   for (int i = head[u]; ~i; i = edge[i].next) {
     int v = edge[i].to;
     if (!used[v]) {
       used[v] = true;
       if (linker[v] == -1 || dfs(linker[v])) {
-        linker[v] = u; return true;
+        linker[v] = u; linker[u] = v; return true;
       }
     }
   }
   return false;
 }
-
-int hungary() {
+int Hungary() {
   int res = 0;
   memset(linker, -1, sizeof(linker));
   for (int u = 0; u < uN; u++) {
@@ -63,22 +58,57 @@ int hungary() {
   }
   return res;
 }
-
+//Hungary + bfs + 邻接矩阵 O(V*E)
+int g[N][N], Mx[N], My[N], uN, uV;
+int check[N], pre[N];
+bool bfs(int src) {
+  queue<int> que;
+  que.push(src);
+  pre[src] = -1;
+  bool flag = false;
+  while (!que.empty() && !flag) {
+    int u = que.front(); que.pop();
+    for (int v = 0; v < uV && !flag; v++) {
+      if (g[u][v] && check[v] != i) {
+        check[v] = i;
+        que.push(My[v]);
+        if (~My[v]) { pre[My[v]] = u; }
+        else {
+          flag = true;
+          int a = u, b = v;
+          while (~a) {
+            int t = Mx[a];
+            Mx[a] = b; My[b] = a;
+            a = pre[a]; b = t;
+          }
+        }
+      }
+    }
+  }
+  return Mx[i] != -1;
+}
+int Hungary() {
+  memset(Mx, -1, sizeof(Mx));
+  memset(My, -1, sizeof(My));
+  memset(check, -1, sizeof(check));
+  int res = 0;
+  for (int i = 0; i < uN; i++) {
+    if (Mx[i] == -1 && bfs(i)) { res++; }
+  }
+  return res;
+}
 //Hungary + bfs + 邻接表 O(V*E)
 struct Edge {
   int to, next;
 } edge[M];
 int head[N], tot, uN;
-int pre[N], check[N];
-int match[N];
+int pre[N], check[N], match[N];
 void init() {
   tot = 0; memset(head, -1, sizeof(head));
 }
-
 void addedge(int u, int v) {
   edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
 }
-
 bool bfs(int src) {
   queue<int> que;
   que.push(src);
@@ -106,8 +136,7 @@ bool bfs(int src) {
   }
   return match[src] != -1;
 }
-
-int hungary() {
+int Hungary() {
   memset(match, -1, sizeof(match));
   memset(check, -1, sizeof(check));
   int ret = 0;
@@ -116,7 +145,6 @@ int hungary() {
   }
   return ret;
 }
-
 //Hopcroft-Karp + 邻接表 + O(V^0.5*E)
 const int INF = 0x3f3f3f3f;
 vector<int> G[N];
@@ -129,9 +157,7 @@ bool SearchP() {
   dis = INF;
   memset(dx, -1, sizeof(dx));
   memset(dy, -1, sizeof(dy));
-  for (int i = 0; i < uN; i++) {
-    if (Mx[i] == -1) { dx[i] = 0; que.push(i); }
-  }
+  for (int i = 0; i < uN; i++) { if (Mx[i] == -1) { dx[i] = 0; que.push(i); } }
   while (!que.empty()) {
     int u = que.front(); que.pop();
     if (dx[u] > dis) { break; }
@@ -140,16 +166,12 @@ bool SearchP() {
       if (dy[v] == -1) {
         dy[v] = dx[u] + 1;
         if (My[v] == -1) { dis = dy[v]; }
-        else {
-          dx[My[v]] = dy[v] + 1;
-          que.push(My[v]);
-        }
+        else { dx[My[v]] = dy[v] + 1; que.push(My[v]); }
       }
     }
   }
   return dis != INF;
 }
-
 bool dfs(int u) {
   for (int i = 0; i < G[u].size(); i++) {
     int v = G[u][i];
@@ -157,15 +179,13 @@ bool dfs(int u) {
       used[v] = true;
       if (My[v] != -1 && dy[v] == dis) { continue; }
       if (My[v] == -1 || dfs(My[v])) {
-        My[v] = u; Mx[u] = v;
-        return true;
+        My[v] = u; Mx[u] = v; return true;
       }
     }
   }
   return false;
 }
-
-int MaxMatch() {
+int HopcroftKarp() {
   memset(Mx, -1, sizeof(Mx));
   memset(My, -1, sizeof(My));
   int res = 0;
@@ -176,9 +196,8 @@ int MaxMatch() {
   }
   return res;
 }
-
 //二分图最佳匹配
-//KM + 邻接矩阵 O(nx*nx*ny)
+//Kuhn-Munkers + 邻接矩阵 O(nx*nx*ny)
 //若求最小权匹配,可将权值取相反数,结果取相反数
 //点的编号从0开始
 const int INF = 0x3f3f3f3f;
@@ -202,7 +221,6 @@ bool dfs(int x) {
   }
   return false;
 }
-
 int KM() {
   memset(linker, -1, sizeof(linker));
   memset(ly, 0, sizeof(ly));
@@ -214,7 +232,7 @@ int KM() {
   }
   for (int x = 0; x < nx; x++) {
     memset(slack, 0x3f, sizeof(slack));
-    while (true) {
+    for (;;) {
       memset(visx, false, sizeof(visx));
       memset(visy, false, sizeof(visy));
       if (dfs(x)) { break; }
@@ -237,23 +255,21 @@ int KM() {
   }
   return res;
 }
-
 //一般图最大匹配 + 邻接表 O(N * E)
 struct edge_t {
   int from, to;
   edge_t *next;
 };
-
-int aug(int n, edge_t *list[], int *match, int *v, int now) {
+int aug(int n, edge_t *lst[], int *match, int *v, int now) {
   int t, ret = 0; edge_t *e;
   v[now] = 1;
-  for (e = list[now]; e; e = e->next)
+  for (e = lst[now]; e; e = e->next)
     if (!v[t = e->to]) {
       if (match[t] < 0) {
         match[now] = t, match[t] = now, ret = 1;
       } else {
         v[t] = 1;
-        if (aug(n, list, match, v, match[t])) {
+        if (aug(n, lst, match, v, match[t])) {
           match[now] = t, match[t] = now, ret = 1;
         }
         v[t] = 0;
@@ -265,24 +281,16 @@ int aug(int n, edge_t *list[], int *match, int *v, int now) {
   v[now] = 0;
   return ret;
 }
-int graph_match(int n, edge_t *list[], int *match) {
-  int v[MAXN], i, j;
-  for (i = 0; i < n; i++) {
-    v[i] = 0, match[i] = -1;
+int graph_match(int n, edge_t *lst[], int *match) {
+  int v[N] = {0}, i, j;
+  memset(match, -1, sizeof(match));
+  for (i = 0, j = n; i < n && j >= 2;) {
+    if (match[i] < 0 && aug(n, lst, match, v, i)) { i = 0, j -= 2; }
+    else { i++; }
   }
-  for (i = 0, j = n; i < n && j >= 2;)
-    if (match[i] < 0 && aug(n, list, match, v, i)) {
-      i = 0, j -= 2;
-    } else {
-      i++;
-    }
-  for (i = j = 0; i < n; i++) {
-    j += (match[i] >= 0);
-  }
-  return j / 2;
+  for (i = j = 0; i < n; i++) { j += (match[i] >= 0); }
+  return j >> 1;
 }
-
-
 //一般图匹配带花树 + 邻接矩阵
 int n; //点的编号从1到n
 bool Graph[N][N];
@@ -294,11 +302,9 @@ int Father[N], Base[N];
 inline void Push(int u) {
   InQueue[u] = true; Queue[Tail++] = u;
 }
-
 inline int Pop() {
   return Queue[Head++];
 }
-
 int FindCommonAncestor(int u, int v) {
   memset(InPath, 0, sizeof(InPath));
   while (true) {
@@ -314,7 +320,6 @@ int FindCommonAncestor(int u, int v) {
   }
   return v;
 }
-
 void ResetTrace(int u) {
   while (Base[u] != NewBase) {
     int v = Match[u];
@@ -323,7 +328,6 @@ void ResetTrace(int u) {
     if (Base[u] != NewBase) { Father[u] = v; }
   }
 }
-
 void BloosomContract(int u, int v) {
   NewBase = FindCommonAncestor(u, v);
   memset(InBlossom, 0, sizeof(InBlossom));
@@ -337,7 +341,6 @@ void BloosomContract(int u, int v) {
     }
   }
 }
-
 void FindAugmentingPath() {
   memset(InQueue, 0, sizeof(InQueue));
   memset(Father, 0, sizeof(Father));
@@ -359,7 +362,6 @@ void FindAugmentingPath() {
       }
   }
 }
-
 void AugmentPath() {
   int u = Finish, v, w;
   while (u > 0) {
@@ -368,7 +370,6 @@ void AugmentPath() {
     u = w;
   }
 }
-
 void Edmonds() {
   memset(Match, 0, sizeof(Match));
   for (int u = 1; u <= n; u++) {

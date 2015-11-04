@@ -5,7 +5,7 @@ inline size_t __stl_hash_string(const char *__s) {
   return size_t(__h);
 }
 //BKDR Hash Function
-inline size_t BKDRHash(char *str) {
+inline size_t BKDRHash(const char *str) { /* const */
   size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
   while (*str) { h = h * seed + (*str++); }
   return (h & 0x7FFFFFFF);
@@ -14,7 +14,7 @@ inline size_t BKDRHash(char *str) {
 //C++: using namespace stdext;
 //G++: using namespace __gnu_cxx;
 struct str_hash {
-  size_t operator()(const string &str) const {
+  size_t operator()(const string &str)const {
     return __stl_hash_string(str.c_str());
   }
 };
@@ -44,51 +44,20 @@ int main() {
     printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
   }
 }
-//字符串最小表示
-int minString(char s[], int m) {
-  int i, j, k;
+//字符串最小/大表示
+int minString(char s[]) {
+  int m = strlen(s), i, j, k;
   char ss[m << 1];
-  for (i = 0; i < m; i++) { ss[i] = ss[i + m] = s[i]; }
+  strcpy(ss, s); strcpy(ss + m, s);
   for (i = k = 0, j = 1; k < m && i < m && j < m;) {
     for (k = 0; k < m && ss[i + k] == ss[j + k]; k++);
     if (k < m) {
-      if (ss[i + k] > ss[j + k]) { i += k + 1; }
+      if (ss[i + k] > ss[j + k]) { i += k + 1; } //最大则改为<
       else { j += k + 1; }
       if (i == j) { j++; }
     }
   }
   return min(i, j);
-}
-//字符串编辑距离 (Levenshtein距离)
-char S[N], T[N];
-int dp[N][N];
-int LenvDist(char S[], char T[]) {
-  int n = strlen(S), m = strlen(T);
-  for (int i = 0; i <= n; i++) { dp[i][0] = i; }
-  for (int i = 0; i <= m; i++) { dp[0][i] = i; }
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= m; j++) {
-      dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + 1;
-      if (S[i - 1] == T[j - 1]) { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); }
-      else { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1] + 1); }
-    }
-  }
-  return dp[n][m];
-}
-//字符串距离
-//非空格字符的距离定义为它们的ASCII码的差的绝对值, 空格字符与其它任意字符之间的距离为已知的定值k
-char S[N], T[N];
-int dp[N][N];
-int Dist(char S[], char T[], int k) {
-  int n = strlen(S), m = strlen(T);
-  for (int i = 0; i <= n; i++) { dp[i][0] = i * k; }
-  for (int i = 1; i <= m; i++) { dp[0][i] = i * k; }
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= m; j++) {
-      dp[i][j] = min(dp[i - 1][j - 1] + abs(S[i - 1] - T[j - 1]), min(dp[i - 1][j], dp[i][j - 1]) + k);
-    }
-  }
-  return dp[n][m];
 }
 //strstr 在串s1中查找指定字符串s2的第一次出现
 char *strstr(const char *str1, const char *str2);
@@ -144,7 +113,6 @@ void preExtend(char x[], int m, int Next[] = Next) {
     }
   }
 }
-
 void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[] = Extend) {
   preExtend(x, m);
   int j = 0, k = 0;
@@ -204,13 +172,14 @@ int hashMatch(char *s, int m, char *p, int n) {
 //Trie
 char buf[M];
 struct Trie {
-  int Next[N * 10][26], End[N * 10];
+  int Next[N * 20][26], End[N * 20];
   int root, L;
-  int newnode() {
-    memset(Next[L], -1, sizeof(Next[L])); End[L] = 0;
-    return L++;
+  int newnode() { return L++; }
+  void init() {
+    memset(Next, -1, sizeof(Next));
+    memset(End, 0, sizeof(End));
+    L = 0; root = newnode();
   }
-  void init() { L = 0; root = newnode(); }
   void insert(char buf[]) {
     int len = strlen(buf);
     int now = root;
@@ -475,10 +444,11 @@ void SAM_build(char *s) {
   int len = strlen(s);
   SAM_last = SAM_root;
   for (int i = 0; i < len; i++) {
-    if (!SAM_last->next[s[i] - '0']
-        || !(SAM_last->next[s[i] - '0']->len == i + 1)) {
+    if (!SAM_last->next[s[i] - '0'] || !(SAM_last->next[s[i] - '0']->len == i + 1)) {
       SAM_add(s[i] - '0', i + 1);
-    } else { SAM_last = SAM_last->next[s[i] - '0']; }
+    } else {
+      SAM_last = SAM_last->next[s[i] - '0'];
+    }
   }
 }
 //回文自动机

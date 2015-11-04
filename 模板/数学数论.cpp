@@ -352,6 +352,12 @@ int main() {
     }
   }
 }
+//G(1-n)最小公倍数 O(n)
+ll lcm(int n) {
+  ll ret = 1;
+  for (ll i = 1; i <= n; i++) { ret = ret / __gcd(ret, i) * i % M; }
+  return ret;
+}
 //模线性方程组 需扩展欧几里得
 int m[10], a[10]; //模数为m, 余数为a, X % m = a
 bool solve(int &m0, int &a0, int m, int a) {

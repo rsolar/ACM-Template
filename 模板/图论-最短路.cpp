@@ -99,7 +99,7 @@ bool vis[N]; //在队列/栈标志
 bool SPFA(int src) {
   memset(dist, 0x3f, sizeof(dist));
   memset(cnt, 0, sizeof(cnt));
-  memset(vis, false, sizeof(vis));
+  memset(vis, 0, sizeof(vis));
   dist[src] = 0;
   cnt[src] = 1;
   vis[src] = true;
@@ -124,14 +124,14 @@ bool SPFA(int src) {
 }
 //SPFA + SLF + LLL + 邻接表 O(kE)
 int dist[N];
-bool inque[M];
+bool vis[M];
 void spfa(int src) {
   memset(dist, 0x3f, sizeof(dist));
-  memset(inque, 0, sizeof(inque));
+  memset(vis, 0, sizeof(vis));
   dist[src] = 0;
   deque<int> que;
   que.push_back(src);
-  inque[src] = true;
+  vis[src] = true;
   ll sum = 0;
   while (!que.empty()) {
     int u = que.front(); que.pop_front();
@@ -139,20 +139,20 @@ void spfa(int src) {
       que.push_back(u); continue;
     }
     sum -= dist[u];
-    inque[u] = false;
+    vis[u] = false;
     for (int i = g.head[u]; ~i; i = g.next[i]) {
       int v = g.to[i], d = dist[u] + g.len[i];
       if (d < dist[v]) {
-        if (inque[v]) { sum += d - dist[v]; }
+        if (vis[v]) { sum += d - dist[v]; }
         dist[v] = d;
-        if (!inque[v]) {
+        if (!vis[v]) {
           if (!que.empty() && dist[que.front()] > dist[v]) {
             que.push_front(v);
           } else {
             que.push_back(v);
           }
           sum += dist[v];
-          inque[v] = true;
+          vis[v] = true;
         }
       }
     }

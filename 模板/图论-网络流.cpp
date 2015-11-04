@@ -1,7 +1,46 @@
 //http://blog.csdn.net/wjf_wzzc/article/details/24820525
 
 //最大流
-//ISAP + 邻接表
+//SAP + 邻接矩阵 O(N^2*M) (点的编号默认从0开始)
+const int N = 505;
+int g[N][N];
+int gap[N], dis[N], pre[N], cur[N], flow[N][N];
+int SAP(int src, int sink, int nodenum) {
+  memset(cur, 0, sizeof(cur));
+  memset(dis, 0, sizeof(dis));
+  memset(gap, 0, sizeof(gap));
+  memset(flow, 0, sizeof(flow));
+  int u = src, maxflow = 0, aug = -1;
+  pre[src] = src;
+  gap[0] = nodenum;
+  while (dis[src] < nodenum) {
+loop:
+    for (int v = cur[u]; v < nodenum; ++v) {
+      if (g[u][v] - flow[u][v] && dis[u] == dis[v] + 1) {
+        if (aug == -1 || aug > g[u][v] - flow[u][v]) { aug = g[u][v] - flow[u][v]; }
+        pre[v] = u; u = cur[u] = v;
+        if (v == sink) {
+          maxflow += aug;
+          for (u = pre[u]; v != src; v = u, u = pre[u]) {
+            flow[u][v] += aug; flow[v][u] -= aug;
+          }
+          aug = -1;
+        }
+        goto loop;
+      }
+    }
+    int mindis = nodenum - 1;
+    for (int v = 0; v < nodenum; v++) {
+      if (g[u][v] - flow[u][v] && mindis > dis[v]) { cur[u] = v; mindis = dis[v]; }
+    }
+    if (--gap[dis[u]] == 0) { break; }
+    dis[u] = mindis + 1;
+    gap[dis[u]]++;
+    u = pre[u];
+  }
+  return maxflow;
+}
+//ISAP + 邻接表 O(N^2*M)
 const int N = 505;
 const int M = 20005;
 const int INF = 0x3f3f3f3f;
@@ -9,25 +48,14 @@ struct Edge {
   int to, next, cap, flow;
 } edge[M];
 int tot, head[N], gap[N], dep[N], pre[N], cur[N];
-
 void init() {
   tot = 0; memset(head, -1, sizeof(head));
 }
-
 void addedge(int u, int v, int w, int rw = 0) {
-  edge[tot].to = v;
-  edge[tot].cap = w;
-  edge[tot].flow = 0;
-  edge[tot].next = head[u];
-  head[u] = tot++;
-  edge[tot].to = u;
-  edge[tot].cap = rw;
-  edge[tot].flow = 0;
-  edge[tot].next = head[v];
-  head[v] = tot++;
+  edge[tot].to = v; edge[tot].cap = w; edge[tot].flow = 0; edge[tot].next = head[u]; head[u] = tot++;
+  edge[tot].to = u; edge[tot].cap = rw; edge[tot].flow = 0; edge[tot].next = head[v]; head[v] = tot++;
 }
-
-int sap(int src, int sink, int nodenum) {
+int SAP(int src, int sink, int nodenum) {
   memset(gap, 0, sizeof(gap));
   memset(dep, 0, sizeof(dep));
   memcpy(cur, head, sizeof(head));
@@ -38,13 +66,10 @@ int sap(int src, int sink, int nodenum) {
     if (u == sink) {
       int mindis = INF;
       for (int i = pre[u]; ~i; i = pre[edge[i ^ 1].to]) {
-        if (mindis > edge[i].cap - edge[i].flow) {
-          mindis = edge[i].cap - edge[i].flow;
-        }
+        if (mindis > edge[i].cap - edge[i].flow) { mindis = edge[i].cap - edge[i].flow; }
       }
       for (int i = pre[u]; ~i; i = pre[edge[i ^ 1].to]) {
-        edge[i].flow += mindis;
-        edge[i ^ 1].flow -= mindis;
+        edge[i].flow += mindis; edge[i ^ 1].flow -= mindis;
       }
       u = src;
       ans += mindis;
@@ -67,13 +92,12 @@ int sap(int src, int sink, int nodenum) {
     }
     if (--gap[dep[u]] == 0) { return ans; }
     dep[u] = mindis + 1;
-    ++gap[dep[u]];
+    gap[dep[u]]++;
     if (u != src) { u = edge[pre[u] ^ 1].to; }
   }
   return ans;
 }
-
-//ISAP + bfs + stack + 邻接表
+//ISAP + bfs + stack + 邻接表 O(N^2*M)
 const int N = 505;
 const int M = 20005;
 const int INF = 0x3f3f3f3f;
@@ -81,24 +105,13 @@ struct Edge {
   int to, next, cap, flow;
 } edge[M];
 int tot, head[N], gap[N], dep[N], cur[N], S[N];
-
 void init() {
   tot = 0; memset(head, 0xff, sizeof(head));
 }
-
 void addedge(int u, int v, int w, int rw = 0) {
-  edge[tot].to = v;
-  edge[tot].cap = w;
-  edge[tot].flow = 0;
-  edge[tot].next = head[u];
-  head[u] = tot++;
-  edge[tot].to = u;
-  edge[tot].cap = rw;
-  edge[tot].flow = 0;
-  edge[tot].next = head[v];
-  head[v] = tot++;
+  edge[tot].to = v; edge[tot].cap = w; edge[tot].flow = 0; edge[tot].next = head[u]; head[u] = tot++;
+  edge[tot].to = u; edge[tot].cap = rw; edge[tot].flow = 0; edge[tot].next = head[v]; head[v] = tot++;
 }
-
 void bfs(int src, int sink) {
   memset(dep, 0xff, sizeof(dep));
   memset(gap, 0, sizeof(gap));
@@ -113,12 +126,11 @@ void bfs(int src, int sink) {
       if (dep[v] != -1) { continue; }
       q.push(v);
       dep[v] = dep[u] + 1;
-      ++gap[dep[v]];
+      gap[dep[v]]++;
     }
   }
 }
-
-int sap(int src, int sink, int nodenum) {
+int SAP(int src, int sink, int nodenum) {
   bfs(src, sink);
   memcpy(cur, head, sizeof(head));
   int top = 0, u = src, ans = 0;
@@ -127,8 +139,7 @@ int sap(int src, int sink, int nodenum) {
       int mindis = INF, inser;
       for (int i = 0; i < top; ++i) {
         if (mindis > edge[S[i]].cap - edge[S[i]].flow) {
-          mindis = edge[S[i]].cap - edge[S[i]].flow;
-          inser = i;
+          mindis = edge[S[i]].cap - edge[S[i]].flow; inser = i;
         }
       }
       for (int i = 0; i < top; ++i) {
@@ -161,20 +172,17 @@ int sap(int src, int sink, int nodenum) {
   }
   return ans;
 }
-
-//Dinic
+//Dinic O(N^2*M)
 const int N = 505;
 const int M = 20005;
 const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow;
 } edge[M];
-int tot, head[N], dis[MAXN], cur[MAXN], src, sink;
-
+int tot, head[N], dis[N], cur[N], src, sink;
 void init() {
   tot = 0; memset(head, 0xff, sizeof(head));
 }
-
 void addedge(int u, int v, int w, int rw = 0) {
   edge[tot].to = v;
   edge[tot].cap = w;
@@ -187,7 +195,6 @@ void addedge(int u, int v, int w, int rw = 0) {
   edge[tot].next = head[v];
   head[v] = tot++;
 }
-
 bool bfs() {
   memset(dis, 0, sizeof(dis));
   queue<int> q;
@@ -205,7 +212,6 @@ bool bfs() {
   }
   return dis[sink];
 }
-
 int dfs(int u, int delta) {
   if (u == sink || delta == 0) { return delta; }
   int ret = 0;
@@ -223,7 +229,6 @@ int dfs(int u, int delta) {
   }
   return ret;
 }
-
 int dinic() {
   int ret = 0;
   while (bfs()) {
@@ -232,7 +237,6 @@ int dinic() {
   }
   return ret;
 }
-
 //最小费用最大流
 const int N = 10005;
 const int M = 100005;
@@ -240,13 +244,11 @@ const int INF = 0x3f3f3f3f;
 struct Edge {
   int to, next, cap, flow, cost;
 } edge[M];
-int tol, head[N], pre[N], dis[N];
+int n, tol, head[N], pre[N], dis[N];
 bool vis[N];
-int n;
 void init() {
   tol = 0; memset(head, -1, sizeof(head));
 }
-
 void addedge(int u, int v, int cap, int cost) {
   edge[tol].to = v;
   edge[tol].cap = cap;
@@ -261,7 +263,6 @@ void addedge(int u, int v, int cap, int cost) {
   edge[tol].next = head[v];
   head[v] = tol++;
 }
-
 bool spfa(int s, int t) {
   memset(dis, 0x3f, sizeof(dis));
   memset(vis, 0, sizeof(vis));

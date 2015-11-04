@@ -4,49 +4,38 @@
 
 //一维树状数组
 //单点修改 + 单点查询 + 区间修改 + 区间查询 + 区间最值
+int n;
 template<typename T> struct BIT {
-  int n;
-  T A[N]; //T B[N]; //区间增减 //T num[N]; //维护最值
+  T A[N]; //T B[N]; //区间增减/维护最值
   int lowbit(int x) { return x & (-x); }
-  void init() {
-    memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B));
-  }
+  void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B));*/ }
   //单点增减
   void add(int i, T v) { while (i <= n) { A[i] += v; i += lowbit(i); } }
-  void add(int i, T v, T a[]) {
-    for (int j = i; j <= n; j += lowbit(j)) { a[j] += v; }
-  }
   //单点赋值
-  void set(int i, T v) { add(i, v - get(i)); }
-  //前缀和 [1, i]
-  T sum(int i) {
-    T ret = 0;
-    while (i) { ret += A[i]; i -= lowbit(i); }
-    return ret;
-  }
-  //单点查询
-  T query(int i) { return sum(i) - sum(i - 1); }
+  void set(int i, T v) { add(i, v - query(i, i)); }
+  //不带区间修改时求前缀和 [1, i]
+  T sum(int i) { T ret = 0; while (i) { ret += A[i]; i -= lowbit(i); } return ret; }
   //区间和[i, j]
   T query(int i, int j) { return sum(j) - sum(i - 1); }
 
-  //带区间修改时区间修改
+  //带区间修改时求前缀和 区间求和用query(i, j)
+  T sum(int x) {
+    if (x == 0) { return 0; }
+    T ret1 = 0, ret2 = 0;
+    for (int i = x; i <= n; i += lowbit(i)) { ret1 += A[i]; }
+    for (int i = x - 1; i > 0; i -= lowbit(i)) { ret2 += B[i]; }
+    return ret1 * x + ret2;
+  }
+  //带区间修改时区间增减
   void add(int x, T v) {
     for (int i = x; i > 0; i -= lowbit(i)) { A[i] += v; }
     for (int i = x; i <= n; i += lowbit(i)) { B[i] += x * v; }
   }
   void add(int i, int j, T v) { add(j, v); if (i > 1) { add(i - 1, -v); } }
-  //带区间修改时前缀和 区间求和用query(i, j)
-  T sum(int x) {
-    if (!x) { return 0; }
-    int ret1 = 0, ret2 = 0;
-    for (int i = x; i <= n; i += lowbit(i)) { ret1 += A[i]; }
-    for (int i = x - 1; i > 0; i -= lowbit(i)) { ret2 += B[i]; }
-    return ret1 * x + ret2;
-  }
 
   //维护区间最值 O(log^2(n))
   void modify(int x, T v) {
-    num[x] = v;
+    B[x] = v;
     for (int i = x; i <= n; i += lowbit(i)) {
       A[i] = max(A[i], v);
       for (int j = 1; j < lowbit(i); j <<= 1) {
@@ -55,9 +44,9 @@ template<typename T> struct BIT {
     }
   }
   T query(int l, int r) {
-    int ret = num[r];
+    T ret = B[r];
     for (;;) {
-      ret = max(ret, num[r]);
+      ret = max(ret, B[r]);
       if (l == r) { break; }
       for (r -= 1; r - l >= lowbit(r); r -= lowbit(r)) { ret = max(ret, A[r]); }
     }
@@ -77,35 +66,25 @@ template<typename T> struct BIT {
 BIT<int> bit;
 //二维树状数组
 //单点修改 + 单点求和 + 区域修改 + 区域求和
+int n, m;
 template<typename T> struct BIT {
-  int n, m;
   T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //区域求和
   int lowbit(int x) { return x & (-x); }
-  void init() {
-    memset(A, 0, sizeof(A)); //memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));
-  }
+  void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));*/ }
   //区域和[1][1]-[x][y]
   T sum(int x, int y) const {
     T ret = 0;
-    for (int i = x; i > 0; i -= lowbit(i)) {
-      for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; }
-    }
+    for (int i = x; i > 0; i -= lowbit(i)) { for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; } }
     return ret;
   }
   //单点查询
-  T sumv(int x, int y) const {
-    return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y);
-  }
+  T sumv(int x, int y) const { return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y); }
   //单点增减
   void add(int x, int y, T v) {
-    for (int i = x; i <= n; i += lowbit(i)) {
-      for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; }
-    }
+    for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; } }
   }
-  void add(int x, int y, T v, T a[][N] = A) {
-    for (int i = x; i <= n; i += lowbit(i)) {
-      for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; }
-    }
+  void add(int x, int y, T v, T a[][N]) {
+    for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; } }
   }
   //单点赋值
   void set(int x, int y, T v) { add(x, y, v - sum(x, y)); }
@@ -127,8 +106,7 @@ template<typename T> struct BIT {
     add(x1, y1, v * y1, C); add(x2 + 1, y1, -v * y1, C);
     add(x1, y2 + 1, -v * (y2 + 1), C); add(x2 + 1, y2 + 1, v * (y2 + 1), C);
     add(x1, y1, v * x1 * y1, D); add(x2 + 1, y1, -v * (x2 + 1) * y1, D);
-    add(x1, y2 + 1, -v * x1 * (y2 + 1), D);
-    add(x2 + 1, y2 + 1, v * (x2 + 1) * (y2 + 1), D);
+    add(x1, y2 + 1, -v * x1 * (y2 + 1), D); add(x2 + 1, y2 + 1, v * (x2 + 1) * (y2 + 1), D);
   }
 };
 BIT<int> bit;
@@ -137,7 +115,7 @@ BIT<int> bit;
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
   T data[N << 2];
-  T calc(const int &x, const int &y)const { return x + y; }
+  T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
   //初始化/建树
   void build(int l, int r, int rt) {
