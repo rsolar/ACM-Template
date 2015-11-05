@@ -1,10 +1,11 @@
 //最小生成树
-//Prim O(V^2) + 邻接矩阵(初始化为INF)
+//Prim O(V^2) + 邻接矩阵 (初始化为INF)
 const int N = 1005;
 const int INF = 0x3f3f3f3f;
+int cost[N][N];
 int lowc[N];
 bool vis[N];
-int Prim(int cost[][N], int n) {
+int Prim(int n) {
   memset(vis, 0, sizeof(vis));
   int ans = 0;
   vis[0] = true;
@@ -22,24 +23,20 @@ int Prim(int cost[][N], int n) {
   }
   return ans;
 }
-
 //Kruskal O(E*logE) + 邻接表
-const int N = 105;
-const int M = 10005;
+const int N = 1005;
+const int M = 100005;
 struct Edge {
   int u, v, w;
-  bool operator<(const Edge &obj) const { return w < obj.w; }
+  bool operator<(const Edge &obj)const { return w < obj.w; }
 } edge[M];
 int fa[N], tol; //加边前赋值为0
-
 void addedge(int u, int v, int w) {
   edge[tol].u = u; edge[tol].v = v; edge[tol++].w = w;
 }
-
 int findfa(int x) {
   return fa[x] == -1 ? x : fa[x] = findfa(fa[x]);
 }
-
 int Kruskal(int n) {
   memset(fa, -1, sizeof(fa));
   sort(edge, edge + tol);

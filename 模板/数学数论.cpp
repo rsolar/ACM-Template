@@ -1,4 +1,4 @@
-//快速幂
+﻿//快速幂
 ll powMod(ll a, ll b, ll m) {
   ll r = 1; a %= m;
   while (b) {
@@ -9,17 +9,19 @@ ll powMod(ll a, ll b, ll m) {
   return r;
 }
 //素数筛 Eratosthenes [0, N)
+const int N = 10000000; //200ms
 bool isprime[N];
 void getPrime() {
   memset(isprime, -1, sizeof(isprime));
   isprime[0] = isprime[1] = false;
-  for (ll i = 2; i < N; i++) {
+  for (int i = 2; i < N; i++) {
     if (isprime[i]) {
-      for (ll j = i * i; j < N; j += i) { isprime[j] = false; }
+      for (ll j = (ll)i * i; j < N; j += i) { isprime[j] = false; }
     }
   }
 }
 //素数表 Euler [2, N] prime[0]为个数
+const int N = 10000000; //160ms
 int prime[N + 1];
 void getPrime() {
   for (int i = 2; i <= N; i++) {
@@ -31,12 +33,13 @@ void getPrime() {
   }
 }
 //素数筛 + 素数表 Euler [0, N)
+const int N = 10000000; //100ms
 bool isprime[N];
 int prime[N];
 void getPrime() {
   memset(isprime, -1, sizeof(isprime));
   isprime[0] = isprime[1] = false;
-  for (ll i = 2; i < N; i++) {
+  for (int i = 2; i <= N; i++) {
     if (isprime[i]) {
       prime[++prime[0]] = i;
       for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
@@ -119,14 +122,6 @@ bool Miller_Rabin(ll n) {
 //pollard rho质因素分解
 ll factor[100]; //质因素分解结果(无序)
 int tol; //质因素个数
-ll gcd(ll a, ll b) {
-  while (b != 0) {
-    ll t = a % b;
-    a = b;
-    b = t;
-  }
-  return a >= 0 ? a : -a;
-}
 //找出一个因子
 ll pollard_rho(ll x, ll c) {
   srand(time(NULL));
@@ -134,7 +129,7 @@ ll pollard_rho(ll x, ll c) {
   while (true) {
     i++;
     x0 = (mulMod(x0, x0, x) + c) % x;
-    ll d = gcd(y - x0, x);
+    ll d = llabs(__gcd(y - x0, x));
     if (d != 1 && d != x) { return d; }
     if (y == x0) { return x; }
     if (i == k) {y = x0; k += k;}
@@ -170,16 +165,33 @@ ll eular(ll n) {
   if (n > 1) { ans -= ans / n; }
   return ans;
 }
-//筛法欧拉函数[1, N)
-int euler[N];
-void getEuler() {
-  euler[1] = 1;
+//欧拉函数表 [1, N)
+const int N = 10000000; //~430ms
+int phi[N + 5] = { 0, 1 };
+void getPhi() {
   for (int i = 2; i < N; i++) {
-    if (!euler[i]) {
-      for (int j = i; j < N; j += i) {
-        if (euler[j] == 0) { euler[j] = j; }
-        euler[j] = euler[j] / i * (i - 1);
+    if (!phi[i]) {
+      phi[i] = i - 1;
+      for (int j = i + i; j < N; j += i) {
+        if (!phi[j]) { phi[j] = j; }
+        phi[j] = phi[j] / i * (i - 1);
       }
+    }
+  }
+}
+//素数表 + 欧拉函数表 线性筛 [1, N)
+const int N = 10000000; //~160ms
+bool check[N + 5];
+int prime[N], phi[N + 5], tot; //素数的个数
+void getPrimePhi() {
+  tot = 0; phi[1] = 1;
+  for (int i = 2; i < N; i++) {
+    if (!check[i]) { prime[tot++] = i; phi[i] = i - 1; }
+    for (int j = 0; j < tot; j++) {
+      if (i * prime[j] >= N) { break; }
+      check[i * prime[j]] = true;
+      if (i % prime[j] == 0) { phi[i * prime[j]] = phi[i] * prime[j]; break; }
+      else { phi[i * prime[j]] = phi[i] * (prime[j] - 1); }
     }
   }
 }
@@ -259,7 +271,7 @@ ll fac[N] = { 0 };
 void getFac(ll p) {
   for (ll i = 1; i <= p; i++) { fac[i] = (fac[i - 1] * i) % p; }
 }
-ll lucas(ll n, ll m, ll p) {
+ll Lucas(ll n, ll m, ll p) {
   if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }
   if (m == 0) { return 1; }
