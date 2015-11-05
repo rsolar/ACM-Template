@@ -24,21 +24,13 @@ int Hungary() {
   return res;
 }
 //Hungary + dfs + 邻接表 O(V*E)
-struct Edge {
-  int to, next;
-} edge[M];
-int head[N], tot, uN;
-int linker[N];
-bool used[N];
-void init() {
-  tot = 0; memset(head, -1, sizeof(head));
-}
-void addedge(int u, int v) {
-  edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
-}
+int head[N], to[M], Next[M], tot;
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y, int z) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
+int uN, linker[N];
 bool dfs(int u) {
-  for (int i = head[u]; ~i; i = edge[i].next) {
-    int v = edge[i].to;
+  for (int i = head[u]; ~i; i = Next[i]) {
+    int v = to[i];
     if (!used[v]) {
       used[v] = true;
       if (linker[v] == -1 || dfs(linker[v])) {
@@ -97,17 +89,10 @@ int Hungary() {
   return res;
 }
 //Hungary + bfs + 邻接表 O(V*E)
-struct Edge {
-  int to, next;
-} edge[M];
-int head[N], tot, uN;
-int Mx[N], My[N], pre[N], check[N];
-void init() {
-  tot = 0; memset(head, -1, sizeof(head));
-}
-void addedge(int u, int v) {
-  edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
-}
+int head[N], to[M], Next[M], tot;
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y, int z) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
+int uN, Mx[N], My[N], pre[N], check[N];
 bool bfs(int src) {
   queue<int> que;
   que.push(src);
@@ -115,8 +100,8 @@ bool bfs(int src) {
   bool flag = false;
   while (!que.empty() && !flag) {
     int u = que.front(); que.pop();
-    for (int i = head[u]; ~i && !flag; i = edge[i].next) {
-      int v = edge[i].to;
+    for (int i = head[u]; ~i && !flag; i = Next[i]) {
+      int v = to[i];
       if (check[v] != src) {
         check[v] = src;
         que.push(My[v]);
@@ -253,7 +238,7 @@ int KM() {
   }
   return res;
 }
-//一般图最大匹配 + 邻接表 O(N*E)
+//一般图最大匹配 + 邻接表 O(V*E)
 struct edge_t {
   int from, to;
   edge_t *next;
