@@ -363,7 +363,7 @@ void Edmonds() {
     }
   }
 }
-//ural 1099
+//ural1099
 int main() {
   int u, v;
   scanf("%d", &n);

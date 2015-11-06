@@ -308,23 +308,109 @@ int main() {
   }
 }
 //生成树计数
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//Matrix-Tree定理(Kirchhoff 矩阵-树定理)
+//1、G的度数矩阵D[G]是一个n*n的矩阵, 并且满足: 当i ≠ j时,dij = 0; 当i = j时, dij等于vi的度数
+//2、G的邻接矩阵A[G]也是一个n*n的矩阵, 并且满足: 如果vi vj之间有边直接相连, 则aij = 1, 否则为0
+//我们定义G的Kirchhoff矩阵(也称为拉普拉斯算子)C[G]为C[G] = D[G] - A[G], 则Matrix-Tree定理可以
+//描述为: G的所有不同的生成树的个数等于其Kirchhoff矩阵C[G]任何一个n - 1阶主子式的行列式的绝对值
+//所谓n - 1阶主子式, 就是对于r(1 ≤ r ≤ n), 将C[G]的第r行、第r列同时去掉后得到的新矩阵, 用Cr[G]表示。
+//HDU4305 计数对10007取模
+const int M = 10007;
+struct Matrix {
+  int mat[N][N];
+  void init() { memset(mat, 0, sizeof(mat)); }
+  int det(int n) { //求行列式的值模上M，需要使用逆元
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        mat[i][j] = (mat[i][j] % M + M) % M;
+      }
+    }
+    int res = 1;
+    for (int i = 0; i < n; i++) {
+      for (int j = i; j < n; j++)
+        if (mat[j][i] != 0) {
+          for (int k = i; k < n; k++) { swap(mat[i][k], mat[j][k]); }
+          if (i != j) { res = (-res + M) % M; }
+          break;
+        }
+      if (mat[i][i] == 0) { res = -1; break; } //不存在(也就是行列式值为0)
+      for (int j = i + 1; j < n; j++) {
+        //int mut = (mat[j][i] * Inv[mat[i][i]]) % M; //打表逆元
+        int mut = (mat[j][i] * inv(mat[i][i], M)) % M;
+        for (int k = i; k < n; k++) {
+          mat[j][k] = (mat[j][k] - (mat[i][k] * mut) % M + M) % M;
+        }
+      }
+      res = (res * mat[i][i]) % M;
+    }
+    return res;
+  }
+};
+Matrix ret;
+ret.init();
+for (int i = 0; i < n; i++) {
+  for (int j = 0; j < n; j++) {
+    if (i != j && g[i][j]) {
+      ret.mat[i][j] = -1; ret.mat[i][i]++;
+    }
+  }
+}
+printf("%d\n", ret.det(n - 1));
+//SPOJ104 不取模
+const double eps = 1e-8;
+const int N = 105;
+bool g[N][N];
+double a[N][N], b[N][N];
+inline int sgn(double x) {
+  if (fabs(x) < eps) { return 0; }
+  if (x < 0) { return -1; }
+  else { return 1; }
+}
+double det(double a[][N], int n) {
+  double ret = 1.0; int sign = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      b[i][j] = a[i][j];
+    }
+  }
+  for (int i = 0, j; i < n; i++) {
+    if (sgn(b[i][i]) == 0) {
+      for (j = i + 1; j < n; j++) {
+        if (sgn(b[j][i]) != 0) { break; }
+      }
+      if (j == n) { return 0; }
+      for (int k = i; k < n; k++) { swap(b[i][k], b[j][k]); }
+      sign++;
+    }
+    ret *= b[i][i];
+    for (int k = i + 1; k < n; k++) { b[i][k] /= b[i][i]; }
+    for (int j = i + 1; j < n; j++) {
+      for (int k = i + 1; k < n; k++) {
+        b[j][k] -= b[j][i] * b[i][k];
+      }
+    }
+  }
+  if (sign & 1) { ret = -ret; }
+  return ret;
+}
+int main() {
+  int T, n, m, u, v;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%d%d", &n, &m);
+    memset(g, 0, sizeof(g));
+    memset(a, 0, sizeof(a));
+    while (m--) {
+      scanf("%d%d", &u, &v); u--; v--;
+      g[u][v] = g[v][u] = true;
+    }
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (i != j && g[i][j]) {
+          a[i][j] = -1; a[i][i]++;
+        }
+      }
+    }
+    printf("%.0lf\n", det(a, n - 1));
+  }
+}

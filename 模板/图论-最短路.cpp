@@ -115,12 +115,13 @@ struct Edge {
   Edge(int _v, int _w): v(_v), w(_w) {}
 };
 vector<Edge> e[N];
-int dist[N], cnt[N]; //cnt[i]为入队列次数
+int dist[N], cnt[N], pre[N]; //cnt[i]为入队列次数, pre[i]记录src到i路径上的父结点, pre[src] = -1
 bool vis[N]; //在队列/栈标志
 bool SPFA(int src) {
   memset(dist, 0x3f, sizeof(dist));
   memset(cnt, 0, sizeof(cnt));
   memset(vis, 0, sizeof(vis));
+  memset(pre, -1, sizeof(pre));
   dist[src] = 0;
   cnt[src] = 1;
   vis[src] = true;
@@ -134,7 +135,7 @@ bool SPFA(int src) {
       if (dist[v] > dist[u] + e[u][i].w) {
         dist[v] = dist[u] + e[u][i].w;
         if (!vis[v]) {
-          vis[v] = true;
+          vis[v] = true; pre[v] = u;
           que.push(v);
           if (++cnt[v] > n) { return false; } //有负环回路
         }
