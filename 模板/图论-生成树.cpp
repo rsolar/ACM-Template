@@ -72,20 +72,97 @@ struct Edge {
   int u, v, w;
   bool operator<(const Edge &r)const { return w < r.w; }
 } edge[M];
-int n, fa[N], tol; //加边前赋值为0
-void addedge(int u, int v, int w) { edge[tol].u = u; edge[tol].v = v; edge[tol++].w = w; }
+int n, fa[N], tot; //加边前赋值为0
+void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
 int Kruskal() {
   memset(fa, -1, sizeof(fa));
-  sort(edge, edge + tol);
+  sort(edge, edge + tot);
   int cnt = 0, ret = 0;
-  for (int i = 0; i < tol; i++) {
+  for (int i = 0; i < tot; i++) {
     int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
     if (t1 != t2) { ret += w; fa[t1] = t2; cnt++; }
     if (cnt == n - 1) { break; }
   }
   if (cnt < n - 1) { return -1; } //不连通
   return ret;
+}
+//曼哈顿距离最小生成树
+//Kruskal O(VlogV)
+const int N = 100005;
+const int INF = 0x3f3f3f3f;
+struct Point {
+  int x, y, id;
+  bool operator<(const Point &r)const { return x < r.x || (x == r.x && y < r.y); }
+} p[N];
+struct Edge { //有效边
+  int u, v, w;
+  bool operator<(const Edge &r)const { return w < r.w; }
+} edge[N << 2];
+struct BIT { //树状数组, 找y-x大于当前的, 但是y+x最小的
+  int min_val, pos;
+  void init() { min_val = INF; pos = -1; }
+} bit[N];
+int n, tot, fa[N];
+int a[N], b[N];
+void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
+int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
+int dist(Point a, Point b) { return abs(a.x - b.x) + abs(a.y - b.y); }
+int lowbit(int x) { return x & (-x); }
+void update(int i, int val, int pos) {
+  for (; i > 0; i -= lowbit(i)) {
+    if (val < bit[i].min_val) { bit[i].min_val = val; bit[i].pos = pos; }
+  }
+}
+int query(int i, int m) { //查询[i, m]的最小值位置
+  int min_val = INF, pos = -1;
+  for (; i <= m; i += lowbit(i)) {
+    if (bit[i].min_val < min_val) { min_val = bit[i].min_val; pos = bit[i].pos; }
+  }
+  return pos;
+}
+void MMST() {
+  tot = 0;
+  for (int d = 0; d < 4; d++) { //4种坐标变换
+    if (d == 1 || d == 3) { for (int i = 0; i < n; i++) { swap(p[i].x, p[i].y); } }
+    else if (d == 2) { for (int i = 0; i < n; i++) { p[i].x = -p[i].x; } }
+    sort(p, p + n);
+    for (int i = 0; i < n; i++) { a[i] = b[i] = p[i].y - p[i].x; }
+    sort(b, b + n);
+    int m = unique(b, b + n) - b;
+    for (int i = 1; i <= m; i++) { bit[i].init(); }
+    for (int i = n - 1 ; i >= 0; i--) {
+      int pos = lower_bound(b, b + m, a[i]) - b + 1, ans = query(pos, m);
+      if (ans != -1) { addedge(p[i].id, p[ans].id, dist(p[i], p[ans])); }
+      update(pos, p[i].x + p[i].y, i);
+    }
+  }
+}
+int Kruskal() {
+  MMST();
+  memset(fa, -1, sizeof(fa));
+  sort(edge, edge + tot);
+  int ret = 0;
+  for (int i = 0, k = 0; i < tot; i++) {
+    int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v);
+    if (t1 != t2) {
+      fa[t1] = t2; ret += edge[i].w;
+      if (++k == n - 1) { return ret; }
+    }
+  }
+}
+//POJ3241 求曼哈顿最小生成树上第k大的边
+int Kruskal(int k) {
+  MMST(n, p);
+  memset(fa, -1, sizeof(fa));
+  sort(edge, edge + tot);
+  for (int i = 0; i < tot; i++) {
+    int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v);
+    if (t1 != t2) {
+      fa[t1] = t2;
+      if (--k == 0) { return edge[i].w; }
+    }
+  }
 }
 //次小生成树
 //Prim + 邻接矩阵 O(V^2 + E)
@@ -118,7 +195,7 @@ int Prim() {
   }
   return ret;
 }
-//Kruskal + 邻接表 O(V*ElogE)
+//Kruskal + 邻接表 O(VElogE)
 const int N = 1005;
 const int M = 100005;
 const int INF = 0x3f3f3f3f;
@@ -126,14 +203,14 @@ struct Edge {
   int u, v, w;
   bool operator<(const Edge &r)const { return w < r.w; }
 } edge[M];
-int n, fa[N], path[N], tol; //加边前赋值为0
-void addedge(int u, int v, int w) { edge[tol].u = u; edge[tol].v = v; edge[tol++].w = w; }
+int n, fa[N], path[N], tot; //加边前赋值为0
+void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
 int Kruskal() {
   memset(fa, -1, sizeof(fa));
-  sort(edge, edge + tol);
+  sort(edge, edge + tot);
   int cnt = 0, ret = 0;
-  for (int i = 0; i < tol; i++) {
+  for (int i = 0; i < tot; i++) {
     int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
     if (t1 != t2) { ret += w; fa[t1] = t2; path[cnt++] = i; }
     if (cnt == n - 1) { break; }
@@ -146,7 +223,7 @@ int KruskalSec() {
   for (int x = 0; x < n - 1; x++) {
     memset(fa, -1, sizeof(fa));
     int cnt = 0, tmp = 0;
-    for (int i = 0; i < tol; i++) {
+    for (int i = 0; i < tot; i++) {
       if (i != path[x]) {
         int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
         if (t1 != t2) { tmp += w; fa[t1] = t2; cnt++; }
@@ -157,3 +234,97 @@ int KruskalSec() {
   if (ret == INF) { return -1; } //不存在
   return ret;
 }
+//最小树形图
+//朱刘算法 O(VE)
+typedef int T; //数据类型
+const int N = 1005;
+const int M = 40005;
+const int INF = 0x3f3f3f3f;
+struct Edge {
+  int u, v; T w;
+} edge[M];
+int n, m, pre[N], id[N], vis[N];
+T g[N][N], in[N];
+T Zhuliu(int root) {
+  T res = 0; int u, v;
+  for (;;) {
+    memset(in, 0x3f, sizeof(in));
+    memset(id, -1, sizeof(id));
+    memset(vis, -1, sizeof(vis));
+    for (int i = 0; i < m; i++) {
+      if (edge[i].u != edge[i].v && edge[i].w < in[edge[i].v]) {
+        pre[edge[i].v] = edge[i].u; in[edge[i].v] = edge[i].w;
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      if (i != root && in[i] == INF) { return -1; } //不存在最小树形图
+    }
+    int tn = 0;
+    in[root] = 0;
+    for (int i = 0; i < n; i++) {
+      res += in[i]; v = i;
+      while (vis[v] != i && id[v] == -1 && v != root) {
+        vis[v] = i; v = pre[v];
+      }
+      if (v != root && id[v] == -1) {
+        for (int u = pre[v]; u != v ; u = pre[u]) { id[u] = tn; }
+        id[v] = tn++;
+      }
+    }
+    if (tn == 0) { break; } //没有有向环
+    for (int i = 0; i < n; i++) {
+      if (id[i] == -1) { id[i] = tn++; }
+    }
+    for (int i = 0; i < m;) {
+      v = edge[i].v; edge[i].u = id[edge[i].u]; edge[i].v = id[edge[i].v];
+      if (edge[i].u != edge[i].v) { edge[i++].w -= in[v]; }
+      else { swap(edge[i], edge[--m]); }
+    }
+    n = tn; root = id[root];
+  }
+  return res;
+}
+//POJ 3164
+int main() {
+  int C = 0, T, u, v, w;
+  scanf("%d", &T);
+  while (++C <= T) {
+    memset(g, 0x3f, sizeof(g));
+    scanf("%d%d", &n, &m);
+    while (m--) {
+      scanf("%d%d%d", &u, &v, &w);
+      if (u == v) { continue; }
+      g[u][v] = min(g[u][v], w);
+    }
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (g[i][j] < INF) { edge[m].u = i; edge[m].v = j; edge[m++].w = g[i][j]; }
+      }
+    }
+    int ans = Zhuliu(0);
+    printf("Case #%d: ", C);
+    if (ans == -1) { puts("Possums!"); }
+    else { printf("%d\n", ans); }
+  }
+}
+//生成树计数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
