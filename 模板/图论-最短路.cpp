@@ -147,7 +147,7 @@ bool SPFA(int src) {
 //SPFA + SLF + LLL + 邻接表 O(kE)
 int dist[N];
 bool vis[M];
-void spfa(int src) {
+void SPFA(int src) {
   memset(dist, 0x3f, sizeof(dist));
   memset(vis, 0, sizeof(vis));
   dist[src] = 0;
@@ -190,7 +190,7 @@ struct Edge {
 };
 vector<Edge> e;
 int dist[N];
-bool bellman_ford(int src) {
+bool BellmanFord(int src) {
   memset(dist, 0x3f, sizeof(dist));
   dist[src] = 0;
   for (int i = 1; i < n; i++) {
@@ -210,7 +210,7 @@ bool bellman_ford(int src) {
 }
 //floyd 带路径记录 O(V^3)
 int n, mp[N][N], dist[N][N], pre[N][N];
-void floyd() {
+void Floyd() {
   memcpy(dist, mp, sizeof(mp));
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) { pre[i][j] = (i == j) ? -1 : i; }

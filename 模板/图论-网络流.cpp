@@ -33,8 +33,7 @@ loop:
       if (g[u][v] - flow[u][v] && mindis > dis[v]) { cur[u] = v; mindis = dis[v]; }
     }
     if (--gap[dis[u]] == 0) { break; }
-    dis[u] = mindis + 1; gap[dis[u]]++;
-    u = pre[u];
+    dis[u] = mindis + 1; gap[dis[u]]++; u = pre[u];
   }
   return maxflow;
 }
@@ -49,7 +48,7 @@ void addedge(int x, int y, int w, int rw = 0) {
   to[tot] = y; cap[tot] = w; flow[tot] = 0; Next[tot] = head[x]; head[x] = tot++;
   to[tot] = x; cap[tot] = rw; flow[tot] = 0; Next[tot] = head[y]; head[y] = tot++;
 }
-int SAP(int src, int sink) {
+int ISAP(int src, int sink) {
   memset(dep, 0, sizeof(dep));
   memset(gap, 0, sizeof(gap));
   memcpy(cur, head, sizeof(head));
@@ -99,19 +98,19 @@ void addedge(int x, int y, int w, int rw = 0) {
 void bfs(int sink) {
   memset(dep, -1, sizeof(dep));
   memset(gap, 0, sizeof(gap));
-  gap[0] = 1; dep[sink] = 0;
+  dep[sink] = 0; gap[0] = 1;
   queue<int> que;
   que.push(sink);
   while (!que.empty()) {
     int u = que.front(); que.pop();
     for (int i = head[u]; ~i; i = Next[i]) {
       int v = to[i];
-      if (dep[v] != -1) { continue; }
+      if (~dep[v]) { continue; }
       dep[v] = dep[u] + 1; gap[dep[v]]++; que.push(v);
     }
   }
 }
-int SAP(int src, int sink) {
+int ISAP(int src, int sink) {
   bfs(sink);
   memcpy(cur, head, sizeof(head));
   int u = src, v, maxflow = 0, top = 0;
@@ -137,9 +136,66 @@ int SAP(int src, int sink) {
     for (int i = head[u]; ~i; i = Next[i]) {
       if (cap[i] - flow[i] && dep[to[i]] < mindis) { mindis = dep[to[i]]; cur[u] = i; }
     }
-    if (--gap[dep[u]] == 0) { return maxflow; }
+    if (--gap[dep[u]] == 0) { break; }
     dep[u] = mindis + 1; gap[dep[u]]++;
     if (u != src) { u = to[S[--top] ^ 1]; }
+  }
+  return maxflow;
+}
+//ISAP + bfs + queue + 邻接表 O(V^2*E)
+const int N = 505;
+const int M = 20005;
+const int INF = 0x3f3f3f3f;
+int n, m, head[N], to[M], Next[M], cap[M], tot;
+int dep[N], pre[N], cur[N], gap[N];
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y, int w, int rw = 0) {
+  to[tot] = y; cap[tot] = w; Next[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; cap[tot] = rw; Next[tot] = head[y]; head[y] = tot++;
+}
+void bfs(int sink) {
+  memset(dep, -1, sizeof(dep));
+  memset(gap, 0, sizeof(gap));
+  dep[sink] = 0; gap[0] = 1;
+  queue<int> que;
+  que.push(sink);
+  while (Front < End) {
+    int u = que.front(); que.pop();
+    for (int i = head[u]; ~i; i = Next[i]) {
+      int v = to[i];
+      if (~dep[v]) { continue; }
+      dep[v] = dep[u] + 1; gap[dep[v]]++; que.push(v);
+    }
+  }
+}
+int ISAP(int src, int sink) {
+  bfs(sink);
+  memcpy(cur, head, sizeof(head));
+  int u = pre[src] = src, v, maxflow = 0, i;
+  while (dep[sink] < n) {
+    if (u == sink) {
+      int mindis = INF, inser;
+      for (i = src; i != sink; i = to[cur[i]]) {
+        if (mindis > cap[cur[i]]) { mindis = cap[cur[i]]; inser = i; }
+      }
+      for (i = src; i != sink; i = to[cur[i]]) {
+        cap[cur[i]] -= mindis; cap[cur[i] ^ 1] += mindis;
+      }
+      maxflow += mindis; u = inser;
+    }
+    for (i = cur[u]; ~i; i = Next[i]) {
+      v = to[i];
+      if (dep[v] + 1 == dep[u] && cap[i]) { break; }
+    }
+    if (~i) { cur[u] = i; pre[to[i]] = u; u = to[i]; }
+    else {
+      if (--gap[dep[u]] == 0) { break; }
+      int mindis = n;
+      for (i = head[u]; ~i; i = Next[i]) {
+        if (cap[i] && mindis > dep[to[i]]) { cur[u] = i; mindis = dep[to[i]]; }
+      }
+      dep[u] = mindis + 1; gap[dep[u]]++; u = pre[u];
+    }
   }
   return maxflow;
 }
@@ -183,7 +239,7 @@ int dfs(int u, int delta) {
   }
   return ret;
 }
-int dinic() {
+int Dinic() {
   int ret = 0;
   while (bfs()) {
     for (int i = 0; i <= sink; ++i) { cur[i] = head[i]; }
@@ -191,70 +247,178 @@ int dinic() {
   }
   return ret;
 }
-//最小费用最大流
-const int N = 10005;
+//HLPP Highest Label Preflow Push O(V^3)
+const int N = 505;
+const int M = 20005;
+struct Edge {
+  int v, c;
+} edge[M << 1];
+vector<int> e[N];
+int n, m, src, sink;
+int c[N << 1], d[N], w[N], done[N];
+bool vis[N];
+void init(int _n, int _src, int _sink) {
+  n = _n; m = 0; src = _src; sink = _sink;
+  for (int i = 0; i <= n; ++i) { e[i].clear(); }
+}
+void addEdge(int a, int b, int c, int rc = 0) {
+  edge[m].v = b; edge[m].c = c; e[a].push_back(m++);
+  edge[m].v = a; edge[m].c = rc; e[b].push_back(m++);
+}
+void bfs() {
+  memset(c, 0, sizeof(c));
+  fill(d, d + n, n + 1);
+  queue<int> que;
+  c[n + 1] = n - 1; d[src] = n; d[sink] = 0;
+  que.push(sink);
+  while (!que.empty()) {
+    int u = que.front(); que.pop();
+    c[n + 1]++; c[d[u]]++;
+    for (int i = 0; i < e[u].size(); i++) {
+      Edge &cra = edge[e[u][i] ^ 1];
+      int v = edge[e[u][i]].v;
+      if (d[v] == n + 1 && cra.c > 0) {
+        d[v] = d[u] + 1; que.push(v);
+      }
+    }
+  }
+}
+int HLPP() {
+  memset(w, 0, sizeof(w));
+  memset(done, 0, sizeof(done));
+  memset(vis, 0, sizeof(vis));
+  bfs();
+  int todo = -1;
+  vector<queue<int> > que(n << 1);
+  vis[src] = vis[sink] = true;
+  for (int i = 0; i < e[src].size(); i++) {
+    Edge &arc = edge[e[src][i]], &cra = edge[e[src][i] ^ 1];
+    int v = arc.v;
+    w[v] += arc.c; cra.c += arc.c; arc.c = 0;
+    if (!vis[v]) { vis[v] = true; que[d[v]].push(v); todo = max(todo, d[v]); }
+  }
+  while (todo >= 0) {
+    if (que[todo].empty()) { todo--; continue; }
+    int u = que[todo].front(); que[todo].pop();
+    vis[u] = false;
+    while (done[u] < e[u].size()) {
+      Edge &arc = edge[e[u][done[u]]];
+      int v = arc.v;
+      if (d[u] == d[v] + 1 && arc.c > 0) {
+        Edge &cra = edge[e[u][done[u]] ^ 1];
+        int f = min(w[u], arc.c);
+        w[u] -= f; w[v] += f; arc.c -= f; cra.c += f;
+        if (!vis[v]) { vis[v] = true; que[d[v]].push(v); }
+        if (w[u] == 0) { break; }
+      }
+      done[u]++;
+    }
+    if (w[u] > 0) {
+      int du = d[u];
+      c[d[u]]--; d[u] = n << 1;
+      for (int i = 0; i < e[u].size(); i++) {
+        Edge &arc = edge[e[u][i]];
+        int v = arc.v;
+        if (d[u] > d[v] + 1 && arc.c > 0) { d[u] = d[v] + 1; done[u] = i; }
+      }
+      c[d[u]]++;
+      if (c[du] == 0) {
+        for (int i = 0; i < n; ++i) {
+          if (d[i] > du && d[i] < n + 1) { c[d[i]]--; c[n + 1]++; d[i] = n + 1; }
+        }
+      }
+      vis[u] = true; que[d[u]].push(u); todo = d[u];
+    }
+  }
+  return w[sink];
+}
+//最小费用最大流 MCMF O(V*E*f)
+//ver.kuangbin
+//求最大费用只需要取相反数, 结果取相反数即可
+const int N = 1005;
 const int M = 100005;
 const int INF = 0x3f3f3f3f;
-struct Edge {
-  int to, next, cap, flow, cost;
-} edge[M];
-int n, tol, head[N], pre[N], dis[N];
+int n, head[N], to[M], Next[M], cap[M], flow[M], cost[M], tot;
+int dis[N], pre[N];
 bool vis[N];
-void init() {
-  tol = 0; memset(head, -1, sizeof(head));
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y, int w, int c) {
+  to[tot] = y; cap[tot] = w; flow[tot] = 0; cost[tot] = c; Next[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; cap[tot] = 0; flow[tot] = 0; cost[tot] = -c; Next[tot] = head[y]; head[y] = tot++;
 }
-void addedge(int u, int v, int cap, int cost) {
-  edge[tol].to = v;
-  edge[tol].cap = cap;
-  edge[tol].cost = cost;
-  edge[tol].flow = 0;
-  edge[tol].next = head[u];
-  head[u] = tol++;
-  edge[tol].to = u;
-  edge[tol].cap = 0;
-  edge[tol].cost = -cost;
-  edge[tol].flow = 0;
-  edge[tol].next = head[v];
-  head[v] = tol++;
-}
-bool spfa(int s, int t) {
+bool SPFA(int src, int sink) {
   memset(dis, 0x3f, sizeof(dis));
-  memset(vis, 0, sizeof(vis));
   memset(pre, -1, sizeof(pre));
+  memset(vis, 0, sizeof(vis));
   queue<int> que;
-  dis[s] = 0;
-  vis[s] = true;
-  que.push(s);
+  dis[src] = 0; vis[src] = true;
+  que.push(src);
   while (!que.empty()) {
     int u = que.front(); que.pop();
     vis[u] = false;
-    for (int i = head[u]; i != -1; i = edge[i].next) {
-      int v = edge[i].to;
-      if (edge[i].cap > edge[i].flow && dis[v] > dis[u] + edge[i].cost) {
-        dis[v] = dis[u] + edge[i].cost; pre[v] = i;
+    for (int i = head[u]; ~i; i = Next[i]) {
+      int v = to[i];
+      if (cap[i] > flow[i] && dis[v] > dis[u] + cost[i]) {
+        dis[v] = dis[u] + cost[i]; pre[v] = i;
         if (!vis[v]) { vis[v] = true; que.push(v); }
       }
     }
   }
-  if (pre[t] == -1) { return false; }
-  else { return true; }
+  return pre[sink] != -1;
 }
-//返回的是最大流，cost存的是最小费用
-int minCostMaxflow(int s, int t, int &cost) {
-  int flow = 0; cost = 0;
-  while (spfa(s, t)) {
+//返回的是最大流, cost存的是最小费用
+int MCMF(int src, int sink, int &cost) {
+  int maxflow = 0; cost = 0;
+  while (SPFA(src, sink)) {
     int mn = INF;
-    for (int i = pre[t]; i != -1; i = pre[edge[i ^ 1].to]) {
-      if (mn > edge[i].cap - edge[i].flow) {
-        mn = edge[i].cap - edge[i].flow;
+    for (int i = pre[sink]; ~i; i = pre[to[i ^ 1]]) {
+      if (mn > cap[i] - flow[i]) { mn = cap[i] - flow[i]; }
+    }
+    for (int i = pre[sink]; ~i; i = pre[edge[i ^ 1].to]) {
+      flow[i] += mn; flow[i ^ 1] -= mn; cost += cost[i] * mn;
+    }
+    maxflow += mn;
+  }
+  return maxflow;
+}
+//ver.poursoul
+const int N = 1005;
+const int M = 100005;
+const int INF = 0x3f3f3f3f;
+int n, head[N], to[M], Next[M], cap[M], cost[M], tot;
+int dis[N], cur[N], flow[N], mncost, mxflow; //结果
+bool vis[N];
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y, int w, int c) {
+  to[tot] = y; cap[tot] = w; cost[tot] = c; Next[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; cap[tot] = 0; cost[tot] = -c; Next[tot] = head[y]; head[y] = tot++;
+}
+bool SPFA(int src, int sink) {
+  memset(dis, 0x3f, sizeof(dis));
+  memset(vis, 0, sizeof(vis));
+  dis[src] = 0; cur[src] = -1; flow[src] = INF;
+  queue<int> que;
+  que.push(src);
+  while (!que.empty()) {
+    int u = que.front(); que.pop();
+    vis[u] = false;
+    for (int i = head[u]; ~i; i = Next[i]) {
+      int v = to[i];
+      if (cap[i] > 0 && dis[v] > dis[u] + cost[i]) {
+        dis[v] = dis[u] + cost[i]; flow[v] = min(flow[u], cap[i]); cur[v] = i;
+        if (!vis[v]) { vis[v] = true; que.push(v); }
       }
     }
-    for (int i = pre[t]; i != -1; i = pre[edge[i ^ 1].to]) {
-      edge[i].flow += mn;
-      edge[i ^ 1].flow -= mn;
-      cost += edge[i].cost * mn;
-    }
-    flow += mn;
   }
-  return flow;
+  if (d[sink] == INF) { return false; }
+  mxflow += flow[sink]; mncost += flow[sink] * dis[sink];
+  for (int i = cur[sink]; ~i; i = cur[to[i ^ 1]]) {
+    cap[i] -= flow[sink]; cap[i ^ 1] += flow[sink];
+  }
+  return true;
+}
+int MCMF() {
+  mxflow = mncost = 0;
+  while (SPFA());
+  return mncost;
 }
