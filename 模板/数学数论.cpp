@@ -8,7 +8,7 @@ ll powMod(ll a, ll b, ll m) {
   }
   return r;
 }
-//素数筛 Eratosthenes [0, N)
+//素数筛 Eratosthenes O(nloglogn) [0, N)
 const int N = 10000000; //200ms
 bool isprime[N];
 void getPrime() {
@@ -20,7 +20,7 @@ void getPrime() {
     }
   }
 }
-//素数表 Euler [2, N] prime[0]为个数
+//素数表 Euler O(n) [2, N] prime[0]为个数
 const int N = 10000000; //160ms
 int prime[N + 1];
 void getPrime() {
@@ -141,7 +141,7 @@ void findfac(ll n, int k = 107) {
   if (Miller_Rabin(n)) { factor[tol++] = n; return; }
   ll p = n;
   int c = k;
-  while (p >= n) { p = pollard_rho(p, c--); } //值变化，防止死循环k
+  while (p >= n) { p = pollard_rho(p, c--); } //值变化, 防止死循环k
   findfac(p, k);
   findfac(n / p, k);
 }
@@ -165,7 +165,7 @@ ll eular(ll n) {
   if (n > 1) { ans -= ans / n; }
   return ans;
 }
-//欧拉函数表 [1, N)
+//欧拉函数筛
 const int N = 10000000; //~430ms
 int phi[N + 5] = { 0, 1 };
 void getPhi() {
@@ -179,7 +179,7 @@ void getPhi() {
     }
   }
 }
-//素数表 + 欧拉函数表 线性筛 [1, N)
+//素数 + 欧拉函数线性筛
 const int N = 10000000; //~160ms
 bool check[N + 5];
 int prime[N], phi[N + 5], tot; //素数的个数
@@ -219,6 +219,12 @@ ll inv(ll a, ll m) {
 //费马小定理, m为素数, a与m互质
 ll inv(ll a, ll m) {
   return powMod(a, m - 2, m);
+}
+//线性求逆元
+void getInv(int m) {
+  for (ll i = 2; i < m; i++) {
+    inv[i] = (m - m / i) * inv[m % i] % m;
+  }
 }
 //预处理卡特兰数
 int a[105][105]; //大数
@@ -364,11 +370,74 @@ int main() {
     }
   }
 }
-//G(1-n)最小公倍数 O(n)
-ll lcm(int n) {
-  ll ret = 1;
-  for (ll i = 1; i <= n; i++) { ret = ret / __gcd(ret, i) * i % M; }
-  return ret;
+//莫比乌斯函数线性筛
+const int N = 10000000; //150ms
+int prime[N], tot, miu[N];
+bool isPrime[N];
+void getMiu() {
+  memset(isPrime, -1, sizeof(isPrime));
+  miu[1] = 1;
+  for (int i = 2; i < N; i++) {
+    if (isPrime[i]) { prime[++tot] = i; miu[i] = -1; }
+    for (int j = 1; j <= tot; j++) {
+      if (i * prime[j] >= N) { break; }
+      isPrime[i * prime[j]] = false;
+      if (i % prime[j] == 0) { miu[i * prime[j]] = 0; break; }
+      miu[i * prime[j]] = -miu[i];
+    }
+  }
+}
+//大步小步算法 Baby-Step Giant-Step
+//a^x = b (mod n) n是素数和不是素数都可以 求解上式最小非负整数解或通解(p是质数)
+#define MOD 76543
+int hs[MOD], head[MOD], next[MOD], id[MOD], top;
+void ins(int x, int y) {
+  int k = x % MOD;
+  hs[top] = x, id[top] = y, next[top] = head[k], head[k] = top++;
+}
+int fnd(int x) {
+  int k = x % MOD;
+  for (int i = head[k]; i != -1; i = next[i])
+    if (hs[i] == x) {
+      return id[i];
+    }
+  return -1;
+}
+int BSGS(int a, int b, int n) {
+  memset(head, -1, sizeof(head));
+  top = 1;
+  if (b == 1) { return 0; }
+  int m = sqrt(n * 1.0), j;
+  ll x = 1, p = 1;
+  for (int i = 0; i < m; ++i, p = p * a % n) { ins(p * b % n, i); }
+  for (ll i = m; ; i += m) {
+    if ((j = fnd(x = x * p % n)) != -1) { return i - j; }
+    if (i > n) { break; }
+  }
+  return -1;
+}
+//ver.STL map
+//BSGS(a, b, p): 求ax≡b(modp)的最小非负整数解, 若无解则返回 -1
+//rev(a, p): 扩展欧几里得求逆元
+//fastPow(base, pow, mod): 快速幂
+//fastMul(a, b, mod): 快速乘(这里用快速乘是为了避免爆long long int, 实际有时可以不用)
+map<ll, ll> Hash; //BSGS的hash表
+ll BSGS(ll a, ll b, ll p) { //a^x=b(mod p), 已知a,b,p,求x
+  a %= p, b %= p; //注意开始的特判是非常重要的
+  if (!a && !b) { return 1; } //a和b都是p的倍数的话, 就相当于0^x=0(mod p)了, 那么最小非负整数解就是1
+  if (!a) { return -1; } //如果a是p的倍数但是b不是, 就相当于0^x=t(mod p),t>0, 无解
+  Hash.clear(); //记得一开始要把map清零
+  ll m = ceil(sqrt(p)); //注意这里的sqrt(p)要向上取整, 不然就不能枚举到0~p-1里的每个幂了
+  ll tmp = 1 % p; //tmp=a^j
+  for (ll j = 0; j < m; j++) { //预处理出a^j mod p的值
+    Hash[tmp] = j; tmp = fastMul(tmp, a, p);
+  }
+  tmp = rev(fastPow(a, m, p), p); //tmp=a^(-m)
+  for (ll i = 0; i < m; i++) {
+    if (Hash.count(b)) { return i * m + Hash[b]; }
+    b = fastMul(b, tmp, p);
+  }
+  return -1;
 }
 //模线性方程组 需扩展欧几里得
 int m[10], a[10]; //模数为m, 余数为a, X % m = a
@@ -394,3 +463,51 @@ bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
   }
   return flag;
 }
+//自适应simpson积分
+double simpson(double a, double b) {
+  double c = a + (b - a) / 2;
+  return (F(a) + 4 * F(c) + F(b)) * (b - a) / 6;
+}
+double asr(double a, double b, double eps, double A) {
+  double c = a + (b - a) / 2;
+  double L = simpson(a, c), R = simpson(c, b);
+  if (fabs(L + R - A) <= 15 * eps) { return L + R + (L + R - A) / 15.0; }
+  return asr(a, c, eps / 2, L) + asr(c, b, eps / 2, R);
+}
+double asr(double a, double b, double eps) {
+  return asr(a, b, eps, simpson(a, b));
+}
+//高斯消元 (浮点数)
+const double eps = 1e-9;
+const int N = 205;
+double a[N][N], x[N]; //方程的左边的矩阵和等式右边的值, 求解之后x存的就是结果
+int equ, var; //方程数和未知数个数
+//返回0表示无解, 1表示有解
+int Gauss() {
+  int i, j, k, col, max_r;
+  for (k = 0, col = 0; k < equ && col < var; k++, col++) {
+    max_r = k;
+    for (i = k + 1; i < equ; i++) {
+      if (fabs(a[i][col]) > fabs(a[max_r][col])) { max_r = i; }
+    }
+    if (fabs(a[max_r][col]) < eps) { return 0; }
+    if (k != max_r) {
+      for (j = col; j < var; j++) { swap(a[k][j], a[max_r][j]); }
+      swap(x[k], x[max_r]);
+    }
+    x[k] /= a[k][col];
+    for (j = col + 1; j < var; j++) { a[k][j] /= a[k][col]; }
+    a[k][col] = 1;
+    for (i = 0; i < equ; i++) {
+      if (i != k) {
+        x[i] -= x[k] * a[i][k];
+        for (j = col + 1; j < var; j++) { a[i][j] -= a[k][j] * a[i][col]; }
+        a[i][col] = 0;
+      }
+    }
+  }
+  return 1;
+}
+//FFT
+
+

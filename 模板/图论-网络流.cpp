@@ -422,3 +422,189 @@ int MCMF() {
   while (SPFA());
   return mncost;
 }
+//zkw的SAP(Shortest Augmenting Paths)最大流算法
+const int V = 220, E = 220;
+int n, m, h[V], vh[V];
+struct etype {
+  int t, u;
+  etype *next, *pair;
+  etype() {}
+  etype(int t_, int u_, etype *next_): t(t_), u(u_), next(next_) {}
+  void *operator new(unsigned, void *p) {return p;}
+} *e[V], *eb[V], Te[E + E], *Pe = Te;
+int aug(int no, int m) {
+  if (no == n) { return m; }
+  int l = m;
+  for (etype *&i = e[no]; i; i = i->next)
+    if (i->u && h[i->t] + 1 == h[no]) {
+      int d = aug(i->t, l < i->u ? l : i->u);
+      i->u -= d, i->pair->u += d, l -= d;
+      if (h[1] == n || !l) { return m - l; }
+    }
+  int minh = n;
+  for (etype *i = e[no] = eb[no]; i; i = i->next)if (i->u)
+      if (h[i->t] + 1 < minh) { minh = h[i->t] + 1; }
+  if (!--vh[h[no]]) { h[1] = n; } else { ++vh[h[no] = minh]; }
+  return m - l;
+}
+int main() {
+  scanf("%d %d", &m, &n);
+  memset(e, 0, sizeof(e));
+  while (m--) {
+    int s, t, u;
+    scanf("%d %d %d", &s, &t, &u);
+    e[s] = new(Pe++)etype(t, u, e[s]); e[t] = new(Pe++)etype(s, 0, e[t]);
+    e[s]->pair = e[t]; e[t]->pair = e[s];
+  }
+  memmove(eb, e, sizeof(e));
+  memset(h, 0, sizeof(h));
+  memset(vh, 0, sizeof(vh));
+  vh[0] = n;
+  int ans = 0;
+  while (h[1] < n) { ans += aug(1, ~0U >> 1); }
+  printf("%d\n", ans);
+}
+//最小费用流的“zkw算法”
+const int maxint = ~0U >> 1;
+int n, m, pi1, cost = 0;
+bool v[550];
+struct etype {
+  int t, c, u;
+  etype *next, *pair;
+  etype() {}
+  etype(int t_, int c_, int u_, etype *next_): t(t_), c(c_), u(u_), next(next_) {}
+  void *operator new(unsigned, void *p) { return p; }
+} *e[550];
+int aug(int no, int m) {
+  if (no == n) { return cost += pi1 * m, m; }
+  v[no] = true;
+  int l = m;
+  for (etype *i = e[no]; i; i = i->next) {
+    if (i->u && !i->c && !v[i->t]) {
+      int d = aug(i->t, l < i->u ? l : i->u);
+      i->u -= d, i->pair->u += d, l -= d;
+      if (!l) { return m; }
+    }
+  }
+  return m - l;
+}
+bool modlabel() {
+  int d = maxint;
+  for (int i = 1; i <= n; ++i) {
+    if (v[i]) {
+      for (etype *j = e[i]; j; j = j->next) {
+        if (j->u && !v[j->t] && j->c < d) { d = j->c; }
+      }
+    }
+  }
+  if (d == maxint) { return false; }
+  for (int i = 1; i <= n; ++i) {
+    if (v[i]) {
+      for (etype *j = e[i]; j; j = j->next) {
+        j->c -= d, j->pair->c += d;
+      }
+    }
+  }
+  pi1 += d;
+  return true;
+}
+int main() {
+  scanf("%d %d", &n, &m);
+  etype *Pe = new etype[m + m];
+  while (m--) {
+    int s, t, c, u;
+    scanf("%d%d%d%d", &s, &t, &u, &c);
+    e[s] = new(Pe++)etype(t, c, u, e[s]); e[t] = new(Pe++)etype(s, -c, 0, e[t]);
+    e[s]->pair = e[t]; e[t]->pair = e[s];
+  }
+  do {
+    do { memset(v, 0, sizeof(v)); }
+    while (aug(1, maxint));
+  } while (modlabel());
+  printf("%d\n", cost);
+}
+//zkw的最小费用流的原始对偶(Primal-Dual)算法
+const int V = 440, E = V * 2, maxint = 0x3F3F3F3F;
+struct etype {
+  int t, c, u;
+  etype *next, *pair;
+  etype() {}
+  etype(int T, int C, int U, etype *N): t(T), c(C), u(U), next(N) {}
+  void *operator new(unsigned, void *p) {return p;}
+} *e[V], Te[E + E], *Pe;
+int S, T, n, piS, cost;
+bool v[V];
+int ab[V], *pab[V], w[V];
+void addedge(int s, int t, int c, int u) {
+  e[s] = new(Pe++) etype(t, +c, u, e[s]); e[t] = new(Pe++) etype(s, -c, 0, e[t]);
+  e[s]->pair = e[t]; e[t]->pair = e[s];
+}
+int aug(int no, int m) {
+  if (no == T) { return cost += piS * m, m; }
+  v[no] = true;
+  int l = m;
+  for (etype *i = e[no]; i; i = i->next) {
+    if (i->u && !i->c && !v[i->t]) {
+      int d = aug(i->t, l < i->u ? l : i->u);
+      i->u -= d, i->pair->u += d, l -= d;
+      if (!l) { return m; }
+    }
+  }
+  return m - l;
+}
+bool modlabel() {
+  static int d[V];
+  memset(d, 0x3F, sizeof(d));
+  d[T] = 0;
+  static deque<int> Q;
+  Q.push_back(T);
+  while (Q.size()) {
+    int dt, no = Q.front(); Q.pop_front();
+    for (etype *i = e[no]; i; i = i->next) {
+      if (i->pair->u && (dt = d[no] - i->c) < d[i->t]) {
+        (d[i->t] = dt) <= d[Q.size() ? Q.front() : 0] ? Q.push_front(i->t) : Q.push_back(i->t);
+      }
+    }
+  }
+  for (int i = 0; i < n; ++i) {
+    for (etype *j = e[i]; j; j = j->next) {
+      j->c += d[j->t] - d[i];
+    }
+  }
+  piS += d[S];
+  return d[S] < maxint;
+}
+struct lt {
+  bool operator()(int *p1, int *p2) {return *p1 < *p2;}
+};
+int main() {
+  int t;
+  scanf("%d", &t);
+  while (t--) {
+    memset(e, 0, sizeof(e));
+    Pe = Te;
+    static int m, k;
+    scanf("%d %d", &m, &k);
+    int abz = 0;
+    for (int i = 0; i < m; ++i) {
+      scanf("%d", pab[abz] = &ab[abz]), abz++;
+      scanf("%d", pab[abz] = &ab[abz]), abz++;
+      scanf("%d", &w[i]);
+    }
+    sort(&pab[0], &pab[abz], lt());
+    int c = 0xDEADBEEF; n = 0;
+    for (int i = 0; i < abz; ++i) {
+      if (c != *pab[i]) { c = *pab[i], ++n; }
+      *pab[i] = n;
+    }
+    ++n, S = 0, T = n++;
+    for (int i = 0; i < T; ++i) { addedge(i, i + 1, 0, k); }
+    for (int i = 0; i < m; ++i) { addedge(ab[i + i], ab[i + i + 1], -w[i], 1); }
+    piS = cost = 0;
+    while (modlabel()) {
+      do { memset(v, 0, sizeof(v)); }
+      while (aug(S, maxint));
+    }
+    printf("%d\n", -cost);
+  }
+}
