@@ -72,32 +72,31 @@ template<typename T> struct BIT {
   int lowbit(int x) { return x & (-x); }
   void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));*/ }
   //区域和[1][1]-[x][y]
-  T sum(int x, int y) const {
+  T sum(int x, int y) {
     T ret = 0;
     for (int i = x; i > 0; i -= lowbit(i)) { for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; } }
     return ret;
   }
   //单点查询
-  T sumv(int x, int y) const { return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y); }
+  T sumv(int x, int y) { return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y); }
   //单点增减
   void add(int x, int y, T v) {
     for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; } }
   }
-  void add(int x, int y, T v, T a[][N]) {
-    for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; } }
-  }
   //单点赋值
-  void set(int x, int y, T v) { add(x, y, v - sum(x, y)); }
+  void set(int x, int y, T v) { add(x, y, v - sumv(x, y)); }
 
-  //区间和[x, y]
-  T sum1(int x, int y) const {
+  //区域和[x1][y1]-[x2][y2]
+  T sum1(int x, int y) {
     return (x + 1) * (y + 1) * sum(x, y) - (y + 1) * sum(x, y) - (x + 1) * sum(x, y) + sum(x, y);
   }
-  //区域和[x1][y1]-[x2][y2]
-  T sum(int x1, int y1, int x2, int y2) const {
+  T sum(int x1, int y1, int x2, int y2) {
     return sum1(x2, y2) - sum1(x1 - 1, y2) - sum1(x2, y1 - 1) + sum1(x1 - 1, y1 - 1);
   }
   //区域增减
+  void add(int x, int y, T v, T a[][N]) {
+    for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; } }
+  }
   void add(int x1, int y1, int x2, int y2, T v) {
     add(x1, y1, v, A); add(x2 + 1, y1, -v, A);
     add(x1, y2 + 1, -v, A); add(x2 + 1, y2 + 1, v, A);
@@ -156,8 +155,8 @@ template<typename T> struct SegmentTree {
   //区间求和的标记下推
   void push_down(int rt, int len) {
     if (lazy[rt]) {
-      lazy[rt << 1] += lazy[rt]; lazy[rt << 1 | 1] += lazy[rt];
-      data[rt << 1] += lazy[rt] * (len - (len >> 1)); data[rt << 1 | 1] += lazy[rt] * (len >> 1);
+      lazy[rt << 1] += lazy[rt]; data[rt << 1] += lazy[rt] * (len - (len >> 1));
+      lazy[rt << 1 | 1] += lazy[rt]; data[rt << 1 | 1] += lazy[rt] * (len >> 1);
       lazy[rt] = 0;
     }
   }
@@ -216,12 +215,11 @@ template<typename T> struct SegmentTree {
 SegmentTree<int> st;
 //非递归版线段树
 const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
-#define l(x) (x<<1) //x的左儿子，利用堆的性质
-#define r(x) ((x<<1)|1) //x的右儿子，利用堆的性质
-template<typename T> struct SegmentTree {
-  int M; //底层的节点数
-  int dl[N], dr[N]; //节点的左右端点
-  int stack[25], top;//栈
+#define l(x) ((x)<<1) //x的左儿子，利用堆的性质
+#define r(x) (((x)<<1)|1) //x的右儿子，利用堆的性质
+template<typename T> struct zkwSegmentTree {
+  int M, dl[N], dr[N]; //底层的节点数 节点的左右端点
+  int stack[30], top;//栈
   T sum[N]; //节点的区间和
   T add[N]; //延迟标记
   void pushdown(int rt) {
@@ -275,7 +273,7 @@ template<typename T> struct SegmentTree {
     for (int insr = insr >> 1; insr; insr >>= 1) { sum[insr] = sum[l(insr)] + sum[r(insr)]; }
   }
 };
-SegmentTree<int> zkw;
+zkwSegmentTree<int> st;
 //------------------------------------------------------------------------------
 !!!
 //实时开节点的线段树 (无需离散化)
@@ -283,18 +281,24 @@ const int N = 60005;
 const int M = 2500005;
 const int INF = 0x3f3f3f3f;
 int n, a[N];
+#define lson l,m,ls[rt]
+#define rson m+1,r,rs[rt]
 struct SegmentTree {
   int ls[M], rs[M], cnt[M], root[N], use[N], tot;
-  void init() { tot = 0; memset(root, 0, sizeof(root)); }
-  int new_node() {
-    ++tot; ls[tot] = rs[tot] = cnt[tot] = 0; return tot;
+  void init() {
+    tot = 0;
+    memset(root, 0, sizeof(root));
+    memset(ls, 0, sizeof(ls));
+    memset(rs, 0, sizeof(rs));
+    memset(cnt, 0, sizeof(cnt));
   }
+  int new_node() { return ++tot; }
   void update(int p, int val, int l, int r, int &rt) {
     if (!rt) { rt = new_node(); }
     if (l == r) { cnt[rt] += val; return; }
-    int m = l + r >> 1;
-    if (p <= m) { update(p, val, l, m, ls[rt]); }
-    else { update(p, val, m + 1, r, rs[rt]); }
+    int m = (l + r) >> 1;
+    if (p <= m) { update(p, val, lson); }
+    else { update(p, val, rson); }
     cnt[rt] = cnt[ls[rt]] + cnt[rs[rt]];
   }
   int lowbit(int x) { return x & -x; }
@@ -312,14 +316,13 @@ struct SegmentTree {
     for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
     for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
     while (l < r) {
-      int m = l + r >> 1, tmp = sum(tt) - sum(ss);
+      int m = (l + r) >> 1, tmp = sum(tt) - sum(ss);
       if (k <= tmp) {
         r = m;
         for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = ls[use[i]]; }
         for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = ls[use[i]]; }
       } else {
-        l = m + 1;
-        k -= tmp;
+        l = m + 1; k -= tmp;
         for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = rs[use[i]]; }
         for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = rs[use[i]]; }
       }
@@ -327,10 +330,9 @@ struct SegmentTree {
     return l;
   }
 } st;
-//BZOJ 1901 区间第k大
+//BZOJ1901 区间第k大
 int main() {
-  int m, l, r, k;
-  char op;
+  int m, l, r, k; char op[5];
   while (~scanf("%d%d", &n, &m)) {
     st.init();
     for (int i = 1; i <= n; ++i) {
@@ -338,8 +340,8 @@ int main() {
       st.modify(i, a[i], 1);
     }
     while (m--) {
-      scanf(" %c%d%d", &op, &l, &r);
-      switch (op) {
+      scanf("%s%d%d", op, &l, &r);
+      switch (op[0]) {
         case 'Q':
           scanf("%d", &k);
           printf("%d\n", st.query(l - 1, r, 0, INF, k));
@@ -353,74 +355,53 @@ int main() {
     }
   }
 }
-//平衡二叉树
-//常用操作
+//平衡二叉树 常用操作
+//注意这些操作适用于不允许重复值的平衡二叉树(set而非multiset)
+//对于允许重复值(拥有cnt域)的实现, 只要在一些+1的地方稍作修改(改成cnt[x])即可
 bool find(int v) {
   for (int x = root; x; x = ch[x][key[x] < v]) {
     if (key[x] == v) { return true; }
   }
   return false;
 }
-
 int getKth(int k) {
   int x = root;
   while (size[ch[x][0]] + 1 != k) {
-    if (k < size[ch[x][0]] + 1) {
-      x = ch[x][0];
-    } else {
-      k -= size[ch[x][0]] + 1;
-      x = ch[x][1];
-    }
+    if (k < size[ch[x][0]] + 1) { x = ch[x][0]; }
+    else { k -= size[ch[x][0]] + 1; x = ch[x][1]; }
   }
   return key[x];
 }
-
 int getRank(int v) {
   int ret = 0, x = root;
   while (x) {
-    if (v < key[x]) {
-      x = ch[x][0];
-    } else {
-      ret += size[ch[x][0]] + 1;
-      x = ch[x][1];
-    }
+    if (v < key[x]) { x = ch[x][0]; }
+    else { ret += size[ch[x][0]] + 1; x = ch[x][1]; }
   }
   return ret;
 }
-
 int getPre(int v) {
   int x = root, y = 0;
   while (x) {
-    if (v < key[x]) {
-      x = ch[x][0];
-    } else {
-      y = x;
-      x = ch[x][1];
-    }
+    if (v < key[x]) { x = ch[x][0]; }
+    else { y = x; x = ch[x][1]; }
   }
   return y;
 }
-
 int getNext(int v) {
   int x = root, y = 0;
   while (x) {
-    if (v > key[x]) {
-      x = ch[x][1];
-    } else {
-      y = x;
-      x = ch[x][0];
-    }
+    if (v > key[x]) { x = ch[x][1]; }
+    else { y = x; x = ch[x][0]; }
   }
   return y;
 }
-
 int getMin() {
   if (size[root] == 0) { return -1; }
   int x = root;
   while (ch[x][0]) { x = ch[x][0]; }
   return x;
 }
-
 int getMax() {
   if (size[root] == 0) { return -1; }
   int x = root;
@@ -430,12 +411,11 @@ int getMax() {
 //Debug遍历
 void treaval(int x) {
   if (x != 0) {
-    Treaval(ch[x][0]);
+    treaval(ch[x][0]);
     printf("Node%2d:lson %2d rson %2d size = %2d ,val = %2d\n", x, ch[x][0], ch[x][1], size[x], key[x]);
-    Treaval(ch[x][1]);
+    treaval(ch[x][1]);
   }
 }
-
 void debug() {
   printf("root:%d\n", root);
   treaval(root);
@@ -938,7 +918,6 @@ struct Splay {
     InOrder(ch[r][1]);
   }
 } splay;
-
 int main() {
   while (scanf("%d%d", &n, &q) == 2) {
     splay.Init();
@@ -968,6 +947,7 @@ int main() {
   }
 }
 //主席树
+
 
 //Link-Cut Tree 动态树
 struct LCT {
@@ -1439,8 +1419,7 @@ int sorted[N]; //已经排序好的数
 int tol[20][N]; //tol[p][i] 表示第i层从1到i有数分入左边
 void build(int l, int r, int dep) {
   if (l == r) { return; }
-  int m = l + r >> 1, cnt = m - l +
-                            1; //表示等于中间值而且被分入左边的个数
+  int m = l + r >> 1, cnt = m - l + 1; //表示等于中间值而且被分入左边的个数
   for (int i = l; i <= r; ++i) {
     if (part[dep][i] < sorted[m]) { --cnt; }
   }

@@ -19,6 +19,7 @@ struct str_hash {
   }
 };
 //Manacher 最长回文子串
+//最长回文子串对应原串T中的位置: l = (i - R[i]) / 2; r = (i + R[i]) / 2 - 2;
 char s[N];
 char Mstr[N << 1];
 int Mdp[N << 1];
@@ -33,7 +34,6 @@ void Manacher(char s[], int len) {
     if (i + Mdp[i] > mx) { mx = i + Mdp[i]; id = i; }
   }
 }
-
 int main() {
   while (~scanf("%s", s)) {
     int len = strlen(s), Mlen = (len << 1) + 2, mxlen = 0, mxpos = 0;
@@ -99,7 +99,7 @@ int KMP_Count(char x[], int m, char y[], int n, int Next[] = Next/*, int &longes
 //Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
 //Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
 int Next[N], Extend[N];
-void preExtend(char x[], int m, int Next[] = Next) {
+void getNext(char x[], int m, int Next[] = Next) {
   int j = 0, k = 1;
   while (j + 1 < m && x[j] == x[j + 1]) { j++; }
   Next[0] = m; Next[1] = j;
@@ -114,7 +114,7 @@ void preExtend(char x[], int m, int Next[] = Next) {
   }
 }
 void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[] = Extend) {
-  preExtend(x, m);
+  getNext(x, m);
   int j = 0, k = 0;
   while (j < n && j < m && x[j] == y[j]) { j++; }
   Extend[0] = j;

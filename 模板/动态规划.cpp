@@ -20,6 +20,25 @@ int LIS() {
   }
   return len;
 }
+//最长上升子序列LIS个数
+ll dp[M][N];
+void add(int id, int v, ll d) {
+  for (; v < N; v |= v + 1) { dp[id][v] += d; }
+}
+ll get(int id, int r) {
+  ll res = 0;
+  for (; r > 0; r = (r & (r + 1)) - 1) { res += dp[id][r]; }
+  return res;
+}
+int main() {
+  scanf("%d%d", &n, &k); k++;
+  add(0, 0, 1);
+  for (int i = 0; i < n; i++) {
+    scanf("%d", &x);
+    for (int i = k; i > 0; i--) { add(i, x, get(i - 1, x)); }
+  }
+  printf("%I64d\n", get(k, n));
+}
 //最长公共子序列 LCS O(n^2)
 int dp[N][N];
 int LCS(const char *s1, const char *s2) {

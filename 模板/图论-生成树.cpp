@@ -1,5 +1,6 @@
 //最小生成树
 //Prim + 邻接矩阵 O(V^2)
+//每次找与当前节点相连的边中权值最小且另一边的节点未被访问过的边加入到生成树中, 直到所有点都被访问
 const int N = 1005;
 const int INF = 0x3f3f3f3f;
 int n, cost[N][N];
@@ -66,6 +67,7 @@ int Prim() {
   return ret;
 }
 //Kruskal + 邻接表 O(ElogE)
+//每次选择没有加入的边中权值最小的且加入后不会形成环的边, 直到形成一棵树
 const int N = 1005;
 const int M = 100005;
 struct Edge {

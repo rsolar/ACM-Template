@@ -198,6 +198,53 @@ int main() {
     }
   }
 }
+//有向图 并查集 HDU1116
+//给你一些英文单词, 判断所有单词能不能连成一串, 如果有多个重复的单词, 也必须满足这样的条件才能算YES
+int n, fa[N], in[N], out[N], p[N];
+bool vis[N];
+char str[M];
+void init() {
+  memset(vis, 0, sizeof(vis));
+  memset(in, 0, sizeof(in));
+  memset(out, 0, sizeof(out));
+  for (int i = 0; i < N; i++) { fa[i] = i; }
+}
+int findfa(int n) {
+  return n == fa[n] ? n : fa[n] = findfa(fa[n]);
+}
+inline void unite(int x, int y) {
+  x = findfa(x); y = findfa(y);
+  if (x != y) { fa[y] = x; }
+}
+int main() {
+  int T, n;
+  scanf("%d", &T);
+  while (T--) {
+    init();
+    scanf("%d", &n);
+    while (n--) {
+      scanf("%s", str);
+      int len = strlen(str), x = str[0] - 'a', y = str[len - 1] - 'a';
+      unite(x, y); out[x]++; in[y]++; vis[x] = vis[y] = true;
+    }
+    int cnt = 0, k = 0;
+    for (int i = 0; i < N; i++) {
+      fa[i] = findfa(i);
+      if (vis[i] && fa[i] == i) { cnt++; }
+    }
+    if (cnt > 1) { puts("The door cannot be opened."); continue; }
+    for (int i = 0; i < N; i++) {
+      if (vis[i] && in[i] != out[i]) { p[k++] = i; }
+    }
+    if (k == 0) { puts("Ordering is possible."); continue; }
+    if (k == 2 && ((out[p[0]] - in[p[0]] == 1 && in[p[1]] - out[p[1]] == 1) ||
+                   (out[p[1]] - in[p[1]] == 1 && in[p[0]] - out[p[0]] == 1))) {
+      puts("Ordering is possible.");
+    } else {
+      puts("The door cannot be opened.");
+    }
+  }
+}
 //混合图 POJ1637 (本题保证了连通)
 //需ISAP + 邻接表 O(V^2*E)
 int in[N], out[N];
