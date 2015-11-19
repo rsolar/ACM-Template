@@ -22,7 +22,7 @@ void getPrime() {
 }
 //素数表 Euler O(n) [2, N] prime[0]为个数
 const int N = 10000000; //160ms
-int prime[N + 1];
+int prime[N + 1]; //3711111 for [2, 10^9)
 void getPrime() {
   for (int i = 2; i <= N; i++) {
     if (!prime[i]) { prime[++prime[0]] = i; }
@@ -305,6 +305,15 @@ ll Com(ll n, ll m) {
 ll Lucas(ll n, ll m, ll p) {
   if (m == 0) { return 1; }
   return C(n % p, m % p) * Lucas(n / p, m / p, p) % p;
+}
+//组合数打表
+const int maxc = 1005;
+ll C[maxc][maxc];
+void calC() { // C(n,k),n个数里选k个
+  for (int i = 0; i < 1005; i++) { C[i][i] = C[i][0] = 1LL; }
+  for (int i = 2; i < 1005; i++) {
+    for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD; }
+  }
 }
 //中国剩余定理
 ll CRT(ll a[], ll m[], int k) {

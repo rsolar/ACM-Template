@@ -1,35 +1,34 @@
-//二分
-template <typename T> int BS(const T a[], int l, int r, int x) {
+//二分查找有序数组是否存在一个元素
+template <typename T> int BS(const T a[], int l, int r, T key) {
   int mid;
   while (l <= r) {
     mid = (l + r) >> 1;
-    if (a[mid] > x) { mid = r = mid - 1;}
-    else if (a[mid] < x) { l = mid + 1;}
-    else { break; }
+    if (a[mid] == key) { return mid; }
+    if (a[mid] > key) { r = mid - 1;}
+    else { l = mid + 1;}
   }
-  return a[mid] == x ? mid : -1;
+  return -1;
 }
-
-template <typename T> int BSup(const T a[], int l, int r) {
+//lower_bound
+template <typename T> int BSlower_bound(const T a[], int l, int r, T key) { //[l, r]
   int mid;
-  while (l + 1 < r) {
+  while (l <= r) {
     mid = (l + r) >> 1;
-    if (judge(a[mid])) { l = mid; }
-    else { r = mid; }
+    if (a[mid] < key) { l = mid + 1; }
+    else { r = mid - 1; }
   }
   return l;
 }
-
-template <typename T> int BSlow(const T a[], int l, int r) {
+//upper_bound
+template <typename T> int BSupper_bound(const T a[], int l, int r, T key) { //[l, r]
   int mid;
-  while (l + 1 < r) {
+  while (l <= r) {
     mid = (l + r) >> 1;
-    if (judge(a[mid])) { r = mid; }
-    else { l = mid; }
+    if (a[mid] <= key) { l = mid + 1; }
+    else { r = mid - 1; }
   }
-  return r;
+  return l;
 }
-
 //三分 求函数极大值
 double TS(double l, double r) {
   double mid, midmid, midv, midmidv;
@@ -42,7 +41,6 @@ double TS(double l, double r) {
   }
   return l;
 }
-
 //归并排序 求逆序数
 ll cnt;
 template <typename T> void mergeSort(T a[], int l, int r) {
@@ -64,7 +62,6 @@ template <typename T> void mergeSort(T a[], int l, int r) {
   while (j <= r) { res.push_back(a[j++]); }
   for (int k = l; k <= r; k++) { a[k] = res[k - l]; }
 }
-
 //快排
 template <typename T> void quickSort(const T a[], int l, int r) {
   if (l >= h) { return; }

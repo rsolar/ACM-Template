@@ -5,7 +5,7 @@
 const int N = 505;
 int n, g[N][N];
 int dis[N], pre[N], cur[N], flow[N][N], gap[N];
-int SAP(int src, int sink) {
+int SAP(int src, int sink, int n = n) {
   memset(dis, 0, sizeof(dis));
   memset(cur, 0, sizeof(cur));
   memset(flow, 0, sizeof(flow));
@@ -48,7 +48,7 @@ void addedge(int x, int y, int w, int rw = 0) {
   to[tot] = y; cap[tot] = w; flow[tot] = 0; Next[tot] = head[x]; head[x] = tot++;
   to[tot] = x; cap[tot] = rw; flow[tot] = 0; Next[tot] = head[y]; head[y] = tot++;
 }
-int ISAP(int src, int sink) {
+int ISAP(int src, int sink, int n = n) {
   memset(dep, 0, sizeof(dep));
   memset(gap, 0, sizeof(gap));
   memcpy(cur, head, sizeof(head));
@@ -110,7 +110,7 @@ void bfs(int sink) {
     }
   }
 }
-int ISAP(int src, int sink) {
+int ISAP(int src, int sink, int n = n) {
   bfs(sink);
   memcpy(cur, head, sizeof(head));
   int u = src, v, maxflow = 0, top = 0;
@@ -168,7 +168,7 @@ void bfs(int sink) {
     }
   }
 }
-int ISAP(int src, int sink) {
+int ISAP(int src, int sink, int n = n) {
   bfs(sink);
   memcpy(cur, head, sizeof(head));
   int u = pre[src] = src, v, maxflow = 0, i;
@@ -283,7 +283,7 @@ void bfs() {
     }
   }
 }
-int HLPP() {
+int HLPP(int n = n) {
   memset(w, 0, sizeof(w));
   memset(done, 0, sizeof(done));
   memset(vis, 0, sizeof(vis));
@@ -367,7 +367,7 @@ bool SPFA(int src, int sink) {
   return pre[sink] != -1;
 }
 //返回的是最大流, cost存的是最小费用
-int MCMF(int src, int sink, int &cost) {
+int MCMF(int src, int sink, int n = n, int &cost) {
   int maxflow = 0; cost = 0;
   while (SPFA(src, sink)) {
     int mn = INF;

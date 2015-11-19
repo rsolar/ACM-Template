@@ -1,7 +1,3 @@
-//http://blog.csdn.net/wjf_wzzc/article/details/39672563
-//http://blog.csdn.net/wjf_wzzc/article/details/24560117
-//http://blog.csdn.net/wjf_wzzc/article/details/38646837
-
 //一维树状数组
 //单点修改 + 单点查询 + 区间修改 + 区间查询 + 区间最值
 int n;
@@ -150,7 +146,7 @@ SegmentTree<int> st;
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
   T data[N << 2], lazy[N << 2];
-  T calc(const int &x, const int &y)const { return x + y; }
+  T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
   //区间求和的标记下推
   void push_down(int rt, int len) {
@@ -215,8 +211,8 @@ template<typename T> struct SegmentTree {
 SegmentTree<int> st;
 //非递归版线段树
 const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
-#define l(x) ((x)<<1) //x的左儿子，利用堆的性质
-#define r(x) (((x)<<1)|1) //x的右儿子，利用堆的性质
+#define l(x) ((x)<<1) //x的左儿子, 利用堆的性质
+#define r(x) (((x)<<1)|1) //x的右儿子, 利用堆的性质
 template<typename T> struct zkwSegmentTree {
   int M, dl[N], dr[N]; //底层的节点数 节点的左右端点
   int stack[30], top;//栈
@@ -274,8 +270,6 @@ template<typename T> struct zkwSegmentTree {
   }
 };
 zkwSegmentTree<int> st;
-//------------------------------------------------------------------------------
-!!!
 //实时开节点的线段树 (无需离散化)
 const int N = 60005;
 const int M = 2500005;
@@ -422,6 +416,9 @@ void debug() {
   putchar('\n');
 }
 //基于旋转的Treap 允许重复值
+//维护序列的有序性和堆的性质, 依靠堆值的随机化,
+//将树的高度维护在期望下平衡的程度,从而实现了各种操作期望O(logn)的复杂度.
+//它的性价比高在只有两种旋转(而且可以合并地写), 比红黑树和AVL短小
 struct Treap {
   int tot, root;
   int ch[N][2], key[N], pt[N], cnt[N], size[N];
@@ -477,6 +474,7 @@ struct Treap {
   void erase(int v) { erase(root, v); }
 } treap;
 //Size Balanced Tree 不允许重复值
+//独特的平摊时间O(1)的Maintain操作, 具有仅次于红黑树的优秀的时间效率
 struct SBT {
   int root, tot;
   int ch[N][2], key[N], size[N];
@@ -531,7 +529,250 @@ struct SBT {
   void insert(int v) { insert(root, v); }
   void erase(int v) { erase(root, v); }
 } sbt;
-//Splay ver.1
+//Splay
+//可以实现很多其它平衡树无法实现的操作(如区间翻转), 既可以维护集合信息,
+//也可以维护序列信息, 可以用它来做Treap的题, 也可以用它来做线段树的题.
+//更重要的是, Splay可以实现split(将某棵子树从原树中分离)和merge操作(将某棵子树插入另一棵树),
+//这也使得区间插入删除成为可能. 它的美中不足是常数稍大, 约是Treap的1.5～3倍, 线段树的2～5倍.
+//Splay有单旋和双旋两种实现, 其中只有双旋保证了均摊O(logn)的单次操作复杂度,
+//但因为很多人认为zigzag太长不好敲(大多是OI选手有此困扰), 选择了单旋.
+//其实完全可以稍微损失一点常数, 合并成一个rotate函数来完成双旋.
+//此外一个良好的实现通常要在序列一首一尾增加两个哨兵节点, 这样可以减少很多边界特判.
+//有必要进行的扩展性说明是, 对于一棵树, 如果想要维护子树信息, 我们可以用Splay维护这棵树的括号序列(dfs序),
+//这样便可以轻易split出任意子树所属的区间；而用Splay维护dfs序的结构, 就是Euler-Tour Tree.
+//同样的, 如果想要维护链上信息, 可以先树链剖分然后用Splay维护每条重链,
+//根据杨哲在07年国家集训队作业的计算, 因其势能分析得到的复杂度依然是单次操作均摊O(logn)复杂度;
+//而类似的思想做些转化, 就变成了后面会提到的Link-Cut Tree(以下简称LCT).
+//ver.1
+#define keyTree (ch[ch[root][1]][0])
+const int N = 200005;
+const int INF = 0x3f3f3f3f;
+int num[N];
+struct Splay {
+  int root, tot1, tot2;
+  int ch[N][2], pre[N], size[N];
+  int gc[N], que[N];
+  int key[N], vmin[N], add[N], rev[N];
+  void rotate(int x, int f) {
+    int y = pre[x];
+    ch[y][f ^ 1] = ch[x][f];
+    pre[ch[x][f]] = y;
+    pre[x] = pre[y];
+    if (pre[x]) {
+      ch[pre[y]][ch[pre[y]][1] == y] = x;
+    }
+    ch[x][f] = y;
+    pre[y] = x;
+    push_up(y);
+  }
+  void splay(int x, int goal) {
+    push_down(x);
+    while (pre[x] != goal) {
+      int y = pre[x], z = pre[y];
+      if (z == goal) {
+        push_down(y);
+        push_down(x);
+        rotate(x, ch[y][0] == x);
+      } else {
+        push_down(z);
+        push_down(y);
+        push_down(x);
+        int f = ch[z][0] == y;
+        if (ch[y][f] == x) {
+          rotate(x, f ^ 1);
+        } else {
+          rotate(y, f);
+        }
+        rotate(x, f);
+      }
+    }
+    push_up(x);
+    if (goal == 0) {
+      root = x;
+    }
+  }
+  void rotate_to(int k, int goal) {
+    int x = root;
+    push_down(x);
+    while (size[ch[x][0]] != k) {
+      if (k < size[ch[x][0]]) {
+        x = ch[x][0];
+      } else {
+        k -= size[ch[x][0]] + 1;
+        x = ch[x][1];
+      }
+      push_down(x);
+    }
+    splay(x, goal);
+  }
+  void erase(int x) {
+    int fa = pre[x], head = 0, tail = 0;
+    for (que[tail++] = x; head < tail; ++head) {
+      gc[tot2++] = que[head];
+      if (ch[que[head]][0]) {
+        que[tail++] = ch[que[head]][0];
+      }
+      if (ch[que[head]][1]) {
+        que[tail++] = ch[que[head]][1];
+      }
+    }
+    ch[fa][ch[fa][1] == x] = 0;
+    push_up(fa);
+  }
+  void new_node(int &x, int v, int fa) {
+    if (tot2) {
+      x = gc[--tot2];
+    } else {
+      x = ++tot1;
+    }
+    ch[x][0] = ch[x][1] = 0;
+    pre[x] = fa;
+    size[x] = 1;
+    key[x] = vmin[x] = v;
+    add[x] = rev[x] = 0;
+  }
+  void update_add(int x, int d) {
+    if (x) {
+      key[x] += d;
+      add[x] += d;
+      vmin[x] += d;
+    }
+  }
+  void update_rev(int x) {
+    if (x) {
+      swap(ch[x][0], ch[x][1]);
+      rev[x] ^= 1;
+    }
+  }
+  void push_up(int x) {
+    size[x] = size[ch[x][0]] + size[ch[x][1]] + 1;
+    vmin[x] = min(key[x], min(vmin[ch[x][0]], vmin[ch[x][1]]));
+  }
+  void push_down(int x) {
+    if (add[x]) {
+      update_add(ch[x][0], add[x]);
+      update_add(ch[x][1], add[x]);
+      add[x] = 0;
+    }
+    if (rev[x]) {
+      update_rev(ch[x][0]);
+      update_rev(ch[x][1]);
+      rev[x] = 0;
+    }
+  }
+  void build(int &x, int l, int r, int f) {
+    int m = l + r >> 1;
+    new_node(x, num[m], f);
+    if (l < m) {
+      build(ch[x][0], l, m - 1, x);
+    }
+    if (r > m) {
+      build(ch[x][1], m + 1, r, x);
+    }
+    push_up(x);
+  }
+  void init(int n) {
+    root = tot1 = tot2 = 0;
+    ch[0][0] = ch[0][1] = pre[0] = size[0] = 0;
+    add[0] = rev[0] = 0;
+    key[0] = vmin[0] = INF;
+    new_node(root, -1, 0);
+    new_node(ch[root][1], -1, root);
+    size[root] = 2;
+    for (int i = 1; i <= n; ++i) {
+      scanf("%d", &num[i]);
+    }
+    build(keyTree, 1, n, ch[root][1]);
+    push_up(ch[root][1]);
+    push_up(root);
+  }
+  void plus(int l, int r, int v) {
+    rotate_to(l - 1, 0);
+    rotate_to(r + 1, root);
+    update_add(keyTree, v);
+  }
+  void reverse(int l, int r) {
+    rotate_to(l - 1, 0);
+    rotate_to(r + 1, root);
+    update_rev(keyTree);
+  }
+  void revolve(int l, int r, int k) {
+    k %= r - l + 1;
+    if (!k) {
+      return;
+    }
+    rotate_to(r - k, 0);
+    rotate_to(r + 1, root);
+    int tmp = keyTree;
+    keyTree = 0;
+    push_up(ch[root][1]);
+    push_up(root);
+    rotate_to(l - 1, 0);
+    rotate_to(l, root);
+    keyTree = tmp;
+    pre[tmp] = ch[root][1];
+    push_up(ch[root][1]);
+    push_up(root);
+  }
+  void insert(int k, int v) {
+    rotate_to(k, 0);
+    rotate_to(k + 1, root);
+    new_node(keyTree, v, ch[root][1]);
+    push_up(ch[root][1]);
+    push_up(root);
+  }
+  void del(int k) {
+    rotate_to(k - 1, 0);
+    rotate_to(k + 1, root);
+    erase(keyTree);
+    push_up(ch[root][1]);
+    push_up(root);
+  }
+  int query(int l, int r) {
+    rotate_to(l - 1, 0);
+    rotate_to(r + 1, root);
+    return vmin[keyTree];
+  }
+} splay;
+int main() {
+  int n, m, x, y, v;
+  char op[10];
+  while (~scanf("%d", &n)) {
+    splay.init(n);
+    scanf("%d", &m);
+    while (m--) {
+      scanf("%s", op);
+      switch (op[0]) {
+        case 'A':
+          scanf("%d%d%d", &x, &y, &v);
+          splay.plus(x, y, v);
+          break;
+        case 'R':
+          scanf("%d%d", &x, &y);
+          if (op[3] == 'E') {
+            splay.reverse(x, y);
+          } else {
+            scanf("%d", &v);
+            splay.revolve(x, y, v);
+          }
+          break;
+        case 'I':
+          scanf("%d%d", &x, &v);
+          splay.insert(x, v);
+          break;
+        case 'D':
+          scanf("%d", &x);
+          splay.del(x);
+          break;
+        case 'M':
+          scanf("%d%d", &x, &y);
+          printf("%d\n", splay.query(x, y));
+          break;
+      }
+    }
+  }
+}
+//ver.2
 int k1, k2, num[N];
 struct Splay {
   int root, tot, point;
@@ -697,7 +938,7 @@ struct Splay {
     join3(root, x, y);
   }
 } splay;
-//HDU 4453
+//HDU4453
 int main() {
   int n, m, v, cas = 0;
   char op[10];
@@ -732,7 +973,7 @@ int main() {
     }
   }
 }
-//Splay ver.2
+//ver.3
 const int N = 500005;
 const int INF = 0x3f3f3f3f;
 int n, q;
@@ -810,7 +1051,7 @@ struct Splay {
     push_up(ch[root][1]);
     push_up(root);
   }
-  //旋转,0为左旋，1为右旋
+  //旋转,0为左旋, 1为右旋
   void Rotate(int x, int kind) {
     int y = pre[x];
     push_down(y);
@@ -823,7 +1064,7 @@ struct Splay {
     pre[y] = x;
     push_up(y);
   }
-  //Splay调整，将r结点调整到goal下面
+  //Splay调整, 将r结点调整到goal下面
   void Splay(int r, int goal) {
     push_down(r);
     while (pre[r] != goal) {
@@ -950,6 +1191,11 @@ int main() {
 
 
 //Link-Cut Tree 动态树
+//维护多棵树(森林)的形态, 并在O(logn)的时间复杂度内维护链上信息; 但LCT处理子树信息将会非常麻烦.
+//它的核心操作是access函数, 可以把某个节点到根的路径上所有点按照深度用Splay维护起来,
+//从而结合evert函数(换跟操作)和splay操作可以实现对链的信息维护.
+//LCT几乎可以实现除维护子树信息外以上的所有操作, 同时有着优越的理论复杂度,
+//但实际常数较大, 很多不改变树形态的题用O(logn)的LCT并不比O(log^2n)的树链剖分套线段树更优越
 struct LCT {
   int ch[N][2], pre[N], key[N], rev[N];
   int add[N], vmax[N];
@@ -1047,7 +1293,7 @@ struct LCT {
     vmax[v] += w;
     push_down(v);
   }
-  //如果u,v在同一颗子树中，返回u,v之间路径上点权的最大值
+  //如果u,v在同一颗子树中, 返回u,v之间路径上点权的最大值
   void query(int u, int v) {
     if (find_root(u) != find_root(v)) { puts("-1"); return; }
     evert(u);
@@ -1093,7 +1339,7 @@ struct LCT {
     dfs(1, 0);
   }
 } lct;
-//HDU 4010
+//HDU4010
 int main() {
   int n, q, op, x, y, w;
   while (~scanf("%d", &n)) {
@@ -1250,7 +1496,7 @@ struct Treap {
     return ret;
   }
 } treap;
-//POJ 3580
+//POJ3580
 int main() {
   int n, m, x, y, v;
   char op[10];
@@ -1301,7 +1547,7 @@ struct Treap {
   int tot;
   int ch[M][2], size[M];
   char key[M];
-  bool hey(int x, int y) { return (long long)rand() * (size[x] + size[y]) < (long long)size[x] * RAND_MAX; }
+  bool hey(int x, int y) { return (ll)rand() * (size[x] + size[y]) < (ll)size[x] * RAND_MAX; }
   void init() { tot = 0; }
   void new_node(int &x, char v) {
     x = ++tot;
@@ -1384,7 +1630,7 @@ struct Treap {
     putchar('\n');
   }
 } treap;
-//UVa 12538
+//UVa12538
 int main() {
   int n, op, p, c, v;
   char s[105];
@@ -1410,9 +1656,397 @@ int main() {
   }
 }
 //树链剖分
-
+//轻重链剖分将一棵树划分成至多logn条重链和若干条轻边, 满足每个节点属于一条重链,
+//从而将树上路径修改转化为至多logn次线性修改, 非常利于套用树状数组、线段树等各类数据结构.
+//树链剖分的常数很小, 且因着树链剖分的性质, 我们发现越是退化的树(极端情况下成为一条链),
+//树链剖分的效果越是好(极端情况下甚至是O(1)级的, 因为只有很少的重链),
+//以至于一些不涉及形态修改的树上路径维护题目, 可以用树链剖分套线段树以O(logn^2)的单次操作复杂度水过,
+//且实际表现不输于单次操作O(logn)但常数很大的LCT.
+//常见轻重链剖分的初始化实现是两次dfs的, 但dfs有两个问题,
+//一是递归调用使得时间稍慢, 二是有些题目有爆栈风险; 所以我抄了bfs实现的很好用的交大板.
+//需要稍作说明的是, 对于点权修改直接维护即可, 对于边权修改, 常规做法是选定一个根,
+//将边权下垂到深度更大的节点上; 换言之, 每个点储存的权值是它与它的父节点之间的边权, 根节点上没有权值.
+int top[N];    //top[p]表示编号为p的路径的顶端节点
+int len[N];    //len[p]表示路径p的长度
+int belong[N]; //belong[v]表示节点v所属的路径编号
+int idx[N];    //idx[v]表示节点v在其路径中的编号, 按深度由深到浅依次标号
+int dep[N];    //dep[v]表示节点v的深度
+int fa[N];     //fa[v]表示节点v的父亲节点
+int size[N];   //size[v]表示以节点v为根的子树的节点个数
+int que[N];
+bool vis[N];
+int n, cnt;       //n是点数, 标号从1到n
+void split() {
+  memset(dep, 0xff, sizeof(dep));
+  int l = 0, r = 0;
+  que[++r] = 1; dep[1] = 0; fa[1] = -1;
+  while (l < r) {
+    int u = que[++l];
+    vis[u] = false;
+    for (int i = g.head[u]; ~i; i = g.next[i]) {
+      int v = g.to[i];
+      if (!~dep[v]) { que[++r] = v; dep[v] = dep[u] + 1; fa[v] = u; }
+    }
+  }
+  cnt = 0;
+  for (int i = n; i > 0; --i) {
+    int u = que[i], p = -1;
+    size[u] = 1;
+    for (int j = g.head[u]; ~j; j = g.next[j]) {
+      int v = g.to[j];
+      if (vis[v]) {
+        size[u] += size[v];
+        if (!~p || size[v] > size[p]) { p = v; }
+      }
+    }
+    if (!~p) {
+      idx[u] = len[++cnt] = 1;
+      belong[u] = cnt;
+      top[cnt] = u;
+    } else {
+      belong[u] = belong[p];
+      idx[u] = ++len[belong[u]];
+      top[belong[u]] = u;
+    }
+    vis[u] = true;
+  }
+}
+int fi[N], cid[N], rank[N];
+void getcid() {
+  fi[1] = 1;
+  for (int i = 2; i <= cnt; ++i) { fi[i] = fi[i - 1] + len[i - 1]; }
+  for (int i = 1; i <= n; ++i) {
+    cid[i] = fi[belong[i]] + len[belong[i]] - idx[i];
+    rank[cid[i]] = i;
+  }
+}
+// 路径修改和查询依下面修改
+int query(int x, int y) {
+  int ret = 0;
+  while (belong[x] != belong[y]) {
+    if (dep[top[belong[x]]] < dep[top[belong[y]]]) { swap(x, y); }
+    ret = max(ret, query(cid[top[belong[x]]], cid[x], 1, n, 1));
+    x = fa[top[belong[x]]];
+  }
+  if (dep[x] > dep[y]) { swap(x, y); }
+  ret = max(ret, query(cid[x], cid[y], 1, n, 1));
+  /*边权如下
+  if(x!=y)
+      ret=max(ret,query(cid[x]+1,cid[y],1,n,1));
+  */
+  return ret;
+}
+//第一次dfs和倍增LCA的dfs部分几乎一致; 所以稍作修改就可以无缝衔接LCA.
+//第二次dfs对节点的新位置进行了标号(对应bfs的getcid函数),
+//我们可以发现无论它以怎样的顺序进行dfs(先dfs重儿子再dfs其它子节点), 得到的依旧是这棵树的一个dfs序.
+//换句话说, 这里处理出的剖分标号, 同时也是dfs序标号.
+//我们知道每棵子树的节点在dfs序中都是连续的一段,
+//这样我们就可以同时维护树上路径信息(剖分部分复杂度O(logn))和子树信息(剖分部分复杂度O(1))了.
+//BZOJ3083 树链剖分套线段树
+const int N = 100005;
+const int maxd = 18;
+const int INF = 0x7fffffff;
+struct graph {
+  int head[N], tot;
+  int to[N << 1], next[N << 1];
+  void init() {
+    tot = 0; memset(head, 0xff, sizeof(head));
+  }
+  void add(int u, int v) {
+    to[tot] = v; next[tot] = head[u]; head[u] = tot++;
+  }
+} g;
+int top[N], son[N];
+int dep[N], fa[N][maxd], size[N];
+int cid[N], rank[N], cnt;
+void dfs1(int u) {
+  size[u] = 1; son[u] = -1;
+  for (int i = 1; i < maxd; ++i) { fa[u][i] = fa[fa[u][i - 1]][i - 1]; }
+  for (int i = g.head[u]; ~i; i = g.next[i]) {
+    int v = g.to[i];
+    if (v != fa[u][0]) {
+      dep[v] = dep[u] + 1; fa[v][0] = u;
+      dfs1(v);
+      size[u] += size[v];
+      if (!~son[u] || size[v] > size[son[u]]) { son[u] = v; }
+    }
+  }
+}
+void dfs2(int u, int tp) {
+  top[u] = tp; cid[u] = ++cnt; rank[cid[u]] = u;
+  if (~son[u]) { dfs2(son[u], tp); }
+  for (int i = g.head[u]; ~i; i = g.next[i]) {
+    int v = g.to[i];
+    if (v != son[u] && v != fa[u][0]) { dfs2(v, v); }
+  }
+}
+void split() {
+  dfs1(1); cnt = 0; dfs2(1, 1);
+}
+int lca(int u, int v) {
+  if (dep[u] < dep[v]) { swap(u, v); }
+  int k = dep[u] - dep[v];
+  for (int i = 0; i < maxd; ++i) {
+    if ((1 << i)&k) { u = fa[u][i]; }
+  }
+  if (u == v) { return u; }
+  for (int i = maxd - 1; i >= 0; --i) {
+    if (fa[u][i] != fa[v][i]) { u = fa[u][i]; v = fa[v][i]; }
+  }
+  return fa[u][0];
+}
+int n, root, a[N];
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+int vmin[N << 2], col[N << 2];
+void push_up(int rt) {
+  vmin[rt] = min(vmin[rt << 1], vmin[rt << 1 | 1]);
+}
+void push_down(int rt) {
+  if (col[rt]) {
+    col[rt << 1] = col[rt << 1 | 1] = vmin[rt << 1] = vmin[rt << 1 | 1] = col[rt];
+    col[rt] = 0;
+  }
+}
+void build(int l, int r, int rt) {
+  col[rt] = 0;
+  if (l == r) { vmin[rt] = a[rank[l]]; return; }
+  int m = l + r >> 1;
+  build(lson);
+  build(rson);
+  push_up(rt);
+}
+void update(int L, int R, int val, int l, int r, int rt) {
+  if (L <= l && r <= R) { col[rt] = vmin[rt] = val; return; }
+  push_down(rt);
+  int m = l + r >> 1;
+  if (L <= m) { update(L, R, val, lson); }
+  if (m < R) { update(L, R, val, rson); }
+  push_up(rt);
+}
+int query(int L, int R, int l, int r, int rt) {
+  if (L <= l && r <= R) { return vmin[rt]; }
+  push_down(rt);
+  int m = l + r >> 1;
+  int ret = INF;
+  if (L <= m) { ret = min(ret, query(L, R, lson)); }
+  if (m < R) { ret = min(ret, query(L, R, rson)); }
+  return ret;
+}
+void modify(int x, int y, int d) {
+  while (top[x] != top[y]) {
+    if (dep[top[x]] < dep[top[y]]) { swap(x, y); }
+    update(cid[top[x]], cid[x], d, 1, n, 1);
+    x = fa[top[x]][0];
+  }
+  if (dep[x] > dep[y]) { swap(x, y); }
+  update(cid[x], cid[y], d, 1, n, 1);
+}
+int query(int rt) {
+  if (rt == root) { return query(1, n, 1, n, 1); }
+  int pre = lca(root, rt);
+  if (pre != rt) { return query(cid[rt], cid[rt] + size[rt] - 1, 1, n, 1); }
+  int depth = dep[root] - dep[rt] - 1, tmp = root;
+  for (int i = maxd - 1; i >= 0; --i) {
+    if (depth & (1 << i)) { tmp = fa[tmp][i]; }
+  }
+  return min(query(1, cid[tmp] - 1, 1, n, 1), query(cid[tmp] + size[tmp], n, 1, n, 1));
+}
+int main() {
+  int m, u, v, opt, id;
+  while (~scanf("%d%d", &n, &m)) {
+    g.init();
+    for (int i = 1; i < n; ++i) {
+      scanf("%d%d", &u, &v);
+      g.add(u, v); g.add(v, u);
+    }
+    for (int i = 1; i <= n; ++i) {
+      scanf("%d", &a[i]);
+    }
+    split();
+    build(1, n, 1);
+    scanf("%d", &root);
+    while (m--) {
+      scanf("%d", &opt);
+      switch (opt) {
+        case 1: scanf("%d", &root); break;
+        case 2: scanf("%d%d%d", &u, &v, &id); modify(u, v, id); break;
+        case 3: scanf("%d", &id); printf("%d\n", query(id)); break;
+      }
+    }
+  }
+}
 //KD-Tree
-
+//用来维护多维第K近点对距离一类的信息.
+//在每一维上依次用一个超平面进行空间划分, 将点集比较均匀地分割在各个区域内,
+//结构上则是一棵二叉树, 且与线段树的形态和构造方法都有些类似.
+//经过改造的KD-Tree一般可以做到O(logn)的单点插入, 以及O(n^(1-1/D))的询问操作, 其中D是维数, 可见维数越大KD-Tree越慢
+//询问距离一个点的前K近点一般需要用一个优先队列进行询问时的维护
+//HDU4347 O(n) 不支持点的插入和删除
+const int N = 50005;
+const int INF = ~0U >> 1;
+const int DIM = 5;
+#define lson l,m-1,dep+1
+#define rson m+1,r,dep+1
+int cur, K;
+struct point {
+  int x[DIM];
+  bool operator<(const point &oth)const { return x[cur] < oth.x[cur]; }
+  void output() {
+    for (int i = 0; i < K; ++i) {
+      printf("%d%c", x[i], i < K - 1 ? ' ' : '\n');
+    }
+  }
+} vec[N], origin[N], pt, ans[10];
+inline int sqr(int x) {
+  return x * x;
+}
+int dist(const point &a, const point &b) {
+  int ret = 0;
+  for (int i = 0; i < K; ++i) {
+    ret += sqr(a.x[i] - b.x[i]);
+  }
+  return ret;
+}
+void build(int l, int r, int dep = 0) {
+  if (l >= r) { return; }
+  int m = l + r >> 1;
+  cur = dep % K;
+  nth_element(vec + l, vec + m, vec + r + 1);
+  build(lson);
+  build(rson);
+}
+priority_queue<pair<int, point> > pq;
+void query(const point &x, int k, int l, int r, int dep = 0) {
+  if (l > r) { return; }
+  int m = l + r >> 1, cur = dep % K;
+  pair<int, point> tmp(dist(x, vec[m]), vec[m]);
+  if (pq.size() < k) {
+    pq.push(tmp);
+  } else if (pq.top().first > tmp.first) {
+    pq.pop();
+    pq.push(tmp);
+  }
+  if (x.x[cur] < vec[m].x[cur]) {
+    query(x, k, lson);
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) {
+      query(x, k, rson);
+    }
+  } else {
+    query(x, k, rson);
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) {
+      query(x, k, lson);
+    }
+  }
+}
+int main() {
+  int n, t, m;
+  while (~scanf("%d%d", &n, &K)) {
+    for (int i = 1; i <= n; ++i) {
+      for (int j = 0; j < K; ++j) {
+        scanf("%d", &origin[i].x[j]);
+      }
+      vec[i] = origin[i];
+    }
+    build(1, n);
+    scanf("%d", &t);
+    while (t--) {
+      for (int i = 0; i < K; ++i) {
+        scanf("%d", &pt.x[i]);
+      }
+      scanf("%d", &m);
+      query(pt, m, 1, n);
+      for (int i = 0; i < m; ++i) {
+        ans[i] = pq.top().second;
+        pq.pop();
+      }
+      printf("the closest %d points are:\n", m);
+      for (int i = m - 1; i >= 0; --i) {
+        ans[i].output();
+      }
+    }
+  }
+}
+//支持点的插入和删除
+#define lson kdt[rt].ls,dep+1
+#define rson kdt[rt].rs,dep+1
+struct kdnode {
+  int ls, rs, x[DIM];
+  bool flag; //删点标记
+} kdt[N];
+inline ll sqr(int x) {
+  return (ll)x * x;
+}
+ll dist(const kdnode &a, const kdnode &b) {
+  ll ret = 0;
+  for (int i = 0; i < DIM; ++i) {
+    ret += sqr(a.x[i] - b.x[i]);
+  }
+  return ret;
+}
+int root, tot;
+void init() {
+  tot = 0; root = -1;
+}
+int add(int pt[]) {
+  kdt[tot].flag = false;
+  kdt[tot].ls = kdt[tot].rs = -1;
+  for (int i = 0; i < DIM; ++i) {
+    kdt[tot].x[i] = pt[i];
+  }
+  return tot++;
+}
+void insert(int pt[], int rt, int dep = 0) {
+  dep %= DIM;
+  if (pt[dep] < kdt[rt].x[dep]) {
+    if (!~kdt[rt].ls) {
+      kdt[rt].ls = add(pt);
+    } else {
+      insert(pt, lson);
+    }
+  } else {
+    if (!~kdt[rt].rs) {
+      kdt[rt].rs = add(pt);
+    } else {
+      insert(pt, rson);
+    }
+  }
+}
+//求最近点距离
+ll query(const kdnode &pt, int rt, int dep = 0) {
+  if (!~rt) { return INF; }
+  dep %= DIM;
+  ll ret = INF, tmp = sqr(kdt[rt].x[dep] - pt.x[dep]);
+  if (!kdt[rt].flag) { ret = dist(kdt[rt], pt); }
+  if (pt.x[dep] <= kdt[rt].x[dep]) {
+    ret = min(ret, query(pt, lson));
+    if (tmp < ret) { ret = min(ret, query(pt, rson)); }
+  }
+  if (pt.x[dep] >= kdt[rt].x[dep]) {
+    ret = min(ret, query(pt, rson));
+    if (tmp < ret) { ret = min(ret, query(pt, lson)); }
+  }
+  return ret;
+}
+//查询区间内有多少个点
+int query(int pt1[], int pt2[], int rt, int dep = 0) {
+  if (!~rt) { return 0; }
+  dep %= DIM;
+  int ret = 0, cur;
+  for (cur = 0; cur < DIM; ++cur) {
+    if (kdt[rt].x[cur] < pt1[cur] || kdt[rt].x[cur] > pt2[cur]) { break; }
+  }
+  if (cur == DIM) { ++ret; }
+  if (pt2[dep] < kdt[rt].x[dep]) {
+    ret += query(pt1, pt2, lson);
+  } else if (pt1[dep] >= kdt[rt].x[dep]) {
+    ret += query(pt1, pt2, rson);
+  } else {
+    ret += query(pt1, pt2, lson);
+    ret += query(pt1, pt2, rson);
+  }
+  return ret;
+}
 //划分树
 int part[20][N]; //表示每层每个位置的值
 int sorted[N]; //已经排序好的数
@@ -1451,6 +2085,7 @@ int query(int L, int R, int k, int l, int r, int dep) {
   }
 }
 //左偏树
+//可并堆的一种实现, 可以在O(logn)的时间内实现堆的push、pop和两个堆的合并操作, 以及O(1)时间的取堆顶操作
 int val[N], ls[N], rs[N], dep[N], fa[N];
 void init(int n) {
   for (int i = 1; i <= n; ++i) {
@@ -1459,40 +2094,26 @@ void init(int n) {
     fa[i] = i;
   }
 }
-
 int find(int x) {
-  if (fa[x] != x) {
-    fa[x] = find(fa[x]);
-  }
+  if (fa[x] != x) { fa[x] = find(fa[x]); }
   return fa[x];
 }
-
 int merge(int x, int y) {
-  if (!x || !y) {
-    return x | y;
-  }
-  if (val[x] < val[y]) {
-    swap(x, y);
-  }
+  if (!x || !y) { return x | y; }
+  if (val[x] < val[y]) { swap(x, y); }
   rs[x] = merge(rs[x], y);
   fa[rs[x]] = x;
-  if (dep[ls[x]] < dep[rs[x]]) {
-    swap(ls[x], rs[x]);
-  }
+  if (dep[ls[x]] < dep[rs[x]]) { swap(ls[x], rs[x]); }
   dep[x] = dep[rs[x]] + 1;
   return x;
 }
-
 int push(int x, int y) {
   return merge(x, y);
 }
-
 int pop(int x) {
   int a = ls[x], b = rs[x];
   ls[x] = rs[x] = dep[x] = 0;
-  fa[x] = x;
-  fa[a] = a;
-  fa[b] = b;
+  fa[x] = x; fa[a] = a; fa[b] = b;
   return merge(a, b);
 }
 //POJ 2201
@@ -1568,4 +2189,54 @@ template<typename T> struct Huffman {
   }
 }
 //笛卡尔树
-
+//考虑一个键值对的序列, 当键与键, 值与值之间互不相同时, 它们可以唯一地构成这样一棵二叉树：
+//key在中序遍历时呈升序, 满足二叉查找树性质; 父节点的value大于子节点的value, 满足堆的性质.
+//一个键值对序列的笛卡儿树可以O(n)时间内构造出来
+//POJ2201
+const int N = 50005;
+int idx[N], n;
+struct Cartesian_Tree {
+  int root, key[N], val[N], ch[N][2], pre[N];
+  void init() {
+    for (int i = 1; i <= n; ++i) {
+      scanf("%d%d", &key[i], &val[i]);
+      ch[i][0] = ch[i][1] = pre[i] = 0;
+    }
+  }
+  void build() {
+    static int st[N];
+    int top = -1;
+    for (int i = 1; i <= n; ++i) {
+      int k = top;
+      while (k >= 0 && val[st[k]] > val[idx[i]]) {
+        --k;
+      }
+      if (~k) {
+        pre[idx[i]] = st[k];
+        ch[st[k]][1] = idx[i];
+      }
+      if (k < top) {
+        pre[st[k + 1]] = idx[i];
+        ch[idx[i]][0] = st[k + 1];
+      }
+      st[++k] = idx[i];
+      top = k;
+    }
+    root = st[0];
+  }
+} ct;
+bool cmp(int x, int y) {
+  return ct.key[x] < ct.key[y];
+}
+int main() {
+  while (~scanf("%d", &n)) {
+    ct.init();
+    for (int i = 1; i <= n; ++i) { idx[i] = i; }
+    sort(idx + 1, idx + n + 1, cmp);
+    ct.build();
+    puts("YES");
+    for (int i = 1; i <= n; ++i) {
+      printf("%d %d %d\n", ct.pre[i], ct.ch[i][0], ct.ch[i][1]);
+    }
+  }
+}
