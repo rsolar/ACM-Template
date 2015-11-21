@@ -1,2 +1,2 @@
 ﻿# ACM-Template
-自用模板。
+ACM自用模板。
