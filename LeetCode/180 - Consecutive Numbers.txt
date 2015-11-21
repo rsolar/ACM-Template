@@ -1,9 +1,0 @@
-select distinct t.Num
-from (select Num,
-        case when @pre = Num then @count := @count + 1
-            when @pre <> @pre := Num then @count := 1
-        end as Count
-        from Logs
-    ) t,
-    (select @count := 0, @pre := (select Num from Logs limit 0,1)) init
-where t.Count >= 3

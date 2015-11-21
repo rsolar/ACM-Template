@@ -1,3 +1,0 @@
-select Score, (select count(*) from (select distinct Score from Scores) tmp where Score >= s.Score) as Rank
-from Scores s
-order by Score desc

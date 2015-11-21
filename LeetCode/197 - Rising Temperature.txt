@@ -1,3 +1,0 @@
-select w1.Id
-from Weather w1 join Weather w2
-on datediff(w1.Date, w2.Date) = 1 and w1.Temperature > w2.Temperature

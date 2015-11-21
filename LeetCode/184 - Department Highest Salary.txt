@@ -1,6 +1,0 @@
-select d.Name as Department,
-        e.Name as Employee,
-        e.Salary as Salary
-from Employee e join Department d
-on e.DepartmentId = d.Id
-where e.Salary >= all(select Salary from Employee ee where DepartmentId = e.DepartmentId)
