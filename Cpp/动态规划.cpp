@@ -190,16 +190,16 @@ int maxSum_adj(int a[], int n) {
 }
 //最大子阵和 O(n^3)
 int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
-  int asum[N][N], ret, sum, i, j, k, s;
+  int presum[N][N], ret = a[0][0], sum, i, j, k, s; x1 = y1 = x2 = y2 = 0;
   for (i = 0; i < h; i++) {
-    for (asum[i][j = 0] = 0; j < w; j++) {
-      asum[i][j + 1] = asum[i][j] + a[i][j];
+    for (presum[i][j = 0] = 0; j < w; j++) {
+      presum[i][j + 1] = presum[i][j] + a[i][j];
     }
   }
-  for (ret = a[x1 = x2 = 0][y1 = y2 = j = 0]; j < w; j++) {
+  for (j = 0; j < w; j++) {
     for (k = j; k < w; k++) {
       for (sum = s = i = 0; i < h; i++, s = (sum > 0 ? s : i)) {
-        if ((sum = (sum > 0 ? sum : 0) + asum[i][k + 1] - asum[i][j]) > ret) {
+        if ((sum = (sum > 0 ? sum : 0) + presum[i][k + 1] - presum[i][j]) > ret) {
           ret = sum; x1 = s; y1 = i; x2 = j; y2 = k;
         }
       }

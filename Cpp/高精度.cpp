@@ -153,13 +153,13 @@ bool BigInt::operator>(const BigInt &T)const {
     else { return false; }
   } else { return false; }
 }
-bool operator>=(const BigInt &T)const {
+bool BigInt::operator>=(const BigInt &T)const {
   return *this > T || *this == T;
 }
 bool BigInt::operator<(const BigInt &T)const {
   return T > *this;
 }
-bool operator<=(const BigInt &T)const {
+bool BigInt::operator<=(const BigInt &T)const {
   return T > *this || T == *this;
 }
 bool BigInt::operator==(const BigInt &T)const {

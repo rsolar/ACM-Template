@@ -1,3 +1,5 @@
+//iostream关闭同步
+#define _ ios_base::sync_with_stdio(0);cin.tie(0);
 //输入一个非负整数
 //G++ ONLY?
 template<typename T> inline void getInt(T &x) {
