@@ -63,8 +63,8 @@ template <typename T> void mergeSort(T a[], int l, int r) {
   for (int k = l; k <= r; k++) { a[k] = res[k - l]; }
 }
 //快排
-template <typename T> void quickSort(const T a[], int l, int r) {
-  if (l >= h) { return; }
+template <typename T> void quickSort(T a[], int l, int r) {
+  if (l >= r) { return; }
   int i = l, j = r, v = a[l];
   while (i < j) {
     while (i < j && a[j] >= v) { j--; }
@@ -74,5 +74,5 @@ template <typename T> void quickSort(const T a[], int l, int r) {
   }
   a[i] = v;
   quickSort(a, l, i - 1);
-  quickSort(a, i + 1, h);
+  quickSort(a, i + 1, r);
 }
