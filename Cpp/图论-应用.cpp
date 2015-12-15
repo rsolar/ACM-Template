@@ -71,7 +71,7 @@ void find_path_d(int n, int now, int &step, int *path) {
   }
   path[step++] = now;
 }
-int euclidPath(int n, int mp[][N], int start, int *path) {
+int eulerianPath(int n, int mp[][N], int start, int *path) {
   int ret = 0;
   find_path_u(n, mp, start, ret, path);
   //find_path_d(n, mp, start, ret, path);

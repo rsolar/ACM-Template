@@ -175,7 +175,7 @@ int maxSum(int a[], int n, int &st, int &ed) {
   }
   return ret;
 }
-//如数组首尾相连
+//循环数组最大子段和
 int maxSum_adj(int a[], int n) {
   int ret_notadj = maxSum(a, n); //不跨界最大子段和
   if (ret_notadj < 0) { return ret_notadj; }
