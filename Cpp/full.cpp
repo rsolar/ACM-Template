@@ -19,10 +19,12 @@
 //#include <numeric>
 #include <bits/stdc++.h>
 using namespace std;
+#include <hash_map>
+using namespace __gnu_cxx;
 
 typedef long long ll;
 const int N = 100005;
-const int M = 1000000007;
+const ll M = 1000000007;
 
 int n;
 int a[N];

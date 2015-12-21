@@ -1,11 +1,7 @@
 ﻿//快速幂
 ll powMod(ll a, ll b, ll m) {
-  ll r = 1; a %= m;
-  while (b) {
-    if (b & 1) { r = r * a % m; }
-    a = a * a % m;
-    b >>= 1;
-  }
+  ll r = 1;
+  for (a %= m; b; b >>= 1) { if (b & 1) { r = r * a % m; } a = a * a % m; }
   return r;
 }
 //素数筛 Eratosthenes O(nloglogn) [0, N)
@@ -94,12 +90,8 @@ ll mulMod(ll a, ll b, ll m) {
 }
 //大数快速幂
 ll powMod(ll a, ll b, ll m) {
-  ll r = 1; a %= m;
-  while (b) {
-    if (b & 1) { r = mulMod(r, a, m); }
-    a = mulMod(a, a, m);
-    b >>= 1;
-  }
+  ll r = 1;
+  for (a %= m; b; b >>= 1) { if (b & 1) { r = mulMod(r, a, m); } a = mulMod(a, a, m); }
   return r;
 }
 //Miller Rabin
@@ -291,7 +283,7 @@ ll Lucas(ll n, ll m, ll p) {
   return res;
 }
 //组合数取模 Lucas定理 p <= 10^9 需要快速幂
-ll Com(ll n, ll m) {
+ll Com(ll n, ll m, ll p) {
   if (m > n) { return 0; }
   if (n - m > m) { m = n - m; }
   if (m == 0) { return 1; }
@@ -304,7 +296,7 @@ ll Com(ll n, ll m) {
 }
 ll Lucas(ll n, ll m, ll p) {
   if (m == 0) { return 1; }
-  return C(n % p, m % p) * Lucas(n / p, m / p, p) % p;
+  return Com(n % p, m % p, p) * Lucas(n / p, m / p, p) % p;
 }
 //组合数打表
 const int maxc = 1005;
@@ -341,12 +333,8 @@ void getPrime() {
 }
 //快速幂取模
 ll powMod(ll a, ll b, ll m) {
-  ll r = 1; a %= m;
-  while (b) {
-    if (b & 1) { r = r * a % m; }
-    a = a * a % m;
-    b >>= 1;
-  }
+  ll r = 1;
+  for (a %= m; b; b >>= 1) { if (b & 1) { r = r * a % m; } a = a * a % m; }
   return r;
 }
 //分解质因数

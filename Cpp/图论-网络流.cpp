@@ -261,9 +261,9 @@ void init(int _n, int _src, int _sink) {
   n = _n; m = 0; src = _src; sink = _sink;
   for (int i = 0; i <= n; ++i) { e[i].clear(); }
 }
-void addEdge(int a, int b, int c, int rc = 0) {
-  edge[m].v = b; edge[m].c = c; e[a].push_back(m++);
-  edge[m].v = a; edge[m].c = rc; e[b].push_back(m++);
+void addEdge(int x, int y, int w, int rw = 0) {
+  edge[m].v = y; edge[m].c = w; e[x].push_back(m++);
+  edge[m].v = x; edge[m].c = rw; e[y].push_back(m++);
 }
 void bfs() {
   memset(c, 0, sizeof(c));
@@ -530,7 +530,7 @@ struct etype {
   etype *next, *pair;
   etype() {}
   etype(int T, int C, int U, etype *N): t(T), c(C), u(U), next(N) {}
-  void *operator new(unsigned, void *p) {return p;}
+  void *operator new(unsigned, void *p) { return p; }
 } *e[V], Te[E + E], *Pe;
 int S, T, n, piS, cost;
 bool v[V];
@@ -540,7 +540,7 @@ void addedge(int s, int t, int c, int u) {
   e[s]->pair = e[t]; e[t]->pair = e[s];
 }
 int aug(int no, int m) {
-  if (no == T) { return cost += piS * m, m; }
+  if (no == T) { cost += piS * m; return m; }
   v[no] = true;
   int l = m;
   for (etype *i = e[no]; i; i = i->next) {

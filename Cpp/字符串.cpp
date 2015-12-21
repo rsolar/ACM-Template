@@ -1,14 +1,14 @@
 //hash_fun.h
-inline size_t __stl_hash_string(const char *__s) {
-  unsigned long __h = 0;
-  for (; *__s; ++__s) { __h = 5 * __h + *__s; }
-  return size_t(__h);
+inline size_t __stl_hash_string(const char *s) {
+  size_t h = 0;
+  for (; *s; ++s) { h = 5 * h + *s; }
+  return h;
 }
 //BKDR Hash Function
 inline size_t BKDRHash(const char *str) { /* const */
   size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
   while (*str) { h = h * seed + (*str++); }
-  return (h & 0x7FFFFFFF);
+  return h & 0x7FFFFFFF;
 }
 //hash_map<string, XXX>
 //C++: using namespace stdext;
@@ -24,8 +24,7 @@ char s[N];
 char Mstr[N << 1];
 int Mdp[N << 1];
 void Manacher(char s[], int len) {
-  int l = 0, mx = 0, id = 0;
-  Mstr[l++] = '$'; Mstr[l++] = '#';
+  int l = 0, mx = 0, id = 0; Mstr[l++] = '$'; Mstr[l++] = '#';
   for (int i = 0; i < len; i++) { Mstr[l++] = s[i]; Mstr[l++] = '#'; }
   Mstr[l] = 0;
   for (int i = 0; i < l; i++) {
@@ -44,11 +43,10 @@ int main() {
     printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
   }
 }
-//字符串最小/大表示
+//字符串最小表示
 int minString(char s[]) {
   int m = strlen(s), i, j, k;
-  char ss[m << 1];
-  strcpy(ss, s); strcpy(ss + m, s);
+  char ss[m << 1]; strcpy(ss, s); strcpy(ss + m, s);
   for (i = k = 0, j = 1; k < m && i < m && j < m;) {
     for (k = 0; k < m && ss[i + k] == ss[j + k]; k++);
     if (k < m) {
@@ -59,7 +57,7 @@ int minString(char s[]) {
   }
   return min(i, j);
 }
-//strstr 在串s1中查找指定字符串s2的第一次出现
+//strstr 在str1中查找str2的第一次出现 无则返回NULL
 char *strstr(const char *str1, const char *str2);
 //KMP O(M+N)
 //Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
@@ -84,9 +82,8 @@ void getNext(char x[], int m, int Next[]) {
 }
 //返回x在y中出现的次数, 可以重叠
 //x是模式串, y是主串
-int KMP_Count(char x[], int m, char y[], int n, int Next[] = Next/*, int &longest, int &lp*/) {
-  int i = 0, j = 0, ans = 0;
-  //longest = 0; lp = 0;
+int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int &lp*/) {
+  int i = 0, j = 0, ans = 0; //longest = 0; lp = 0;
   while (i < n) {
     while (j != -1 && y[i] != x[j]) { j = Next[j]; }
     i++; j++;
@@ -99,11 +96,11 @@ int KMP_Count(char x[], int m, char y[], int n, int Next[] = Next/*, int &longes
 //Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
 //Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
 int Next[N], Extend[N];
-void getNext(char x[], int m, int Next[] = Next) {
-  int j = 0, k = 1;
+void getNext(char x[], int m, int Next[]) {
+  int i = 2, j = 0, k = 1;
   while (j + 1 < m && x[j] == x[j + 1]) { j++; }
   Next[0] = m; Next[1] = j;
-  for (int i = 2; i < m; i++) {
+  for (; i < m; i++) {
     int p = Next[k] + k - 1, l = Next[i - k];
     if (i + l < p + 1) { Next[i] = l; }
     else {
@@ -113,12 +110,12 @@ void getNext(char x[], int m, int Next[] = Next) {
     }
   }
 }
-void getExtend(char x[], int m, char y[], int n, int Next[] = Next, int Extend[] = Extend) {
+void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
   getNext(x, m);
-  int j = 0, k = 0;
+  int i = 1, j = 0, k = 0;
   while (j < n && j < m && x[j] == y[j]) { j++; }
   Extend[0] = j;
-  for (int i = 1; i < n; i++) {
+  for (; i < n; i++) {
     int p = Extend[k] + k - 1, l = Next[i - k];
     if (i + l < p + 1) { Extend[i] = l; }
     else {
@@ -133,10 +130,8 @@ int Sunday(char x[], int m, char y[], int n) {
   int next[26] = {0};
   for (int j = 0; j < 26; j++) { next[j] = m + 1; }
   for (int j = 0; j < m; j++) { next[x[j] - 'a'] = m - j; }
-  int pos = 0;
-  while (pos <= n - m) {
-    int i = pos, j;
-    for (j = 0; j < m; ++j, ++i) {
+  for (int pos = 0, i, j; pos <= n - m;) {
+    for (i = pos, j = 0; j < m; i++, j++) {
       if (y[i] != x[j]) { pos += next[y[pos + m] - 'a']; break; }
     }
     if (j == m) { return pos; }
@@ -155,7 +150,7 @@ int hashMatch(char *s, int m, char *p, int n) {
   for (i = 1; i < m; i++) {
     pv = pv * d + UNSIGNED(p[i]);
     sv = sv * d + UNSIGNED(s[i]);
-    base = base * d;
+    base *= d;
   }
   i = m - 1;
   do {
@@ -172,32 +167,26 @@ int hashMatch(char *s, int m, char *p, int n) {
 //Trie
 char buf[M];
 struct Trie {
-  int Next[N * 20][26], End[N * 20];
-  int root, L;
+  int Next[N * 20][26], End[N * 20], root, L;
   int newnode() { return L++; }
   void init() {
-    memset(Next, -1, sizeof(Next));
-    memset(End, 0, sizeof(End));
+    memset(Next, -1, sizeof(Next)); memset(End, 0, sizeof(End));
     L = 0; root = newnode();
   }
   void insert(char buf[]) {
-    int len = strlen(buf);
-    int now = root;
+    int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (Next[now][c] == -1) {
-        Next[now][c] = newnode();
-      }
+      if (~Next[now][c]) { Next[now][c] = newnode(); }
       now = Next[now][c];
     }
     End[now]++;
   }
   int query(char buf[]) {
-    int len = strlen(buf);
-    int now = root;
+    int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (Next[now][c] == -1) { return -1; }
+      if (~Next[now][c]) { return -1; }
       now = Next[now][c];
     }
     return End[now];
@@ -206,21 +195,17 @@ struct Trie {
 //AC自动机
 char buf[M];
 struct Trie {
-  int Next[N * 20][26], Fail[N * 20], End[N * 20];
-  int root, L;
-  int newnode() {
-    memset(Next[L], -1, sizeof(Next[L])); End[L] = 0;
-    return L++;
+  int Next[N * 20][26], Fail[N * 20], End[N * 20], root, L;
+  int newnode() { return L++; }
+  void init() {
+    memset(Next, -1, sizeof(Next)); memset(End, 0, sizeof(End));
+    L = 0; root = newnode();
   }
-  void init() { L = 0; root = newnode(); }
   void insert(char buf[]) {
-    int len = strlen(buf);
-    int now = root;
+    int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (Next[now][c] == -1) {
-        Next[now][c] = newnode();
-      }
+      if (~Next[now][c]) { Next[now][c] = newnode(); }
       now = Next[now][c];
     }
     End[now]++;
@@ -229,37 +214,26 @@ struct Trie {
     queue<int> que;
     Fail[root] = root;
     for (int i = 0; i < 26; i++) {
-      if (Next[root][i] == -1) {
-        Next[root][i] = root;
-      } else {
-        Fail[Next[root][i]] = root;
-        que.push(Next[root][i]);
-      }
+      if (~Next[root][i]) { Next[root][i] = root; }
+      else { Fail[Next[root][i]] = root; que.push(Next[root][i]); }
     }
     while (!que.empty()) {
       int now = que.front(); que.pop();
       for (int i = 0; i < 26; i++) {
-        if (Next[now][i] == -1) {
-          Next[now][i] = Next[Fail[now]][i];
-        } else {
-          Fail[Next[now][i]] = Next[Fail[now]][i];
-          que.push(Next[now][i]);
-        }
+        if (Next[now][i] == -1) { Next[now][i] = Next[Fail[now]][i]; }
+        else { Fail[Next[now][i]] = Next[Fail[now]][i]; que.push(Next[now][i]); }
       }
     }
   }
   int query(char buf[]) {
-    int len = strlen(buf);
-    int now = root;
-    int res = 0;
+    int len = strlen(buf), now = root, res = 0;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      now = Next[now][c];
-      int temp = now;
-      while (temp != root) {
-        res += End[temp];
-        //End[temp] = 0;
-        temp = Fail[temp];
+      int tmp = now = Next[now][c];
+      while (tmp != root) {
+        res += End[tmp];
+        //End[tmp] = 0;
+        tmp = Fail[tmp];
       }
     }
     return res;

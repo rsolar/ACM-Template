@@ -57,7 +57,7 @@ void find_path_u(int n, int now, int &step, int *path) {
   for (int i = n - 1; i >= 0; i--) {
     while (mp[now][i]) {
       mp[now][i]--; mp[i][now]--;
-      find_path_u(n, mp, i, step, path);
+      find_path_u(n, i, step, path);
     }
   }
   path[step++] = now;
@@ -66,15 +66,15 @@ void find_path_d(int n, int now, int &step, int *path) {
   for (int i = n - 1; i >= 0; i--) {
     while (mp[now][i]) {
       mp[now][i]--;
-      find_path_d(n, mp, i, step, path);
+      find_path_d(n, i, step, path);
     }
   }
   path[step++] = now;
 }
-int eulerianPath(int n, int mp[][N], int start, int *path) {
+int eulerianPath(int n, int start, int *path) {
   int ret = 0;
-  find_path_u(n, mp, start, ret, path);
-  //find_path_d(n, mp, start, ret, path);
+  find_path_u(n, start, ret, path);
+  //find_path_d(n, start, ret, path);
   return ret;
 }
 //欧拉回路: 每条边只经过一次, 要求回到起点

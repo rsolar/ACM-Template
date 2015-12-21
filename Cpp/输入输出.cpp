@@ -1,14 +1,13 @@
 //iostream关闭同步
-#define _ ios_base::sync_with_stdio(0);cin.tie(0);
+#define _ ios_base::sync_with_stdio(false);cin.tie(NULL);
 //输入一个非负整数
-//G++ ONLY?
-template<typename T> inline void getInt(T &x) {
+template<typename T> inline void getI(T &x) {
   char c; x = 0;
   while ((c = getchar()) < '0' || c > '9');
   while (c >= '0' && c <= '9') { x = x * 10 + c - '0'; c = getchar(); }
 }
 //输入一个整数
-template<typename T> inline bool getInt(T &x) {
+template<typename T> inline bool getI(T &x) {
   char c; T sign = 1; x = 0;
   if (c = getchar(), c == EOF) { return false; }
   while (c != '-' && (c < '0' || c > '9')) { c = getchar(); };
@@ -28,7 +27,7 @@ template<typename T> bool getN(T &x) {
   x *= sign; return true;
 }
 //空格作为分隔 读取一行的整数
-void getLine(int a[]) {
+void getL(int a[]) {
   int i = 0;
   gets(buf);
   for (char *p = strtok(buf, " "); p; p = strtok(NULL, " ")) {
@@ -36,7 +35,7 @@ void getLine(int a[]) {
   }
 }
 //输出一个整数
-template<typename T> inline void printInt(T x) {
+template<typename T> inline void printI(T x) {
   if (x > 9) { printInt(x / 10); }
   putchar(x % 10 + '0');
 }

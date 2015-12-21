@@ -10,8 +10,7 @@ int BS(int len, int x) {
   }
 }
 int LIS() {
-  int len = 1;
-  b[0] = a[0];
+  int len = 1; b[0] = a[0];
   for (int i = 1, j; i < n; i++) {
     if (a[i] <= b[0]) { j = 0; }  // <= 换为 <
     else if (a[i] > b[len - 1]) { j = len++; } // > 换为 >=
@@ -31,11 +30,11 @@ ll get(int id, int r) {
   return res;
 }
 int main() {
-  scanf("%d%d", &n, &k); k++;
+  scanf("%d%d", &n, &k);
   add(0, 0, 1);
   for (int i = 0; i < n; i++) {
     scanf("%d", &x);
-    for (int i = k; i > 0; i--) { add(i, x, get(i - 1, x)); }
+    for (int j = k; j > 0; j--) { add(j, x, get(j - 1, x)); }
   }
   printf("%I64d\n", get(k, n));
 }
@@ -65,12 +64,12 @@ void printLCS(const char *s1, const char *s2) {
 //DP O(n^2)
 int dp[2][N];
 int LCS_dp(const char *s1, const char *s2, int &start1, int &start2) {
-  int m = strlen(s1), n = strlen(s2), longest = 0, cur = 1; start1 = start2 = -1;
-  for (int i = 0; i < m; i++) {
-    cur ^= 1;
+  int m = strlen(s1), n = strlen(s2), longest = 0, cur = 0; start1 = start2 = -1;
+  for (int i = 0; i < m; i++, cur ^= 1) {
     for (int j = 0; j < n; j++) {
       if (s1[i] == s2[j]) {
-        if (i == 0 || j == 0) { dp[cur][j] = 1; } else { dp[cur][j] = dp[cur ^ 1][j - 1] + 1; }
+        if (i == 0 || j == 0) { dp[cur][j] = 1; }
+        else { dp[cur][j] = dp[cur ^ 1][j - 1] + 1; }
         if (dp[cur][j] > longest) { longest = dp[cur][j]; start1 = i + 1 - longest; start2 = j + 1 - longest; }
       }
     }
@@ -123,8 +122,7 @@ int GCIS(int a[], int la, int b[], int lb, int ans[]) {
     for (k = 0, j = 1; j <= lb; j++) {
       if (b[j - 1] < a[i - 1] && dp[j] > dp[k]) { k = j; }
       if (b[j - 1] == a[i - 1] && dp[k] + 1 > dp[j]) {
-        dp[j] = dp[k] + 1;
-        f[i][j] = i * (lb + 1) + k;
+        dp[j] = dp[k] + 1; f[i][j] = i * (lb + 1) + k;
       }
     }
   }

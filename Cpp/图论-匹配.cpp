@@ -1,182 +1,184 @@
-//二分图最大权匹配
+//二分图最大匹配
 //Hungary + dfs + 邻接矩阵 O(V*E)
-int g[N][N], uN, vN; //左右点的数目, 使用前赋值
-int linker[N];
-bool used[N];
+bool g[N][N];
+int uN, vN; //左右点的数目
+int match[N];
+bool check[N];
 bool dfs(int u) {
   for (int v = 0; v < vN; v++) {
-    if (g[u][v] && !used[v]) {
-      used[v] = true;
-      if (linker[v] == -1 || dfs(linker[v])) {
-        linker[v] = u; return true;
+    if (g[u][v] && !check[v]) {
+      check[v] = true;
+      if (match[v] == -1 || dfs(match[v])) {
+        match[v] = u; match[u] = v; return true;
       }
     }
   }
   return false;
 }
 int Hungary() {
+  memset(match, -1, sizeof(match));
   int res = 0;
-  memset(linker, -1, sizeof(linker));
   for (int u = 0; u < uN; u++) {
-    memset(used, 0, sizeof(used));
-    if (dfs(u)) { res++; }
+    if (match[u] == -1) {
+      memset(check, 0, sizeof(check));
+      if (dfs(u)) { res++; }
+    }
   }
   return res;
 }
 //Hungary + dfs + 邻接表 O(V*E)
 int head[N], to[M], Next[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int z) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
-int uN, linker[N];
+void addedge(int x, int y) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
+int uN, match[N];
 bool dfs(int u) {
   for (int i = head[u]; ~i; i = Next[i]) {
     int v = to[i];
-    if (!used[v]) {
-      used[v] = true;
-      if (linker[v] == -1 || dfs(linker[v])) {
-        linker[v] = u; return true;
+    if (!check[v]) {
+      check[v] = true;
+      if (match[v] == -1 || dfs(match[v])) {
+        match[v] = u; match[u] = v; return true;
       }
     }
   }
   return false;
 }
 int Hungary() {
+  memset(match, -1, sizeof(match));
   int res = 0;
-  memset(linker, -1, sizeof(linker));
   for (int u = 0; u < uN; u++) {
-    memset(used, false, sizeof(used));
-    if (dfs(u)) { res++; }
+    if (match[u] == -1) {
+      memset(check, 0, sizeof(check));
+      if (dfs(u)) { res++; }
+    }
   }
   return res;
 }
 //Hungary + bfs + 邻接矩阵 O(V*E)
-int g[N][N], uN, vN;
-int Mx[N], My[N], check[N], pre[N];
-bool bfs(int src) {
+bool g[N][N];
+int uN, vN;
+int match[N], check[N], pre[N];
+int Hungary() {
+  memset(match, -1, sizeof(match));
+  memset(check, -1, sizeof(check));
   queue<int> que;
-  que.push(src);
-  pre[src] = -1;
-  bool flag = false;
-  while (!que.empty() && !flag) {
-    int u = que.front(); que.pop();
-    for (int v = 0; v < vN && !flag; v++) {
-      if (g[u][v] && check[v] != src) {
-        check[v] = src;
-        que.push(My[v]);
-        if (~My[v]) { pre[My[v]] = u; }
-        else {
-          flag = true;
-          int a = u, b = v;
-          while (~a) {
-            int t = Mx[a];
-            Mx[a] = b; My[b] = a;
-            a = pre[a]; b = t;
+  int res = 0;
+  for (int i = 0; i < uN; i++) {
+    if (match[i] == -1) {
+      while (!que.empty()) { que.pop(); }
+      que.push(i);
+      pre[i] = -1;
+      bool flag = false;
+      while (!que.empty() && !flag) {
+        int u = que.front(); que.pop();
+        for (int v = 0; v < vN && !flag; v++) {
+          if (g[u][v] && check[v] != i) {
+            check[v] = i;
+            que.push(match[v]);
+            if (~match[v]) { pre[match[v]] = u; }
+            else {
+              flag = true;
+              int a = u, b = v;
+              while (~a) {
+                int t = match[a]; match[a] = b; match[b] = a;
+                a = pre[a]; b = t;
+              }
+            }
           }
         }
       }
+      if (~match[i]) { res++; }
     }
-  }
-  return Mx[src] != -1;
-}
-int Hungary() {
-  memset(Mx, -1, sizeof(Mx));
-  memset(My, -1, sizeof(My));
-  memset(check, -1, sizeof(check));
-  int res = 0;
-  for (int i = 0; i < uN; i++) {
-    if (Mx[i] == -1 && bfs(i)) { res++; }
   }
   return res;
 }
 //Hungary + bfs + 邻接表 O(V*E)
 int head[N], to[M], Next[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int z) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
-int uN, Mx[N], My[N], pre[N], check[N];
-bool bfs(int src) {
+void addedge(int x, int y) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
+int uN, match[N], check[N], pre[N];
+int Hungary() {
+  memset(match, -1, sizeof(match));
+  memset(check, -1, sizeof(check));
   queue<int> que;
-  que.push(src);
-  pre[src] = -1;
-  bool flag = false;
-  while (!que.empty() && !flag) {
-    int u = que.front(); que.pop();
-    for (int i = head[u]; ~i && !flag; i = Next[i]) {
-      int v = to[i];
-      if (check[v] != src) {
-        check[v] = src;
-        que.push(My[v]);
-        if (~My[v]) { pre[My[v]] = u; }
-        else {
-          int a = u, b = v;
-          flag = true;
-          while (~a) {
-            int t = Mx[a];
-            Mx[a] = b; My[b] = a;
-            a = pre[a]; b = t;
+  int res = 0;
+  for (int i = 0; i < uN; i++) {
+    if (match[i] == -1) {
+      while (!que.empty()) { que.pop(); }
+      que.push(i);
+      pre[i] = -1;
+      bool flag = false;
+      while (!que.empty() && !flag) {
+        int u = que.front(); que.pop();
+        for (int i = head[u]; ~i && !flag; i = Next[i]) {
+          int v = to[i];
+          if (g[u][v] && check[v] != i) {
+            check[v] = i;
+            que.push(match[v]);
+            if (~match[v]) { pre[match[v]] = u; }
+            else {
+              flag = true;
+              int a = u, b = v;
+              while (~a) {
+                int t = match[a]; match[a] = b; match[b] = a;
+                a = pre[a]; b = t;
+              }
+            }
           }
         }
       }
+      if (~match[i]) { res++; }
     }
   }
-  return Mx[src] != -1;
+  return res;
 }
-int Hungary() {
-  memset(Mx, -1, sizeof(Mx));
-  memset(My, -1, sizeof(My));
-  memset(check, -1, sizeof(check));
-  int ret = 0;
-  for (int i = 0; i < uN; i++) {
-    if (Mx[i] == -1 && bfs(i)) { ret++; }
-  }
-  return ret;
-}
-//Hopcroft-Karp + vector存边 + O(V^0.5*E)
+//Hopcroft-Karp + vector + O(sqrt(V)*E)
 const int INF = 0x3f3f3f3f;
 vector<int> g[N];
-int uN;
-int Mx[N], My[N], dx[N], dy[N], dis;
-bool used[N];
+int uN, matchx[N], matchy[N], dx[N], dy[N], dis;
+bool check[N];
 bool SearchP() {
   queue<int> que;
   dis = INF;
   memset(dx, -1, sizeof(dx));
   memset(dy, -1, sizeof(dy));
-  for (int i = 0; i < uN; i++) { if (Mx[i] == -1) { dx[i] = 0; que.push(i); } }
+  for (int i = 0; i < uN; i++) { if (matchx[i] == -1) { dx[i] = 0; que.push(i); } }
   while (!que.empty()) {
     int u = que.front(); que.pop();
     if (dx[u] > dis) { break; }
-    for (int i = 0; i < g[u].size(); i++) {
+    for (size_t i = 0; i < g[u].size(); i++) {
       int v = g[u][i];
       if (dy[v] == -1) {
         dy[v] = dx[u] + 1;
-        if (My[v] == -1) { dis = dy[v]; }
-        else { dx[My[v]] = dy[v] + 1; que.push(My[v]); }
+        if (matchy[v] == -1) { dis = dy[v]; }
+        else { dx[matchy[v]] = dy[v] + 1; que.push(matchy[v]); }
       }
     }
   }
   return dis != INF;
 }
 bool dfs(int u) {
-  for (int i = 0; i < g[u].size(); i++) {
+  for (size_t i = 0; i < g[u].size(); i++) {
     int v = g[u][i];
-    if (!used[v] && dy[v] == dx[u] + 1) {
-      used[v] = true;
-      if (My[v] != -1 && dy[v] == dis) { continue; }
-      if (My[v] == -1 || dfs(My[v])) {
-        My[v] = u; Mx[u] = v; return true;
+    if (!check[v] && dy[v] == dx[u] + 1) {
+      check[v] = true;
+      if (~matchy[v] && dy[v] == dis) { continue; }
+      if (matchy[v] == -1 || dfs(matchy[v])) {
+        matchy[v] = u; matchx[u] = v; return true;
       }
     }
   }
   return false;
 }
-int HopcroftKarp() {
-  memset(Mx, -1, sizeof(Mx));
-  memset(My, -1, sizeof(My));
+int HK() {
+  memset(matchx, -1, sizeof(matchx));
+  memset(matchy, -1, sizeof(matchy));
   int res = 0;
   while (SearchP()) {
-    memset(used, 0, sizeof(used));
-    for (int i = 0; i < uN; i++)
-      if (Mx[i] == -1 && dfs(i)) { res++; }
+    memset(check, 0, sizeof(check));
+    for (int i = 0; i < uN; i++) {
+      if (matchx[i] == -1 && dfs(i)) { res++; }
+    }
   }
   return res;
 }
@@ -184,58 +186,40 @@ int HopcroftKarp() {
 //Kuhn-Munkers + 邻接矩阵 O(uN^2*vN)
 //若求最小权匹配,可将权值取相反数,结果取相反数 点的编号从0开始
 const int INF = 0x3f3f3f3f;
-int uN, vN, g[N][N]; //点数 二分图描述
-int linker[N], lx[N], ly[N]; //y中各点匹配状态, x,y中的点标号
-int slack[N];
+int uN, vN, g[N][N];
+int match[N], lx[N], ly[N]; //y中各点匹配状态, 可行顶标
+int slack[N]; //松弛数组
 bool visx[N], visy[N];
-bool dfs(int x) {
-  visx[x] = true;
-  for (int y = 0; y < vN; y++) {
-    if (visy[y]) { continue; }
-    int tmp = lx[x] + ly[y] - g[x][y];
+bool dfs(int u) {
+  visx[u] = true;
+  for (int v = 0; v < vN; v++) {
+    if (visy[v]) { continue; }
+    int tmp = lx[u] + ly[v] - g[u][v];
     if (tmp == 0) {
-      visy[y] = true;
-      if (linker[y] == -1 || dfs(linker[y])) {
-        linker[y] = x; return true;
-      }
-    } else if (slack[y] > tmp) {
-      slack[y] = tmp;
-    }
+      visy[v] = true;
+      if (match[v] == -1 || dfs(match[v])) { match[v] = u; return true; }
+    } else if (slack[v] > tmp) { slack[v] = tmp; }
   }
   return false;
 }
 int KM() {
-  memset(linker, -1, sizeof(linker));
+  memset(match, -1, sizeof(match));
   memset(ly, 0, sizeof(ly));
-  for (int i = 0; i < uN; i++) {
-    lx[i] = -INF;
-    for (int j = 0; j < vN; j++) {
-      if (g[i][j] > lx[i]) { lx[i] = g[i][j]; }
-    }
-  }
-  for (int x = 0; x < uN; x++) {
+  for (int i = 0; i < uN; i++) { lx[i] = *min_element(g[i], g[i] + vN); }
+  for (int u = 0; u < uN; u++) {
     memset(slack, 0x3f, sizeof(slack));
     for (;;) {
-      memset(visx, false, sizeof(visx));
-      memset(visy, false, sizeof(visy));
-      if (dfs(x)) { break; }
+      memset(visx, 0, sizeof(visx));
+      memset(visy, 0, sizeof(visy));
+      if (dfs(u)) { break; }
       int d = INF;
-      for (int i = 0; i < vN; i++) {
-        if (!visy[i] && d > slack[i]) { d = slack[i]; }
-      }
-      for (int i = 0; i < uN; i++) {
-        if (visx[i]) { lx[i] -= d; }
-      }
-      for (int i = 0; i < vN; i++) {
-        if (visy[i]) { ly[i] += d; }
-        else { slack[i] -= d; }
-      }
+      for (int i = 0; i < vN; i++) { if (!visy[i] && d > slack[i]) { d = slack[i]; } }
+      for (int i = 0; i < uN; i++) { if (visx[i]) { lx[i] -= d; } }
+      for (int i = 0; i < vN; i++) { visy[i] ? ly[i] += d : slack[i] -= d; }
     }
   }
   int res = 0;
-  for (int i = 0; i < vN; i++) {
-    if (linker[i] != -1) { res += g[linker[i]][i]; }
-  }
+  for (int i = 0; i < vN; i++) { if (~match[i]) { res += g[match[i]][i]; } }
   return res;
 }
 //一般图最大匹配 + 邻接矩阵 O(V^3)
