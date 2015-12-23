@@ -1,4 +1,4 @@
-//并查集基本函数
+//并查集 基本函数
 int fa[N];
 void init(int n) {
   for (int i = 0; i <= n; i++) { fa[i] = i; }

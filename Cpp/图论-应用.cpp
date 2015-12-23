@@ -48,165 +48,132 @@ bool topoSort() {
   }
   return k == n;
 }
-//欧拉回路 + 邻接矩阵 O(N^2)
-//求欧拉回路/欧拉路
-//返回路径长度, path返回路径(有向图时得到的是反向路径)
-//可以有自环与重边, 分为无向图和有向图
-int mp[N][N];
-void find_path_u(int n, int now, int &step, int *path) {
-  for (int i = n - 1; i >= 0; i--) {
-    while (mp[now][i]) {
-      mp[now][i]--; mp[i][now]--;
-      find_path_u(n, i, step, path);
-    }
-  }
-  path[step++] = now;
-}
-void find_path_d(int n, int now, int &step, int *path) {
-  for (int i = n - 1; i >= 0; i--) {
-    while (mp[now][i]) {
-      mp[now][i]--;
-      find_path_d(n, i, step, path);
-    }
-  }
-  path[step++] = now;
-}
-int eulerianPath(int n, int start, int *path) {
-  int ret = 0;
-  find_path_u(n, start, ret, path);
-  //find_path_d(n, start, ret, path);
-  return ret;
-}
 //欧拉回路: 每条边只经过一次, 要求回到起点
 //欧拉路径: 每条边只经过一次, 不要求回到起点
-//欧拉回路判断:
-//无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数。
-//有向图: 基图连通(把边当成无向边, 同样不考虑度为0的点), 每个顶点出度等于入度。
-//混合图: 首先是基图连通(不考虑度为0的点), 然后需要借助网络流判定。
-//首先给原图中的每条无向边随便指定一个方向(称为初始定向), 将原图改为有向图G',然后的任务就是
-//改变G'中某些边的方向(当然是无向边转化来的, 原混合图中的有向边不能动)使其满足每个点的入度等于出度
-//设D[i]为G'中(点i的出度 - 点i的入度) 可以发现, 在改变G'中边的方向的过程中,任何点的D值的奇偶性都不会发生改变
-//(设将边<i, j>改为<j, i>, 则i入度加1出度减1, j入度减1出度加1, 两者之差加2或减2, 奇偶性不变)
-//而最终要求的是每个点的入度等于出度, 即每个点的D值都为0,是偶数, 故可得:
-//若初始定向得到的G'中任意一个点的D值是奇数, 那么原图中一定不存在欧拉环
-//若初始D值都是偶数, 则将G'改装成网络: 设立源点S和汇点T,
-//对于每个D[i] > 0的点i, 连边<S, i>, 容量为D[i] / 2; 对于每个D[j] < 0的点j, 连边<j, T>, 容量为 -D[j] / 2
-//G'中的每条边在网络中仍保留, 容量为1(表示该边最多只能被改变方向一次)。
-//求这个网络的最大流, 若S引出的所有边均满流, 则原混合图是欧拉图, 将网络中所有流量为1的中间边(就是不与S或T关联的边)
-//在G'中改变方向,形成的新图G''一定是有向欧拉图; 若S引出的边中有的没有满流, 则原混合图不是欧拉图
 //欧拉路径的判断:
 //无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数或者仅有两个点的度数为偶数。
 //有向图: 基图连通(把边当成无向边, 同样不考虑度为0的点), 每个顶点出度等于入度
 //或者有且仅有一个点的出度比入度多1, 有且仅有一个点的出度比入度少1, 其余出度等于入度。
 //混合图: 如果存在欧拉回路, 一点存在欧拉路径了。否则如果有且仅有两个点的(出度 - 入度)是奇数,
 //那么给这个两个点加边, 判断是否存在欧拉回路。
+//欧拉回路判断:
+//无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数
+//有向图: 基图连通(同样不考虑度为0的点), 每个顶点出度等于入度
+//混合图: 基图连通(不考虑度为0的点), 然后借助网络流判定
+//首先给原图中的每条无向边随便指定一个方向(称为初始定向), 将原图改为有向图G'
+//然后的任务就是改变G'中某些边(无向边转化来的)的方向使其满足每个点的入度等于出度
+//设D[i]为G'中(点i的出度 - 点i的入度), 可以发现, 在改变G'中边的方向的过程中, 任何点的D值的奇偶性都不会发生改变
+//而最终要求的是每个点的入度等于出度, 即每个点的D值都为0, 是偶数, 故可得:
+//若初始定向得到的G'中任意一个点的D值是奇数, 那么原图中一定不存在欧拉环
+//若初始D值都是偶数, 则将G'改装成网络: 设立源点S和汇点T,
+//对于每个D[i] > 0的点i, 连边<S, i>, 容量为D[i] / 2; 对于每个D[j] < 0的点j, 连边<j, T>, 容量为-D[j] / 2
+//G'中的每条边在网络中仍保留, 容量为1(表示该边最多只能被改变方向一次)
+//求这个网络的最大流, 若S引出的所有边均满流, 则原混合图是欧拉图, 将网络中所有流量为1的中间边(就是不与S或T关联的边)
+//在G'中改变方向,形成的新图G''一定是有向欧拉图; 若S引出的边中有的没有满流, 则原混合图不是欧拉图
+//欧拉回路 + 邻接矩阵 O(N^2)
+//求欧拉路径/回路经过的点 支持自环和重边
+int n, mp[N][N], path[N], cnt;
+void dfsu(int u) {
+  for (int v = n - 1; v >= 0; v--) {
+    while (mp[u][v]) { mp[u][v]--; mp[v][u]--; dfsu(v); }
+  }
+  path[cnt++] = u;
+}
+void dfsd(int u) {
+  for (int v = n - 1; v >= 0; v--) {
+    while (mp[u][v]) { mp[u][v]--; dfsd(v); }
+  }
+  path[cnt++] = u;
+}
 //无向图 SGU101
-const int N = 105;
-const int M = 2005;
-int head[N], to[M], Next[M], id[M], tot, deg[N];
-bool dir[M], vis[M];
-vector<int> ans;
+int head[N], to[M], Next[M], tot, deg[N], path[M], cnt;
+bool vis[M];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int index) {
-  to[tot] = y; Next[tot] = head[x]; id[tot] = index; dir[tot] = false; vis[tot] = false; head[x] = tot++;
-  to[tot] = x; Next[tot] = head[y]; id[tot] = index; dir[tot] = false; vis[tot] = false; head[y] = tot++;
+void addedge(int x, int y) {
+  to[tot] = y; Next[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; Next[tot] = head[y]; head[y] = tot++;
 }
 void dfs(int u) {
-  for (int i = head[u]; ~i; i = Next[i]) {
-    if (!vis[i]) {
-      vis[i] = true; vis[i ^ 1] = true;
-      dfs(to[i]); ans.push_back(i);
-    }
+  for (int i = &head[u]; ~i;) {
+    if (!vis[i]) { vis[i] = vis[i ^ 1] = true; int t = i; dfs(to[i]); path[cnt++] = t; }
+    else { i = Next[i]; }
   }
 }
 int main() {
   int n, u, v;
   while (~scanf("%d", &n)) {
-    init();
-    memset(deg, 0, sizeof(deg));
-    ans.clear();
-    for (int i = 1; i <= n; i++) {
-      scanf("%d%d", &u, &v);
-      addedge(u, v, i); deg[u]++; deg[v]++;
+    init(); cnt = 0;
+    memset(vis, 0, sizeof(vis)); memset(deg, 0, sizeof(deg));
+    for (int i = 0; i < n; i++) {
+      scanf("%d%d", &u, &v); addedge(u, v); deg[u]++; deg[v]++;
     }
-    int s = -1, cnt = 0;
+    int s = -1, cnto = 0;
     for (int i = 0; i <= 6; i++) {
-      if (deg[i] & 1) { cnt++; s = i; }
-      if (deg[i] > 0 && s == -1) { s = i; }
+      if (s == -1 && deg[i] > 0) { s = i; }
+      if (deg[i] & 1) { cnto++; s = i; }
     }
-    bool flag = true;
-    if (cnt != 0 && cnt != 2) { puts("No solution"); continue; }
+    if (cnto != 0 && cnto != 2) { puts("No solution"); continue; }
     dfs(s);
-    if (ans.size() != n) { puts("No solution"); continue; }
-    for (int i = 0; i < ans.size(); i++) {
-      printf("%d ", id[ans[i]]);
-      if (!dir[ans[i]]) { puts("-"); }
-      else { puts("+"); }
+    if (cnt != n) { puts("No solution"); continue; }
+    for (int i = 0; i < cnt; i++) {
+      printf("%d %c\n", (path[i] >> 1) + 1, path[i] & 1 ? '+' : '-');
     }
   }
 }
 //有向图 POJ2337
 //给出n个小写字母组成的单词, 要求将n个单词连接起来, 输出字典序最小的解
-const int N = 1005;
-const int M = 2005;
-int head[N], to[M], Next[M], id[M], tot, in[N], out[N];
+int head[N], to[M], Next[M], tot, in[N], out[N], path[N], cnt;
 bool vis[M];
 string str[N];
-vector<int> ans;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int index) {
-  to[tot] = y; Next[tot] = head[x]; id[tot] = index; vis[tot] = false; head[x] = tot++;
+void addedge(int x, int y) {
+  to[tot] = y; Next[tot] = head[x]; head[x] = tot++;
 }
 void dfs(int u) {
-  for (int i = head[u] ; ~i; i = Next[i])
-    if (!vis[i]) {
-      vis[i] = true;
-      dfs(to[i]); ans.push_back(id[i]);
-    }
+  for (int &i = head[u]; ~i;) {
+    if (!vis[i]) { vis[i] = true; int t = i; dfs(to[i]); path[cnt++] = n - t - 1; }
+    else { i = Next[i]; }
+  }
 }
 int main() {
   int T, n;
+  char s[25];
   scanf("%d", &T);
   while (T--) {
-    init();
+    init(); cnt = 0;
+    memset(vis, 0, sizeof(vis));
     memset(in, 0, sizeof(in));
     memset(out, 0, sizeof(out));
-    ans.clear();
     scanf("%d", &n);
-    for (int i = 0; i < n; i++) { cin >> str[i]; }
-    sort(str, str + n); //字典序排序
-    int start = 100;
+    for (int i = 0; i < n; i++) { scanf("%s", s); str[i] = s; }
+    sort(str, str + n);
+    int s = 26;
     for (int i = n - 1; i >= 0; i--) { //字典序大的先加入
-      int u = str[i][0] - 'a', v = str[i][str[i].length() - 1] - 'a';
-      addedge(u, v, i); out[u]++; in[v]++;
-      if (u < start) { start = u; }
-      if (v < start) { start = v; }
+      int u = str[i][0] - 'a', v = str[i][str[i].size() - 1] - 'a';
+      addedge(u, v); out[u]++; in[v]++;
+      s = min(s, min(u, v));
     }
-    int cc1 = 0, cc2 = 0;
+    int cnt1 = 0, cnt2 = 0;
     for (int i = 0; i < 26; i++) {
-      if (out[i] - in[i] == 1) { cc1++; start = i; } //如果有一个出度比入度大1的点, 就从这个点出发, 否则从最小的点出发
-      else if (out[i] - in[i] == -1) { cc2++; }
-      else if (out[i] - in[i] != 0) { cc1 = 3; }
+      if (out[i] - in[i] == 1) { cnt1++; s = i; } //如果有一个出度比入度大1的点, 就从这个点出发, 否则从最小的点出发
+      else if (out[i] - in[i] == -1) { cnt2++; }
+      else if (out[i] - in[i] != 0) { cnt1 = 3; }
     }
-    if (!((cc1 == 0 && cc2 == 0) || (cc1 == 1 && cc2 == 1))) { puts("***"); continue; }
-    dfs(start);
-    if (ans.size() != n) { puts("***"); continue; } //判断是否连通
-    for (int i = ans.size() - 1; i >= 0; i--) {
-      cout << str[ans[i]];
-      if (i > 0) { putchar("."); }
-      else { putchar("\n"); }
+    if (!((cnt1 == 0 && cnt2 == 0) || (cnt1 == 1 && cnt2 == 1))) { puts("***"); continue; }
+    dfs(s);
+    if (cnt != n) { puts("***"); continue; }
+    for (int i = cnt - 1; i >= 0; i--) {
+      printf("%s%c", str[path[i]].c_str(), i > 0 ? '.' : '\n');
     }
   }
 }
 //有向图 并查集 HDU1116
-//给你一些英文单词, 判断所有单词能不能连成一串, 如果有多个重复的单词, 也必须满足这样的条件才能算YES
+//判断所有单词能不能连成一串, 如果有多个重复的单词, 也必须满足这样的条件
 int n, fa[N], in[N], out[N], p[N];
 bool vis[N];
-char str[M];
+char s[M];
 void init() {
-  memset(vis, 0, sizeof(vis));
-  memset(in, 0, sizeof(in));
-  memset(out, 0, sizeof(out));
+  memset(vis, 0, sizeof(vis)); memset(in, 0, sizeof(in)); memset(out, 0, sizeof(out));
   for (int i = 0; i < N; i++) { fa[i] = i; }
 }
 int findfa(int n) {
@@ -223,53 +190,46 @@ int main() {
     init();
     scanf("%d", &n);
     while (n--) {
-      scanf("%s", str);
-      int len = strlen(str), x = str[0] - 'a', y = str[len - 1] - 'a';
-      unite(x, y); out[x]++; in[y]++; vis[x] = vis[y] = true;
+      scanf("%s", s); int u = s[0] - 'a', v = s[strlen(s) - 1] - 'a';
+      unite(u, v); out[u]++; in[v]++; vis[u] = vis[v] = true;
     }
     int cnt = 0, k = 0;
     for (int i = 0; i < N; i++) {
       fa[i] = findfa(i);
       if (vis[i] && fa[i] == i) { cnt++; }
     }
-    if (cnt > 1) { puts("The door cannot be opened."); continue; }
+    if (cnt > 1) { puts("The door cannot be opened."); continue; } //不连通
     for (int i = 0; i < N; i++) {
-      if (vis[i] && in[i] != out[i]) { p[k++] = i; }
+      if (in[i] != out[i]) { p[k++] = i; if (k > 2) { break; } }
     }
-    if (k == 0) { puts("Ordering is possible."); continue; }
-    if (k == 2 && ((out[p[0]] - in[p[0]] == 1 && in[p[1]] - out[p[1]] == 1) ||
-                   (out[p[1]] - in[p[1]] == 1 && in[p[0]] - out[p[0]] == 1))) {
+    if (k == 0 || (k == 2 && ((out[p[0]] - in[p[0]] == 1 && in[p[1]] - out[p[1]] == 1) ||
+                              (out[p[1]] - in[p[1]] == 1 && in[p[0]] - out[p[0]] == 1)))) {
       puts("Ordering is possible.");
-    } else {
-      puts("The door cannot be opened.");
-    }
+    } else { puts("The door cannot be opened."); }
   }
 }
-//混合图 POJ1637 (本题保证了连通)
-//需ISAP + 邻接表 O(V^2*E)
+//混合图 POJ1637 (本题保证连通)
+//判断欧拉回路 需ISAP + 邻接表 O(V^2*E)
 int in[N], out[N];
 int main() {
-  int T, n, m, u, v, w;
+  int T, u, v, w;
   scanf("%d", &T);
   while (T--) {
     init();
-    memset(in, 0, sizeof(in));
-    memset(out, 0, sizeof(out));
+    memset(in, 0, sizeof(in)); memset(out, 0, sizeof(out));
     scanf("%d%d", &n, &m);
     while (m--) {
-      scanf("%d%d%d", &u, &v, &w);
-      out[u]++; in[v]++;
+      scanf("%d%d%d", &u, &v, &w); out[u]++; in[v]++;
       if (w == 0) { addedge(u, v, 1); } //双向
     }
     bool flag = true;
     for (int i = 1; i <= n; i++) {
-      if (out[i] - in[i] > 0) { addedge(0, i, (out[i] - in[i]) / 2); }
-      else if (in[i] - out[i] > 0) { addedge(i, n + 1, (in[i] - out[i]) / 2); }
-      if ((out[i] - in[i]) & 1) { flag = false; }
+      if (out[i] - in[i] > 0) { addedge(0, i, (out[i] - in[i]) >> 1); }
+      else if (in[i] - out[i] > 0) { addedge(i, n + 1, (in[i] - out[i]) >> 1); }
+      if (out[i] - in[i] & 1) { flag = false; break; }
     }
     if (!flag) { puts("impossible"); continue; }
-    n += 2;
-    ISAP(0, n - 1);
+    ISAP(0, n + 1, n + 2);
     for (int i = head[0]; ~i; i = Next[i]) {
       if (cap[i] > 0 && cap[i] > flow[i]) { flag = false; break; }
     }
