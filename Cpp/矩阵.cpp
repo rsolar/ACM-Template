@@ -1,116 +1,113 @@
-//矩阵模板
-#define fabs(x) ((x)>=0?(x):-(x))
-#define isZero(x) (fabs(x)<1e-10)
-template <typename T> struct Matrix {
-  int r, c; T m[N][N];
-  Matrix(int _r = N, int _c = N): r(_r), c(_c) { init(); }
-  Matrix(const Matrix &mat): r(mat.r), c(mat.c) {
-    for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] = mat.m[i][j]; } }
+//矩阵类
+template<typename T> struct Matrix {
+  vector<T> a; int h, w;
+  Matrix(): a(), h(), w() {}
+  Matrix(const Matrix &v): a(v.a), h(v.h), w(v.w) {}
+  Matrix(const int &_h, const int &_w): a(_h *_w), h(_h), w(_w) { }
+  static Matrix e(const int &_h, const int &_w) {
+    Matrix res(_h, _w);
+    for (int i = 0, n = min(_h, _w); i < n; i++) { res[i][i] = T(1); }
+    return res;
   }
-  void init() { for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] = 0; } } }
-  void input() { for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { scanf("%d", &m[i][j]); } } }
-  void print() { for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { printf("%d%c", m[i][j], j == c - 1 ? '\n' : ' '); } } }
-  //初始化为单位矩阵
-  void e() { for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) {  m[i][j] = !(i ^ j); } } }
-  T *const operator[](const int i) { return m[i]; }
-  Matrix &operator=(const Matrix &mat) {
-    r = mat.r; c = mat.c;
-    for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] = mat.m[i][j]; } }
+  static Matrix e(const Matrix &v) { return e(v.h, v.w); }
+  T *operator[](const int &v) { return &a[v * w]; }
+  const T *operator[](const int &v)const { return &a[v * w]; }
+  Matrix &operator+=(const Matrix &b) {
+    for (int i = 0, n = h * w; i < n; i++) { a[i] += b.a[i]; }
     return *this;
   }
-  Matrix &operator=(const T a[]) {
-    for (int i = 0, cnt = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] = a[cnt++]; } }
-    return *this;
-  }
-  Matrix operator+(const Matrix &mat) {
-    Matrix rt = *this;
-    for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] += mat.m[i][j]; } }
-    return rt;
-  }
-  Matrix operator-(const Matrix &mat) {
-    Matrix rt = *this;
-    for (int i = 0; i < r; i++) { for (int j = 0; j < c; j++) { m[i][j] -= mat.m[i][j]; } }
-    return rt;
-  }
-  Matrix operator*(const Matrix &mat) {
-    Matrix rt(r, mat.c);
-    for (int i = 0; i < r; i++) {
-      for (int k = 0; k < c; k++) {
-        if (!isZero(m[i][k])) {
-          for (int j = 0; j < mat.c; j++) { rt[i][j] = (rt[i][j] + m[i][k] * mat.m[k][j]) % M; }
-        }
+  Matrix &operator-=(const Matrix &b) { return *this += -b; }
+  Matrix &operator*=(const Matrix &b) {
+    Matrix c(h, b.w);
+    for (int i = 0; i < h; i++) {
+      for (int k = 0; k < w; k++) {
+        const T &tmp = (*this)[i][k];
+        if (isZero(tmp)) { continue; }
+        for (int j = 0; j < b.w; j++) { c[i][j] += tmp * b[k][j]; }
       }
     }
-    return rt;
+    swap(a, c.a); h = c.h; w = c.w; return *this;
   }
-  //矩阵快速幂
-  Matrix operator^(ll n) {
-    Matrix rt(r, c), base = *this; rt.e();
-    while (n) {
-      if (n & 1) { rt = rt * base; }
-      base = base * base; n >>= 1;
-    }
-    return rt;
+  Matrix operator-()const {
+    Matrix ret(*this);
+    for (int i = 0, n = h * w; i < n; i++) { ret.a[i] = -ret.a[i]; }
+    return ret;
   }
-  bool operator==(const Matrix &mat) {
-    if (r != mat.r || c != mat.c) { return false; }
-    for (int i = 0; i < r; i++) {
-      for (int j = 0; j < c; j++) {
-        if (!isZero(m[i][j] - mat.m[i][j])) { return false; }
-      }
-    }
+  Matrix operator+(const Matrix &b)const { return Matrix(*this) += b; }
+  Matrix operator-(const Matrix &b)const { return Matrix(*this) -= b; }
+  Matrix operator*(const Matrix &b)const { return Matrix(*this) *= b; }
+  Matrix operator^(const ll &v)const {
+    Matrix ret(e(*this)), t(*this);
+    for (ll b = v; b; b >>= 1) { if (b & 1) { ret *= t; } t *= t; }
+    return ret;
+  }
+  bool operator==(const Matrix &v)const {
+    if (h != v.h || w != v.w) { return false; }
+    for (int i = 0, n = h * w; i < n; i++) { if (!isZero(a[i] - v.a[i])) { return false; } }
     return true;
   }
-  //矩阵转置
-  Matrix trans() {
-    Matrix rt(c, r);
-    for (int i = 0; i < c; i++) { for (int j = 0; j < r; j++) { rt[i][j] = m[j][i]; } }
-    return rt;
+  bool operator!=(const Matrix &v)const { return !(*this == v); }
+  T abs(const T &v)const { return v < 0 ? -v : v; }
+  bool isZero(const T &v)const { return abs(v) < 1e-10; }
+  void trans() {
+    Matrix c(w, h);
+    for (int i = 0; i < w; i++) { for (int j = 0; j < h; j++) { c[i][j] = a[j][i]; } }
+    *this = c;
   }
-  //求逆矩阵 限double
-  bool inv(Matrix &a) {
-    if (r != c) { return false; }
-    int is[N], js[N]; a = *this;
-    for (int k = 0; k < a.r; k++) {
+  void input() { for (int i = 0, n = h * w; i < n; i++) { scanf("%d", &a[i]); } }
+  void print()const {
+    for (int i = 0, n = h * w; i < n; i++) { printf("%d%c", a[i], i % w == w - 1 ? '\n' : ' '); }
+  }
+  friend istream &operator>>(istream &in, Matrix &b) {
+    for (int i = 0, n = b.h * b.w; i < n; i++) { in >> b.a[i]; }
+    return in;
+  }
+  friend ostream &operator<<(ostream &out, const Matrix &b) {
+    for (int i = 0, n = b.h * b.w; i < n; i++) { out << b.a[i] << (i % b.w == b.w - 1 ? '\n' : ' '); }
+    return out;
+  }
+  //求逆矩阵 限double 可逆则返回true
+  bool inv(Matrix &v)const {
+    if (h != w) { return false; }
+    int is[N], js[N]; v = *this;
+    for (int k = 0; k < h; k++) {
       double t = 0;
-      for (int i = k; i < a.r; i++) {
-        for (int j = k; j < a.r; j++) {
-          if (fabs(a[i][j]) > t) { t = fabs(a[is[k] = i][js[k] = j]); }
+      for (int i = k; i < h; i++) {
+        for (int j = k; j < h; j++) {
+          if (abs(v[i][j]) > t) { t = abs(v[is[k] = i][js[k] = j]); }
         }
       }
       if (isZero(t)) { return false; }
-      if (is[k] != k) { for (int j = 0; j < a.r; j++) { swap(a[k][j], a[is[k]][j]); } }
-      if (js[k] != k) { for (int i = 0; i < a.r; i++) { swap(a[i][k], a[i][js[k]]); } }
-      a[k][k] = 1.0 / a[k][k];
-      for (int j = 0; j < a.r; j++) { if (j != k) { a[k][j] *= a[k][k]; } }
-      for (int i = 0; i < a.r; i++) {
-        if (i != k) { for (int j = 0; j < a.r; j++) { if (j != k) { a[i][j] -= a[i][k] * a[k][j]; } } }
+      if (is[k] != k) { for (int j = 0; j < h; j++) { swap(v[k][j], v[is[k]][j]); } }
+      if (js[k] != k) { for (int i = 0; i < h; i++) { swap(v[i][k], v[i][js[k]]); } }
+      v[k][k] = 1.0 / v[k][k];
+      for (int j = 0; j < h; j++) { if (j != k) { v[k][j] *= v[k][k]; } }
+      for (int i = 0; i < h; i++) {
+        if (i != k) { for (int j = 0; j < h; j++) { if (j != k) { v[i][j] -= v[i][k] * v[k][j]; } } }
       }
-      for (int i = 0; i < a.r; i++) { if (i != k) { a[i][k] *= -a[k][k]; } }
+      for (int i = 0; i < h; i++) { if (i != k) { v[i][k] *= -v[k][k]; } }
     }
-    for (int k = a.r - 1; k >= 0; k--) {
-      for (int j = 0; j < a.r; j++) { if (js[k] != k) { swap(a[k][j], a[js[k]][j]); } }
-      for (int i = 0; i < a.r; i++) { if (is[k] != k) { swap(a[i][k], a[i][is[k]]); } }
+    for (int k = h - 1; k >= 0; k--) {
+      for (int j = 0; j < h; j++) { if (js[k] != k) { swap(v[k][j], v[js[k]][j]); } }
+      for (int i = 0; i < h; i++) { if (is[k] != k) { swap(v[i][k], v[i][is[k]]); } }
     }
     return true;
   }
-  //求行列式
-  double det() {
-    int sign = 0; double ret = 1.0;
-    if (r != c) { return 0; }
-    Matrix a = *this;
-    for (int i = 0, j; i < r; i++) {
-      if (isZero(a[i][i])) {
-        for (j = i + 1; j < r; j++) { if (!isZero(a[j][i])) { break; } }
-        if (j == r) { return 0; }
-        for (int k = i; k < r; k++) { swap(a[i][k], a[j][k]); }
+  //求行列式 限double
+  double det()const {
+    if (h != w) { return 0; }
+    int sign = 0; double ret = 1.0; Matrix c(*this);
+    for (int i = 0, j, k; i < h; i++) {
+      if (isZero(c[i][i])) {
+        for (j = i + 1; j < h && isZero(c[j][i]); j++);
+        if (j == h) { return 0; }
+        for (k = i; k < h; k++) { swap(c[i][k], c[j][k]); }
         sign++;
       }
-      ret *= a[i][i];
-      for (int k = i + 1; k < r; k++) { a[i][k] /= a[i][i]; }
-      for (int j = i + 1; j < r; j++) { for (int k = i + 1; k < r; k++) { a[j][k] -= a[j][i] * a[i][k]; } }
+      ret *= c[i][i];
+      for (k = i + 1; k < h; k++) { c[i][k] /= c[i][i]; }
+      for (j = i + 1; j < h; j++) { for (k = i + 1; k < h; k++) { c[j][k] -= c[j][i] * c[i][k]; } }
     }
-    if (sign & 1) { ret = -ret; }
-    return ret;
+    return sign & 1 ? -ret : ret;
   }
 };

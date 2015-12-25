@@ -31,13 +31,11 @@ template <typename T> int BSupper_bound(const T a[], int l, int r, T key) { //[l
 }
 //三分 求函数极大值
 double TS(double l, double r) {
-  double mid, midmid, midv, midmidv;
+  double mid1, mid2;
   while (r - l > EPS) {
-    mid = l + (r - l) / 3.0;
-    midmid = r - (r - l) / 3.0;
-    midv = calc(mid); midmidv = calc(midmid);
-    if (midv > midmidv) { r = midmid; }
-    else { l = mid; }
+    mid1 = l + (r - l) / 3.0; mid2 = r - (r - l) / 3.0;
+    if (calc(mid1) > calc(mid2)) { r = mid2; }
+    else { l = mid1; }
   }
   return l;
 }

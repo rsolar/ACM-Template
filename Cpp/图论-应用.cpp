@@ -1,47 +1,28 @@
 //拓扑排序 O(N^2)
+//queue->普通判断用, priority_queue->字典序
+//邻接矩阵
 int n, mp[N][N], in[N], ret[N];
 bool topoSort() {
-  int i, j, k;
-  for (k = 0; k < n; ret[k++] = i) {
-    for (i = 0; in[i] && i < n; i++);
-    if (i == n) { return false; } //有环
-    for (in[i] = -1, j = 0; j < n; j++) { in[j] -= mp[i][j]; }
-  }
-  return true;
-}
-//queue->普通判断用, priority_queue->字典序
-//vector存边
-int n, in[N], ret[N];
-vector<int> e[N];
-bool topoSort() {
-  int k = 0;
-  priority_queue<int> que;
+  queue<int> que; int k = 0;
   for (int i = 0; i < n; i++) { if (in[i] == 0) { que.push(i); } }
   while (!que.empty()) {
-    int u = que.top(); que.pop();
-    ret[k++] = u;
-    for (int i = 0; i < e[u].size(); i++) {
-      int v = e[u][i];
-      if (--in[v] == 0) { que.push(v); }
+    int u = que.top(); que.pop(); ret[k++] = u;
+    for (int v = 0; v < n; v++) {
+      if (mp[u][v] && --in[v] == 0) { que.push(v); }
     }
   }
   return k == n;
 }
 //邻接表
-const int N = 1005;
-const int M = 200005;
-const int INF = 0x3f3f3f3f;
 int head[N], to[M], Next[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
 int n, in[N], ret[N];
 bool topoSort() {
-  int k = 0;
-  priority_queue<int> que;
+  priority_queue<int> que; int k = 0;
   for (int i = 0; i < n; i++) { if (in[i] == 0) { que.push(i); } }
   while (!que.empty()) {
-    int u = que.top(); que.pop();
-    ret[k++] = u;
+    int u = que.top(); que.pop(); ret[k++] = u;
     for (int i = head[u]; ~i; i = Next[i]) {
       if (--in[to[i]] == 0) { que.push(to[i]); }
     }
@@ -94,7 +75,7 @@ void addedge(int x, int y) {
   to[tot] = x; Next[tot] = head[y]; head[y] = tot++;
 }
 void dfs(int u) {
-  for (int i = &head[u]; ~i;) {
+  for (int &i = head[u]; ~i;) {
     if (!vis[i]) { vis[i] = vis[i ^ 1] = true; int t = i; dfs(to[i]); path[cnt++] = t; }
     else { i = Next[i]; }
   }

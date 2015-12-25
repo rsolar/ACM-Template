@@ -11,10 +11,8 @@ void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; Next[tot] = head[
 int n, mp[N][N], dist[N], pre[N]; //邻接矩阵初始化为INF, pre[i]记录src到i路径上的父结点, pre[src] = -1
 bool vis[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist));
-  memset(vis, 0, sizeof(vis));
-  memset(pre, -1, sizeof(pre));
-  dist[src] = 0;
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  memset(vis, 0, sizeof(vis)); memset(pre, -1, sizeof(pre));
   for (int j = 0; j < n; j++) {
     int k = -1, mn = INF;
     for (int i = 0; i < n; i++) {
@@ -35,23 +33,19 @@ struct Node {
   Node(int _v, int _w): v(_v), w(_w) {}
   bool operator<(const Node &r)const { return w > r.w; }
 };
-int n, mp[N][N], dist[N], pre[N]; //邻接矩阵初始化为INF, pre[i]记录src到i路径上的父结点, pre[src] = -1
+int n, mp[N][N], dist[N], pre[N];
 bool vis[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist));
-  memset(vis, 0, sizeof(vis));
-  memset(pre, -1, sizeof(pre));
-  priority_queue<Node> que;
-  dist[src] = 0;
-  que.push(Node(src, dist[src]));
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  memset(vis, 0, sizeof(vis)); memset(pre, -1, sizeof(pre));
+  priority_queue<Node> que; que.push(Node(src, dist[src]));
   while (!que.empty()) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
     vis[u] = true;
     for (int i = 0; i < n; i++) {
       if (u != i && !vis[i] && dist[k] + mp[k][i] < dist[i]) {
-        dist[i] = dist[k] + mp[k][i]; pre[i] = k;
-        que.push(Node(i, dist[i]));
+        dist[i] = dist[k] + mp[k][i]; pre[i] = k; que.push(Node(i, dist[i]));
       }
     }
   }
@@ -66,11 +60,9 @@ vector<Node> e[N];
 int dist[N];
 bool vis[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist));
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
   memset(vis, 0, sizeof(vis));
-  priority_queue<Node> que;
-  dist[src] = 0;
-  que.push(Node(src, dist[src]));
+  priority_queue<Node> que; que.push(Node(src, dist[src]));
   while (!que.empty()) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
@@ -78,8 +70,7 @@ void Dijkstra(int src) {
     for (size_t i = 0; i < e[u].size(); i++) {
       int v = e[u][i].v;
       if (!vis[v] && dist[v] > dist[u] + e[u][i].w) {
-        dist[v] = dist[u] + e[u][i].w;
-        que.push(Node(v, dist[v]));
+        dist[v] = dist[u] + e[u][i].w; que.push(Node(v, dist[v]));
       }
     }
   }
@@ -92,31 +83,27 @@ struct Node {
 };
 int dist[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist));
-  dist[src] = 0;
-  priority_queue<Node> que;
-  que.push(Node(src, dist[src]));
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  priority_queue<Node> que; que.push(Node(src, dist[src]));
   while (!que.empty()) {
     int u = que.top().v, dis = que.top().w; que.pop();
     if (dis != dist[u]) { continue; }
     for (int i = head[u]; ~i; i = Next[i]) {
       int v = to[i];
       if (dis + len[i] < dist[v]) {
-        dist[v] = dis + len[i];
-        que.push(Node(v, dist[v]));
+        dist[v] = dis + len[i]; que.push(Node(v, dist[v]));
       }
     }
   }
 }
 //SPFA + queue/stack + vector存边 O(kE)
-const int INF = 0x3f3f3f3f;
 struct Edge {
   int v, w;
   Edge(int _v, int _w): v(_v), w(_w) {}
 };
 vector<Edge> e[N];
 int dist[N], cnt[N], pre[N]; //cnt[i]为入队列次数, pre[i]记录src到i路径上的父结点, pre[src] = -1
-bool vis[N]; //在队列/栈标志
+bool vis[N]; //在队/栈标志
 bool SPFA(int src) {
   memset(dist, 0x3f, sizeof(dist));
   memset(cnt, 0, sizeof(cnt));
@@ -148,42 +135,33 @@ bool SPFA(int src) {
 int dist[N];
 bool vis[M];
 void SPFA(int src) {
-  memset(dist, 0x3f, sizeof(dist));
-  memset(vis, 0, sizeof(vis));
-  dist[src] = 0;
-  deque<int> que;
-  que.push_back(src);
-  vis[src] = true;
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  memset(vis, 0, sizeof(vis)); vis[src] = true;
+  deque<int> que; que.push_back(src);
   ll sum = 0;
   while (!que.empty()) {
     int u = que.front(); que.pop_front();
     if (!que.empty() && (ll)dist[u] * que.size() > sum) {
       que.push_back(u); continue;
     }
-    sum -= dist[u];
-    vis[u] = false;
+    sum -= dist[u]; vis[u] = false;
     for (int i = head[u]; ~i; i = Next[i]) {
       int v = to[i], d = dist[u] + len[i];
       if (d < dist[v]) {
         if (vis[v]) { sum += d - dist[v]; }
         dist[v] = d;
         if (!vis[v]) {
-          if (!que.empty() && dist[que.front()] > dist[v]) {
-            que.push_front(v);
-          } else {
-            que.push_back(v);
-          }
-          sum += dist[v];
-          vis[v] = true;
+          if (!que.empty() && dist[que.front()] > dist[v]) { que.push_front(v); }
+          else { que.push_back(v); }
+          sum += dist[v]; vis[v] = true;
         }
       }
     }
   }
 }
-//bellman-ford + vector O(VE)
+//Bellman-Ford + vector O(VE)
 //可以处理负边权图
 //可以判断是否存在负环回路, 当且仅当图中不包含从源点可达的负权回路时返回true
-const int INF = 0x3f3f3f3f;
 struct Edge {
   int u, v, w;
   Edge(int _u, int _v, int _w): u(_u), v(_v), w(_w) {}
@@ -191,15 +169,12 @@ struct Edge {
 vector<Edge> e;
 int dist[N];
 bool BellmanFord(int src) {
-  memset(dist, 0x3f, sizeof(dist));
-  dist[src] = 0;
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
   for (int i = 1; i < n; i++) {
     bool flag = false;
     for (size_t j = 0; j < e.size(); j++) {
       int u = e[j].u, v = e[j].v, dis = e[j].w;
-      if (dist[v] > dist[u] + dis) {
-        dist[v] = dist[u] + dis; flag = true;
-      }
+      if (dist[v] > dist[u] + dis) { dist[v] = dist[u] + dis; flag = true; }
     }
     if (!flag) { return true; } //没有负环回路
   }
@@ -208,7 +183,7 @@ bool BellmanFord(int src) {
   }
   return true; //没有负环回路
 }
-//floyd 带路径记录 O(V^3)
+//Floyd 带路径记录 O(V^3)
 int n, mp[N][N], dist[N][N], pre[N][N];
 void Floyd() {
   memcpy(dist, mp, sizeof(mp));

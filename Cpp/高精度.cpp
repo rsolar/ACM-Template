@@ -1,254 +1,161 @@
-//大数类ver.1 不支持负数
-const int MAXN = 9999; //10 ^ DLEN - 1
-const int MAXSIZE = 505;
-const int DLEN = 4;
+//高精度整数
+const int BASE = 1000000000;
+const int BASE_DIGITS = 9;
 struct BigInt {
-  int a[MAXSIZE], len; //MAXSIZE * DLEN位
-  BigInt() : len(1) { memset(a, 0, sizeof(a)); } //构造函数
-  BigInt(int b): len(0) { //int转化为大数
-    memset(a, 0, sizeof(a));
-    for (; b > MAXN; b /= MAXN + 1) { a[len++] = b - (b / (MAXN + 1)) * (MAXN + 1); }
-    a[len++] = b;
+  vector<int> s; char sign;
+  BigInt(): s(), sign(1) {}
+  BigInt(const ll &v): s(), sign(v < 0 ? -1 : 1) {
+    for (ll t = v < 0 ? -v : v; t; t /= BASE) { s.push_back(t % BASE); }
   }
-  BigInt(const char *s) { //char[]转化为大数
-    memset(a, 0, sizeof(a));
-    while (*(s + 1) && *s == '0') { s++; }
-    int L = strlen(s); len = L / DLEN + (L % DLEN != 0);
-    for (int i = L - 1, index = 0, t, j; i >= 0; a[index++] = t, i -= DLEN) {
-      for (t = 0, j = max(i - DLEN + 1, 0); j <= i; j++) { t = t * 10 + s[j] - '0'; }
+  BigInt(const string &v): s(), sign(1) {
+    int beg = 0;
+    for (; beg < (int)v.size() && (v[beg] == '-' || v[beg] == '+'); beg++) {
+      if (v[beg] == '-') { sign = -1; }
     }
-  }
-  BigInt(const BigInt &T): len(T.len) { memcpy(a, T.a, sizeof(a)); } //拷贝构造函数
-  BigInt &operator=(const BigInt &T) { len = T.len; memcpy(a, T.a, sizeof(a)); return *this; } //大数赋值大数
-  BigInt operator+(const BigInt &T)const { //大数 + 大数
-    BigInt t(*this); t.len = max(len, T.len);
-    for (int i = 0; i < t.len; i++) {
-      t.a[i] += T.a[i];
-      if (t.a[i] > MAXN) { t.a[i + 1]++; t.a[i] -= MAXN + 1; }
+    for (int i = v.size() - 1; i >= beg; i -= BASE_DIGITS) {
+      int x = 0;
+      for (int j = max(beg, i - BASE_DIGITS + 1); j <= i; x = x * 10 + v[j++] - '0');
+      s.push_back(x);
     }
-    t.len += (t.a[t.len] != 0);
-    return t;
+    trim();
   }
-  BigInt operator-(const BigInt &T)const { //|大数 - 大数|
-    BigInt t1, t2; bool flag;
-    if (*this > T) { t1 = *this; t2 = T; flag = false; }
-    else { t1 = T; t2 = *this; flag = true; }
-    for (int i = 0, j; i < t1.len; i++) {
-      if (t1.a[i] < t2.a[i]) {
-        for (j = i + 1; t1.a[j] == 0; j++); t1.a[j--]--;
-        while (j > i) { t1.a[j--] += MAXN; }
-        t1.a[i] += MAXN + 1 - t2.a[i];
-      } else { t1.a[i] -= t2.a[i]; }
-    }
-    while (t1.a[len - 1] == 0 && t1.len > 1) { t1.len--; }
-    if (flag) { t1.a[t1.len - 1] = -t1.a[t1.len - 1]; }
-    return t1;
-  }
-  BigInt operator*(const BigInt &T)const { //大数 * 大数
-    BigInt t; int i, j, up, tmp;
-    for (i = 0; i < len; i++) {
-      for (up = j = 0; j < T.len; j++) {
-        tmp = a[i] * T.a[j] + t.a[i + j] + up;
-        if (tmp > MAXN) {
-          t.a[i + j] = tmp - tmp / (MAXN + 1) * (MAXN + 1);
-          up = tmp / (MAXN + 1);
-        } else { t.a[i + j] = tmp; up = 0; }
+  BigInt &operator=(const BigInt &v) { sign = v.sign; s = v.s; return *this; }
+  BigInt &operator+=(const BigInt &v) {
+    if (sign == v.sign) {
+      for (int i = 0, is = 0, len = max(s.size(), v.s.size()); i < len || is; i++) {
+        if (i == (int)s.size()) { s.push_back(0); }
+        s[i] += is + (i < (int)v.s.size() ? v.s[i] : 0);
+        if ((is = s[i] >= BASE)) { s[i] -= BASE; }
       }
-      if (up != 0) { t.a[i + j] = up; }
-    }
-    for (t.len = i + j; t.a[t.len - 1] == 0 && t.len > 1; t.len--);
-    return t;
+      return *this;
+    } else { return *this -= -v; }
   }
-  BigInt operator/(const int b)const { //大数 / int
-    BigInt t;
-    for (int i = len - 1, down = 0; i >= 0; i--) {
-      t.a[i] = (a[i] + down * (MAXN + 1)) / b;
-      down = a[i] + down * (MAXN + 1) - t.a[i] * b;
-    }
-    for (t.len = len; t.a[t.len - 1] == 0 && t.len > 1; t.len--);
-    return t;
+  BigInt &operator-=(const BigInt &v) {
+    if (sign == v.sign) {
+      if (cmp(v, 0) != -1) {
+        for (int i = 0, is = 0; i < (int)v.s.size() || is; i++) {
+          s[i] -= is + (i < (int)v.s.size() ? v.s[i] : 0);
+          if ((is = s[i] < 0)) { s[i] += BASE; }
+        }
+        trim(); return *this;
+      } else { return *this = -(BigInt(v) -= *this); }
+    } else { return *this += -v; }
   }
-  BigInt operator^(int b)const { //大数快速幂
-    if (b == 0) { return 1; }
-    if (b == 1) { return *this; }
-    BigInt t = *this, ret(1);
-    for (; b > 1; b >>= 1) { if (b & 1) { ret = ret * t; } t = t * t; }
-    return ret * t;
-  }
-  int operator%(const int b)const { //大数膜int
-    int d = 0;
-    for (int i = len - 1; i >= 0; i--) { d = ((d * (MAXN + 1)) % b + a[i]) % b; }
-    return d;
-  }
-  bool operator>(const BigInt &T)const { //大数间大小比较
-    if (len > T.len) { return true; }
-    else if (len == T.len) {
-      int i = len - 1;
-      while (a[i] == T.a[i] && i >= 0) { i--; }
-      return i >= 0 && a[i] > T.a[i];
-    } else { return false; }
-  }
-  bool operator>=(const BigInt &T)const { return *this > T || *this == T; }
-  bool operator<(const BigInt &T)const { return T > *this; }
-  bool operator<=(const BigInt &T)const { return T > *this || T == *this; }
-  bool operator==(const BigInt &T)const { return len == T.len && equal(a, a + len, T.a); }
-  bool operator!=(const BigInt &T)const { return !(*this == T); }
-  void print()const { //输出大数 不带换行
-    printf("%d", a[len - 1]);
-    for (int i = len - 2; i >= 0; i--) { printf("%04d", a[i]); }
-  }
-  friend istream &operator>>(istream &in, BigInt &b) { //重载输入运算符
-    char ch[MAXSIZE * DLEN]; in >> ch; b = BigInt(ch);
-    return in;
-  }
-  friend ostream &operator<<(ostream &out, const BigInt &b) { //重载输出运算符
-    out << setfill('0') << b.a[b.len - 1];
-    for (int i = b.len - 2; i >= 0; i--) { out << setw(4) << b.a[i]; }
-    return out;
-  }
-};
-
-//大数类ver.2 支持负数
-const int MAXBIT = 2005; //位数
-class BigInt {
-private:
-  int bit[MAXBIT];
-  bool nega; //负数标志
-public:
-  BigInt(): nega(false) { memset(bit, 0, sizeof(bit)); }
-  BigInt(int n) {
-    memset(bit, 0, sizeof(bit));
-    if (n >= 0) { nega = false; } else { nega = true; n = -n; }
-    for (int pos = 0; n; bit[pos++] = n % 10, n /= 10);
-  }
-  BigInt(const char *s) {
-    memset(bit, 0, sizeof(bit));
-    int len = strlen(s), beg = 0; bool valid = true; //符合数字格式
-    if (len >= 2) {
-      if (s[0] != '+' && s[0] != '-' && !isdigit(s[0])) { valid = false; }
-      else { for (int i = 1; i < len; i++) { if (!isdigit(s[i])) { valid = false; break; } } }
-    } else if (len == 1) { valid = isdigit(s[0]); }
-    if (len == 0 || !valid) { *this = BigInt(); return; }
-    if (s[0] == '+') { nega = false; beg++; }
-    else if (s[0] == '-') {
-      for (int i = 1; i < len; i++) { if (s[i] != '0') { nega = true; break; } } beg++;
-    } else { nega = false; }
-    for (int i = beg; i < len; i++) { bit[len - 1 - i] = s[i] - '0'; }
-  }
-  BigInt(const BigInt &n): nega(n.nega) { memcpy(bit, n.bit, sizeof(n.bit)); }
-  BigInt &operator=(const BigInt &n) { nega = n.nega; memcpy(bit, n.bit, sizeof(bit)); return *this; }
-  BigInt operator+(const BigInt &n)const {
-    if (nega ^ !n.nega) { return this->absoluteAdd(n); }
-    else if (absoluteEqual(n)) { return BigInt(); }
-    else { return absoluteEqualGreater(n) ? this->absoluteMinus(n) : n.absoluteMinus(*this); }
-  }
-  BigInt operator-(const BigInt &n)const { return *this + n.opposite(); }
-  BigInt operator*(const BigInt &n)const {
-    if (isZero() || n.isZero()) { return BigInt(); }
-    BigInt ret; ret.nega = nega ^ n.nega;
-    for (int i = 0; i < MAXBIT; i++) {
-      for (int j = 0; j < MAXBIT - i; j++) { ret.bit[i + j] += bit[i] * n.bit[j]; }
-    }
-    for (int i = 0; i < MAXBIT - 1; i++) { ret.bit[i + 1] += ret.bit[i] / 10; ret.bit[i] %= 10; }
-    return ret;
-  }
-  BigInt operator/(const int &n)const {
-    if (isZero() || n == 0) { return BigInt(); } //除以0直接返回0
-    BigInt ret; int div = 0; ret.nega = (!nega && n < 0) || (nega && n > 0);
-    for (int i = MAXBIT - 1; i >= 0; i--) { div = div * 10 + bit[i]; ret.bit[i] = div / n; div %= n; }
-    return ret;
-  }
-  int operator%(const int &n)const {
-    int mod = 0;
-    for (int i = MAXBIT - 1; i >= 0; i--) { mod = (mod * 10 + bit[i]) % n; }
-    return mod;
-  }
-  BigInt operator-()const {
-    BigInt ret(*this);
-    if (!this->isZero()) { ret.nega = !ret.nega; }
-    return ret;
-  }
-  bool operator>(const BigInt &n)const {
-    if (!nega && n.nega) { return true; }
-    else if (nega && !n.nega) { return false; }
-    else if (!nega && !n.nega) { return absoluteGreater(n); }
-    else { return n.absoluteGreater(*this); }
-  }
-  bool operator>=(const BigInt &n)const {
-    if (!nega && n.nega) { return true; }
-    else if (nega && !n.nega) { return false; }
-    else if (!nega && !n.nega) { return absoluteEqualGreater(n); }
-    else { return n.absoluteEqualGreater(*this); }
-  }
-  bool operator<(const BigInt &n)const { return n > *this; }
-  bool operator<=(const BigInt &n)const { return n >= *this; }
-  bool operator==(const BigInt &n)const { return nega == n.nega && equal(bit, bit + MAXBIT, n.bit); }
-  bool operator!=(const BigInt &n)const { return !(*this == n); }
-  void print()const { //输出大数 不带换行
-    if (nega) { putchar('-'); }
-    int i = MAXBIT - 1;
-    for (; i > 0 && !bit[i]; i--);
-    for (; i >= 0; i--) { putchar(bit[i] + '0'); }
-  }
-  char *toString()const { //返回数值字符串
-    char *content = new char[MAXBIT + 2];
-    int pos = 0, i = MAXBIT - 1;
-    for (; i > 0 && !bit[i]; i--);
-    if (nega) { content[pos++] = '-'; }
-    for (; i >= 0; i--) { content[pos++] = bit[i] + '0'; }
-    return content;
-  }
-  bool isZero()const { //是否为0
-    for (int i = 0; i < MAXBIT; i++) { if (bit[i] != 0) { return false; } }
-    return true;
-  }
-  bool isPositive()const { return !nega && !isZero(); }
-  bool isNegative()const { return nega; }
-  bool notNegative()const { return !nega; }
-private:
-  BigInt opposite()const { //取相反数
-    BigInt n(*this);
-    if (!n.isZero()) { n.nega = !n.nega; }
-    return n;
-  }
-  BigInt absoluteAdd(const BigInt &n)const { //加上绝对值
-    BigInt ret(*this);
-    for (int i = 0, next = 0; i < MAXBIT; i++) {
-      ret.bit[i] = (bit[i] + n.bit[i] + next) % 10;
-      next = (bit[i] + n.bit[i] + next) / 10;
-    }
-    return ret;
-  }
-  BigInt absoluteMinus(const BigInt &n)const { //减去绝对值小于自身的数的绝对值
-    BigInt ret(*this);
-    for (int i = MAXBIT - 1; i >= 0; i--) {
-      if (ret.bit[i] >= n.bit[i]) { ret.bit[i] -= n.bit[i]; }
-      else { //借位
-        int borrow = i + 1;
-        while (ret.bit[borrow] == 0) { borrow++; } ret.bit[borrow]--;
-        for (int j = i + 1; j < borrow; j++) { ret.bit[j] = 9; }
-        ret.bit[i] += 10 - n.bit[i];
+  BigInt &operator*=(const BigInt &v) {
+    vector<ll> num(s.size() + v.s.size());
+    for (int i = 0; i < (int)s.size(); i++) {
+      for (int j = 0; j < (int)v.s.size(); j++) {
+        num[i + j] += (ll)s[i] * v.s[j];
+        if (num[i + j] >= BASE) {
+          num[i + j + 1] += num[i + j] / BASE; num[i + j] %= BASE;
+        }
       }
     }
+    sign *= v.sign; s.resize(num.size());
+    for (int i = 0; i < (int)num.size(); i++) { s[i] = num[i]; }
+    trim(); return *this;
+  }
+  BigInt &operator*=(int v) {
+    if (v < 0) { sign = -sign, v = -v; }
+    for (int i = 0, is = 0; i < (int)s.size() || is; i++) {
+      if (i == (int)s.size()) { s.push_back(0); }
+      ll a = s[i] * (ll)v + is; is = a / BASE; s[i] = a % BASE;
+    }
+    trim(); return *this;
+  }
+  //除法, 商为first, 余数为second
+  friend pair<BigInt, BigInt> divmod(const BigInt &a, const BigInt &b) {
+    int norm = BASE / (b.s.back() + 1);
+    BigInt x = a.abs() * norm, y = b.abs() * norm, q, r; q.s.resize(x.s.size());
+    for (int i = x.s.size() - 1; i >= 0; i--) {
+      r *= BASE; r += x.s[i];
+      int s1 = r.s.size() <= y.s.size() ? 0 : r.s[y.s.size()];
+      int s2 = r.s.size() <= y.s.size() - 1 ? 0 : r.s[y.s.size() - 1];
+      int d = ((ll)BASE * s1 + s2) / y.s.back();
+      r -= y * d;
+      while (r.cmp(0, 1) == -1) { r += y; --d; }
+      q.s[i] = d;
+    }
+    q.sign = a.sign * b.sign; q.trim(); r.sign = a.sign; r.trim();
+    return make_pair(q, r / norm);
+  }
+  BigInt &operator/=(const BigInt &v) { return *this = divmod(*this, v).first; }
+  BigInt &operator/=(int v) {
+    if (v < 0) { sign = -sign, v = -v; }
+    for (int i = s.size() - 1, rem = 0; i >= 0; i--) {
+      ll a = s[i] + rem * (ll)BASE; s[i] = a / v; rem = a % v;
+    }
+    trim(); return *this;
+  }
+  BigInt &operator%=(const BigInt &v) { return *this = divmod(*this, v).second; }
+  BigInt operator-()const { BigInt ret(*this); ret.sign = -sign; return ret; }
+  BigInt operator+(const BigInt &v)const { return BigInt(*this) += v; }
+  BigInt operator-(const BigInt &v)const { return BigInt(*this) -= v; }
+  BigInt operator*(const BigInt &v)const { return BigInt(*this) *= v; }
+  BigInt operator*(int v)const { return BigInt(*this) *= v; }
+  BigInt operator/(const BigInt &v)const { return divmod(*this, v).first; }
+  BigInt operator/(int v)const { return BigInt(*this) /= v; }
+  BigInt operator%(const BigInt &v)const { return divmod(*this, v).second; }
+  int operator%(int v)const {
+    if (v < 0) { v = -v; }
+    int m = 0;
+    for (int i = s.size() - 1; i >= 0; i--) { m = (s[i] + m * (ll)BASE) % v; }
+    return m * sign;
+  }
+  BigInt operator^(const int &v)const {
+    BigInt ret(1), t(*this);
+    for (int b = v; b; b >>= 1) { if (b & 1) { ret *= t; } t *= t; }
     return ret;
   }
-  bool absoluteEqual(const BigInt &n)const { return equal(bit, bit + MAXBIT, n.bit); } //绝对值等于
-  bool absoluteGreater(const BigInt &n)const { //绝对值大于
-    for (int i = MAXBIT - 1; i >= 0; i--) {
-      if (bit[i] > n.bit[i]) { return true; }
-      else if (bit[i] < n.bit[i]) { return false; }
+  bool operator<(const BigInt &v)const { return cmp(v) < 0; }
+  bool operator>(const BigInt &v)const { return cmp(v) > 0; }
+  bool operator<=(const BigInt &v)const { return cmp(v) <= 0; }
+  bool operator>=(const BigInt &v)const { return cmp(v) >= 0; }
+  bool operator==(const BigInt &v)const { return !cmp(v); }
+  bool operator!=(const BigInt &v)const { return cmp(v) != 0; }
+  int cmp(const BigInt &v, bool is = 1)const {
+    if (is) { if (sign > v.sign) { return 1; } if (sign < v.sign) { return -1; } }
+    int d = sign > 0 || !is ? 1 : -1;
+    if (s.size() > v.s.size()) { return d; }
+    if (s.size() < v.s.size()) { return -d; }
+    for (int i = s.size() - 1; i >= 0; i--) {
+      if (s[i] > v.s[i]) { return d; } if (s[i] < v.s[i]) { return -d; }
     }
-    return false;
+    return 0;
   }
-  bool absoluteEqualGreater(const BigInt &n)const { //绝对值大于等于
-    for (int i = MAXBIT - 1; i >= 0; i--) {
-      if (bit[i] > n.bit[i]) { return true; }
-      else if (bit[i] < n.bit[i]) { return false; }
+  BigInt abs()const { BigInt ret(*this); ret.sign *= ret.sign; return ret; }
+  void trim() {
+    while (!s.empty() && !s.back()) { s.pop_back(); }
+    if (s.empty()) { sign = 1; }
+  }
+  void print()const {
+    if (sign == -1) { putchar('-'); }
+    printf("%d", s.empty() ? 0 : s.back());
+    for (int i = (int)s.size() - 2; i >= 0; i--) { printf("%09d", s[i]); }
+  }
+  friend istream &operator>>(istream &in, BigInt &v) { string s; in >> s; v = s; return in; }
+  friend ostream &operator<<(ostream &out, const BigInt &v) {
+    if (v.sign == -1) { out << '-'; }
+    out << setfill('0') << (v.s.empty() ? 0 : v.s.back());
+    for (int i = (int)v.s.size() - 2; i >= 0; i--) { out << setw(BASE_DIGITS) << v.s[i]; }
+    return out << setfill(' ');
+  }
+  string toString()const {
+    if (s.empty()) { return "0"; }
+    string ret, x;
+    if (sign == -1) { ret += '-'; }
+    for (int o = s[s.size() - 1]; o; o /= 10) { x += o % 10 + '0'; }
+    for (int i = x.size() - 1; i >= 0; i--) { ret += x[i]; }
+    for (int i = s.size() - 2; i >= 0; i--) {
+      x.clear();
+      for (int j = 0, p = s[i]; j < BASE_DIGITS; j++, p /= 10) { x += p % 10 + '0'; }
+      for (int j = BASE_DIGITS - 1; j >= 0; j--) { ret += x[j]; }
     }
-    return true;
+    return ret;
   }
+  operator bool()const { return s.size() && !(s.size() == 1 && !s[0]); }
+  operator string()const { return this->toString(); }
 };
-
 //高精度开方
 bool bigger(char *s1, char *s2) {
   int beg = 0;

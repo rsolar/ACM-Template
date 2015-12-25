@@ -2138,56 +2138,62 @@ int main() {
   }
 }
 //哈夫曼树
-template<typename T> struct Huffman {
-  int lChild[N << 1], rChild[N << 1], parent[N << 1], weight[N << 1], n, tot;
-  char key[N];
-  void init() { n = tot = 0; }
-  void build(char s[], T w[]) {
-    priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > que;
-    pair<int, int> x, y;
-    n = strlen(s); tot = (n << 1) - 1;
+template<typename T> struct HfmTree {
+  int n, l[N << 1], r[N << 1]; T w[N << 1];
+  void build(int _n, T weight[]) {
+    priority_queue<pair<T, int>, vector<pair<T, int> >, greater<pair<T, int> > > que;
+    pair<T, int> x, y; n = _n;
     for (int i = 0; i < n; i++) {
-      weight[i] = w[i]; key[i] = s[i]; lChild[i] = rChild[i] = parent[i] = 0;
-      que.push(make_pair(weight[i], i));
+      w[i] = weight[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));
+    }
+    for (int i = n; i < (n << 1) - 1; i++) {
+      x = que.top(); que.pop(); y = que.top(); que.pop();
+      l[i] = x.second; r[i] = y.second; w[i] = x.first + y.first; que.push(make_pair(w[i], i));
+    }
+  }
+};
+//带编码解码功能
+template<typename T> struct Huffman {
+  int l[N << 1], r[N << 1], p[N << 1], n, tot; T w[N << 1]; char key[N];
+  void init() { n = tot = 0; }
+  void build(char s[], T weight[]) {
+    priority_queue<pair<T, int>, vector<pair<T, int> >, greater<pair<T, int> > > que;
+    pair<T, int> x, y; n = strlen(s); tot = (n << 1) - 1;
+    for (int i = 0; i < n; i++) {
+      w[i] = weight[i]; key[i] = s[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));
     }
     for (int i = n; i < m; i++) {
       x = que.top(); que.pop(); y = que.top(); que.pop();
-      lChild[i] = x.second; rChild[i] = y.second; weight[i] = x.first + y.first;
-      parent[x.second] = parent[y.second] = i; parent[i] = 0;
+      l[i] = x.second; r[i] = y.second; w[i] = x.first + y.first;
+      p[x.second] = p[y.second] = i; p[i] = 0; que.push(make_pair(w[i], i));
     }
   }
   void getCode(vector<string> &code) {
-    code.clear(); code.resize(n);
+    code.resize(n);
     for (int i = 0, pos; i < n; i++) {
-      pos = i;
-      while (pos != tot - 1) {
-        if (pos == lChild[parent[pos]]) { code[i] = '0' + code[i]; }
+      for (pos = i; pos != tot - 1;) {
+        if (pos == l[p[pos]]) { code[i] = '0' + code[i]; }
         else { code[i] = '1' + code[i]; }
       }
     }
   }
-  char *encode(char s[], const vector<string> &code) {
+  string encode(char s[], const vector<string> &code) {
     string ret;
     for (int i = 0, j; s[i]; i++) {
       for (j = 0; j < n && s[i] != key[j]; j++);
       ret += code[j];
     }
-    return ret.c_str();
+    return ret;
   }
-  char *decode(char s[], const vector<string> &code) {
+  string decode(char s[], const vector<string> &code) {
     string ret;
     for (int i = 0, pos = tot - 1; s[i]; i++) {
-      if (pos >= n) {
-        if (s[i] == '0') { pos = lChild[pos]; }
-        else { pos = rChild[pos]; }
-      } else {
-        ret += key[pos];
-        pos = tot - 1;
-      }
+      if (pos >= n) { pos = s[i] == '0' ? l[pos] : r[pos]; }
+      else { ret += key[pos]; pos = tot - 1; }
     }
-    return ret.c_str();
+    return ret;
   }
-}
+};
 //笛卡尔树
 //考虑一个键值对的序列, 当键与键, 值与值之间互不相同时, 它们可以唯一地构成这样一棵二叉树：
 //key在中序遍历时呈升序, 满足二叉查找树性质; 父节点的value大于子节点的value, 满足堆的性质.

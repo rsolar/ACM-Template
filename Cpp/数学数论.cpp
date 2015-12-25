@@ -187,21 +187,18 @@ void getPrimePhi() {
     }
   }
 }
+//gcd
+ll gcd(ll a, ll b) { while (b) { ll t = a % b; a = b; b = t; } return a; }
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
 ll extendGcd(ll a, ll b, ll &x, ll &y) {
-  if (a == 0 && b == 0) { return -1; } //无最大公约数
   if (b == 0) { x = 1; y = 0; return a; }
-  ll d = extendGcd(b, a % b, y, x);
-  y -= a / b * x;
-  return d;
+  ll d = extendGcd(b, a % b, y, x); return y -= a / b * x, d;
 }
 //扩展欧几里得求逆元
 ll modReverse(ll a, ll m) {
-  ll x, y;
-  ll d = extendGcd(a, m, x, y);
-  if (d == 1) { return (x % m + m) % m; }
-  else { return -1; }
+  ll x, y, d = extendGcd(a, m, x, y);
+  if (d == 1) { return (x % m + m) % m; } else { return -1; }
 }
 //只能求0 < a < m的情况,a和m互质
 ll inv(ll a, ll m) {
@@ -209,14 +206,10 @@ ll inv(ll a, ll m) {
   return inv(m % a, m) * (m - m / a) % m;
 }
 //费马小定理, m为素数, a与m互质
-ll inv(ll a, ll m) {
-  return powMod(a, m - 2, m);
-}
+ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
 //线性求逆元
 void getInv(int m) {
-  for (ll i = 2; i < m; i++) {
-    inv[i] = (m - m / i) * inv[m % i] % m;
-  }
+  for (ll i = 2; i < m; i++) { inv[i] = (m - m / i) * inv[m % i] % m; }
 }
 //预处理卡特兰数
 int a[105][105]; //大数

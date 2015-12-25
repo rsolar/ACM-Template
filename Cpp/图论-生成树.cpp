@@ -1,23 +1,20 @@
 //最小生成树
 //Prim + 邻接矩阵 O(V^2)
 //每次找与当前节点相连的边中权值最小且另一边的节点未被访问过的边加入到生成树中, 直到所有点都被访问
-const int N = 1005;
 const int INF = 0x3f3f3f3f;
 int n, cost[N][N];
 int dist[N];
 bool vis[N];
-int Prim() {
-  memset(vis, 0, sizeof(vis));
-  for (int i = 1; i < n; i++) { dist[i] = cost[0][i]; }
-  int ret = 0;
-  vis[0] = true;
+int Prim(int src) {
+  memset(vis, 0, sizeof(vis)); memcpy(dist, cost[src], sizeof(dist));
+  int ret = 0; vis[src] = true;
   for (int i = 1; i < n; i++) {
     int minc = INF, p = -1;
     for (int j = 0; j < n; j++) {
       if (!vis[j] && minc > dist[j]) { minc = dist[j]; p = j; }
     }
     if (minc == INF) { return -1; } //原图不连通
-    ret += minc; vis[p] = true;
+    vis[p] = true; ret += minc;
     for (int j = 0; j < n; j++) {
       if (!vis[j] && dist[j] > cost[p][j]) { dist[j] = cost[p][j]; }
     }
@@ -25,8 +22,6 @@ int Prim() {
   return ret;
 }
 //Prim + priority_queue + 邻接表 O(ElogV)
-const int N = 100005;
-const int M = 200005;
 const int INF = 0x3f3f3f3f;
 int head[N], to[M], Next[M], len[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
@@ -38,38 +33,28 @@ struct Node {
 };
 int dist[N];
 bool vis[N];
-int Prim() {
-  memset(dist, 0x3f, sizeof(dist));
-  memset(vis, 0, sizeof(vis));
+int Prim(int src) {
+  memset(dist, 0x3f, sizeof(dist)); memset(vis, 0, sizeof(vis));
   int ret = 0;
   priority_queue<Node> que;
   for (int i = head[0]; ~i; i = Next[i]) {
     int v = to[i];
-    if (len[i] < dist[v]) {
-      dist[v] = len[i];
-      que.push(Node(v, dist[v]));
-    }
+    if (len[i] < dist[v]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
   }
-  vis[0] = true;
+  vis[src] = true;
   while (!que.empty()) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
-    vis[u] = true;
-    ret += dist[u];
+    vis[u] = true; ret += dist[u];
     for (int i = head[u]; ~i; i = Next[i]) {
       int v = to[i];
-      if (!vis[v] && dist[v] > len[i]) {
-        dist[v] = len[i];
-        que.push(Node(v, dist[v]));
-      }
+      if (!vis[v] && dist[v] > len[i]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
     }
   }
   return ret;
 }
 //Kruskal + 邻接表 O(ElogE)
 //每次选择没有加入的边中权值最小的且加入后不会形成环的边, 直到形成一棵树
-const int N = 1005;
-const int M = 100005;
 struct Edge {
   int u, v, w;
   bool operator<(const Edge &r)const { return w < r.w; }
@@ -91,7 +76,6 @@ int Kruskal() {
 }
 //曼哈顿距离最小生成树
 //Kruskal O(VlogV)
-const int N = 100005;
 const int INF = 0x3f3f3f3f;
 struct Point {
   int x, y, id;
@@ -168,15 +152,14 @@ int Kruskal(int k) {
 }
 //次小生成树
 //Prim + 邻接矩阵 O(V^2 + E)
-//求最小生成树时, 用数组Max[i][j]来表示MST中i到j最大边权
+//求最小生成树时, 用数组Mx[i][j]来表示MST中i到j最大边权
 //求完后, 直接枚举所有不在MST中的边, 替换掉最大边权的边, 更新答案
-const int N = 1005;
 const int INF = 0x3f3f3f3f;
 int n, cost[N][N];
-int dist[N], pre[N], Max[N][N]; //Max[i][j]表示在最小生成树中从i到j的路径中的最大边权
+int dist[N], pre[N], Mx[N][N]; //Mx[i][j]表示在最小生成树中从i到j的路径中的最大边权
 bool vis[N], used[N][N];
 int Prim() {
-  memset(Max, 0, sizeof(Max));
+  memset(Mx, 0, sizeof(Mx));
   memset(pre, 0, sizeof(pre));
   memset(vis, 0, sizeof(vis));
   memset(used, 0, sizeof(used));
@@ -191,15 +174,13 @@ int Prim() {
     ret += minc; vis[p] = true;
     used[p][pre[p]] = used[pre[p]][p] = true;
     for (int j = 0; j < n; j++) {
-      if (vis[j]) { Max[j][p] = Max[p][j] = max(Max[j][pre[p]], dist[p]); }
+      if (vis[j]) { Mx[j][p] = Mx[p][j] = max(Mx[j][pre[p]], dist[p]); }
       if (!vis[j] && dist[j] > cost[p][j]) { dist[j] = cost[p][j]; pre[j] = p; }
     }
   }
   return ret;
 }
 //Kruskal + 邻接表 O(VElogE)
-const int N = 1005;
-const int M = 100005;
 const int INF = 0x3f3f3f3f;
 struct Edge {
   int u, v, w;
