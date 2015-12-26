@@ -1,5 +1,46 @@
+//最大子段和 O(n)
+ll maxSum(int a[], int n, int &st, int &ed) {
+  ll ret = a[0], sum = 0; st = ed = 0;
+  for (int i = 0, s = 0; i < n; i++, s = sum > 0 ? s : i) {
+    if ((sum = max(sum, 0LL) + a[i]) > ret) { ret = sum; st = s; ed = i; }
+  }
+  return ret;
+}
+//循环数组最大子段和 O(n)
+ll maxSum_adj(int a[], int n) {
+  ll ret_notadj = maxSum(a, n); //不跨界最大子段和
+  if (ret_notadj < 0) { return ret_notadj; }
+  ll sum = 0, mnsum = INT_MAX, mntmp = 0;
+  for (int i = 0; i < n; i++) {
+    if (mntmp > 0) { mntmp = a[i]; } else { mntmp += a[i]; }
+    if (mntmp < mnsum) { mnsum = mntmp; }
+    sum += a[i];
+  }
+  ll ret_adj = sum - mnsum;
+  return max(ret_notadj, ret_adj);
+}
+//最大子阵和 O(n^3)
+ll presum[N][N];
+ll maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
+  ll ret = a[0][0], sum; x1 = y1 = x2 = y2 = 0;
+  for (int i = 0, j; i < h; i++) {
+    for (presum[i][j = 0] = 0; j < w; j++) {
+      presum[i][j + 1] = presum[i][j] + a[i][j];
+    }
+  }
+  for (int j = 0, k, i, s; j < w; j++) {
+    for (k = j; k < w; k++) {
+      for (sum = s = i = 0; i < h; i++, s = (sum > 0 ? s : i)) {
+        if ((sum = max(sum, 0LL) + presum[i][k + 1] - presum[i][j]) > ret) {
+          ret = sum; x1 = s; y1 = i; x2 = j; y2 = k;
+        }
+      }
+    }
+  }
+  return ret;
+}
 //最长上升子序列 LIS O(nlogn) 非降如注释
-int n, a[N], b[N];
+int b[N];
 int BS(int len, int x) {
   int l = 0, r = len - 1, mid;
   while (l <= r) {
@@ -9,7 +50,7 @@ int BS(int len, int x) {
     else { r = mid - 1; }
   }
 }
-int LIS() {
+int LIS(int a[], int n) {
   int len = 1; b[0] = a[0];
   for (int i = 1, j; i < n; i++) {
     if (a[i] <= b[0]) { j = 0; }  // <= 换为 <
@@ -164,46 +205,6 @@ int Dist(char S[], char T[], int k) {
     }
   }
   return dp[n][m];
-}
-//最大子段和 O(n)
-int maxSum(int a[], int n, int &st, int &ed) {
-  int ret, sum, s, i;
-  for (ret = a[sum = st = ed = s = i = 0]; i < n; i++, s = (sum > 0 ? s : i)) {
-    if ((sum = (sum > 0 ? sum : 0) + a[i]) > ret) { ret = sum; st = s; ed = i; }
-  }
-  return ret;
-}
-//循环数组最大子段和
-int maxSum_adj(int a[], int n) {
-  int ret_notadj = maxSum(a, n); //不跨界最大子段和
-  if (ret_notadj < 0) { return ret_notadj; }
-  int sum = 0, mnsum = INT_MAX, mntmp = 0;
-  for (int i = 0; i < n; i++) {
-    if (mntmp > 0) { mntmp = a[i]; } else { mntmp += a[i]; }
-    if (mntmp < mnsum) { mnsum = mntmp; }
-    sum += a[i];
-  }
-  int ret_adj = sum - mnsum;
-  return ret_notadj > ret_adj ? ret_notadj : ret_adj;
-}
-//最大子阵和 O(n^3)
-int maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
-  int presum[N][N], ret = a[0][0], sum, i, j, k, s; x1 = y1 = x2 = y2 = 0;
-  for (i = 0; i < h; i++) {
-    for (presum[i][j = 0] = 0; j < w; j++) {
-      presum[i][j + 1] = presum[i][j] + a[i][j];
-    }
-  }
-  for (j = 0; j < w; j++) {
-    for (k = j; k < w; k++) {
-      for (sum = s = i = 0; i < h; i++, s = (sum > 0 ? s : i)) {
-        if ((sum = (sum > 0 ? sum : 0) + presum[i][k + 1] - presum[i][j]) > ret) {
-          ret = sum; x1 = s; y1 = i; x2 = j; y2 = k;
-        }
-      }
-    }
-  }
-  return ret;
 }
 //RMQ 一维
 //Sparse Table 返回值

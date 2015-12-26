@@ -4,8 +4,17 @@ int Joseph(int n, int m) {
   for (int i = 2; i <= n; i++) { ret = (ret + m) % i; }
   return ret + 1;
 }
+//二叉树前序 + 中序求后序遍历
+void getPost(char *pre, char *in, int len) {
+  if (len == 0) { return; }
+  int root = 0;
+  for (; root < len && in[root] != *pre; root++);
+  getPost(pre + 1, in, root);
+  getPost(pre + root + 1, in + root + 1, len - root - 1);
+  putchar(*pre);
+}
 //统计0到n之间1的个数
-int CountOne(int n) {
+int countOne(int n) {
   int i = 1, ret = 0, before, current, after;
   while (n / i) {
     before = n / (i * 10); current = n / i % 10; after = n - n / i * i;
@@ -18,10 +27,9 @@ int CountOne(int n) {
 }
 //小数转化为分数
 //把小数转化为分数, 循环部分用()表示
-void Work(char str[]) {
+void work(char str[]) {
   int len = strlen(str), cnt1 = 0, cnt2 = 0;
-  ll a = 0, b = 0;
-  bool flag = false;
+  ll a = 0, b = 0; bool flag = false;
   for (int i = 2; i < len; i++) {
     if (str[i] == '(') { break; }
     a = a * 10 + str[i] - '0'; cnt1++;
@@ -30,20 +38,18 @@ void Work(char str[]) {
     if (str[i] == '(' || str[i] == ')') { flag = true; continue; }
     b = b * 10 + str[i] - '0'; cnt2++;
   }
-  cnt2 -= cnt1;
-  ll p = b - a, q = 0;
+  ll p = b - a, q = 0; cnt2 -= cnt1;
   if (!flag) { p = b; q = 1; cnt2 = 0; }
   for (int i = 0; i < cnt2; i++) { q = q * 10 + 9; }
   for (int i = 0; i < cnt1; i++) { q = q * 10; }
-  ll g = gcd(p, q);
-  p /= g; q /= g;
+  ll g = gcd(p, q); p /= g; q /= g;
   printf("%I64d/%I64d\n", p, q);
 }
 //分数转化为小数
 //定理: 有理数a / b(其中0 < a < b，(a, b) = 1)能表示成纯循环小数的充要条件是(b, 10) = 1
 //定理: 有理数a / b, 0 < a < b, (a, b) = 1, b = (2 ^ α) * (5 ^ β) * b1, (b1, 10) = 1,
 //      b1不等于1，α，β不全为零，则a / b可以表示为纯循环小数，其不循环的位数为u = max(α, β)
-void Work(int n) {
+void work(int n) {
   bool flag = false;
   int ans[N] = { 0 }, f[N] = { 0, 1 }, k = 1, cnt = 0;
   if (n < 0) { n = -n; flag = 1; }

@@ -5,11 +5,10 @@ ll powMod(ll a, ll b, ll m) {
   return r;
 }
 //素数筛 Eratosthenes O(nloglogn) [0, N)
-const int N = 10000000; //200ms
-bool isprime[N];
+const int N = 10000000; //~80ms
+bitset<N> isprime;
 void getPrime() {
-  memset(isprime, -1, sizeof(isprime));
-  isprime[0] = isprime[1] = false;
+  isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i < N; i++) {
     if (isprime[i]) {
       for (ll j = (ll)i * i; j < N; j += i) { isprime[j] = false; }
@@ -17,31 +16,28 @@ void getPrime() {
   }
 }
 //素数表 Euler O(n) [2, N] prime[0]为个数
-const int N = 10000000; //160ms
-int prime[N + 1]; //3711111 for [2, 10^9)
+const int N = 10000000; //~65ms
+int prime[N + 5]; //3711111 for [2, 10^9)
 void getPrime() {
   for (int i = 2; i <= N; i++) {
     if (!prime[i]) { prime[++prime[0]] = i; }
-    for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
       prime[prime[j] * i] = 1;
       if (i % prime[j] == 0) { break; }
     }
   }
 }
 //素数筛 + 素数表 Euler [0, N)
-const int N = 10000000; //100ms
-bool isprime[N];
+const int N = 10000000; //~95ms
+bitset<N> isprime;
 int prime[N];
 void getPrime() {
-  memset(isprime, -1, sizeof(isprime));
-  isprime[0] = isprime[1] = false;
+  isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i <= N; i++) {
-    if (isprime[i]) {
-      prime[++prime[0]] = i;
-      for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
-        isprime[prime[j] * i] = false;
-        if (i % prime[j]) { break; }
-      }
+    if (isprime[i]) { prime[++prime[0]] = i; }
+    for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+      isprime[prime[j] * i] = false;
+      if (i % prime[j] == 0) { break; }
     }
   }
 }
@@ -66,10 +62,7 @@ int getFactors(ll x) {
     factor[fatCnt][1] = 0;
     if (x % prime[i] == 0) {
       factor[fatCnt][0] = prime[i];
-      while (x % prime[i] == 0) {
-        factor[fatCnt][1]++;
-        x /= prime[i];
-      }
+      while (x % prime[i] == 0) { factor[fatCnt][1]++; x /= prime[i]; }
       fatCnt++;
     }
   }
@@ -137,53 +130,64 @@ void findfac(ll n, int k = 107) {
   findfac(p, k);
   findfac(n / p, k);
 }
-//求单个数的欧拉函数+合数分解
+//求单个数的欧拉函数 + 合数分解
 int getFacEul(ll n, ll factor[][2] = factor) {
-  int fatCnt = getFactors(n);
-  for (int i = 0; i < fatCnt; i++) {
+  for (int i = 0, fatCnt = getFactors(n); i < fatCnt; i++) {
     n = n / factor[i][0] * (factor[i][0] - 1);
   }
-  return fatCnt;
+  return n;
+}
+//约数个数筛
+const int N = 10000000; //~125ms
+bitset<N> isprime;
+int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
+void getFaccnt() {
+  isprime.set(); isprime[0] = isprime[1] = false;
+  for (int i = 2; i <= N; i++) {
+    if (isprime[i]) { prime[++prime[0]] = i; faccnt[i] = 2; d[i] = 1; }
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+      isprime[prime[j] * i] = false;
+      if (i % prime[j] == 0) {
+        faccnt[prime[j] * i] = faccnt[i] / (d[i] + 1) * (d[i] + 2);
+        d[prime[j] * i] = d[i] + 1;
+        break;
+      }
+      faccnt[prime[j] * i] = faccnt[i] << 1; d[prime[j] * i] = 1;
+    }
+  }
 }
 //求单个数的欧拉函数
 ll eular(ll n) {
   ll ans = n;
-  for (int i = 2; i * i <= n; i++) {
-    if (n % i == 0) {
-      ans -= ans / i;
-      while (n % i == 0) { n /= i; }
-    }
+  for (ll i = 2; i * i <= n; i++) {
+    if (n % i == 0) { ans -= ans / i; while (n % i == 0) { n /= i; } }
   }
-  if (n > 1) { ans -= ans / n; }
-  return ans;
+  return n > 1 ? ans - ans / n ? ans;
 }
 //欧拉函数筛
-const int N = 10000000; //~430ms
+const int N = 10000000; //~320ms
 int phi[N + 5] = { 0, 1 };
 void getPhi() {
-  for (int i = 2; i < N; i++) {
+  for (int i = 2; i <= N; i++) {
     if (!phi[i]) {
-      phi[i] = i - 1;
-      for (int j = i + i; j < N; j += i) {
-        if (!phi[j]) { phi[j] = j; }
-        phi[j] = phi[j] / i * (i - 1);
+      for (int j = i; j <= N; j += i) {
+        if (!phi[j]) { phi[j] = j; } phi[j] -= phi[j] / i;
       }
     }
   }
 }
 //素数 + 欧拉函数线性筛
-const int N = 10000000; //~160ms
-bool check[N + 5];
-int prime[N], phi[N + 5], tot; //素数的个数
+const int N = 10000000; //~95ms
+bitset<N> isprime;
+int prime[N], phi[N + 5] = { 0, 1 };
 void getPrimePhi() {
-  tot = 0; phi[1] = 1;
+  isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i < N; i++) {
-    if (!check[i]) { prime[tot++] = i; phi[i] = i - 1; }
-    for (int j = 0; j < tot; j++) {
-      if (i * prime[j] >= N) { break; }
-      check[i * prime[j]] = true;
-      if (i % prime[j] == 0) { phi[i * prime[j]] = phi[i] * prime[j]; break; }
-      else { phi[i * prime[j]] = phi[i] * (prime[j] - 1); }
+    if (isprime[i]) { prime[++prime[0]] = i; phi[i] = i - 1; }
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+      isprime[prime[j] * i] = false;
+      if (i % prime[j] == 0) { phi[prime[j] * i] = phi[i] * prime[j]; break; }
+      else { phi[prime[j] * i] = phi[i] * (prime[j] - 1); }
     }
   }
 }
@@ -313,12 +317,12 @@ ll CRT(ll a[], ll m[], int k) {
 }
 //求原根
 ll n, factor[100];
-int cnt, prime[N + 1];
+int cnt, prime[N + 5];
 //素数表
 void getPrime() {
   for (int i = 2; i <= N; i++) {
     if (!prime[i]) { prime[++prime[0]] = i; }
-    for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
       prime[prime[j] * i] = 1;
       if (i % prime[j] == 0) { break; }
     }
@@ -333,7 +337,7 @@ ll powMod(ll a, ll b, ll m) {
 //分解质因数
 void getFactors(ll x) {
   cnt = 0;
-  for (int i = 1; prime[i] <= x / prime[i]; i++) {
+  for (int i = 1; (ll)prime[i] * prime[i] <= x; i++) {
     if (x % prime[i] == 0) {
       factor[cnt++] = prime[i];
       while (x % prime[i] == 0) { x /= prime[i]; }
@@ -361,19 +365,17 @@ int main() {
   }
 }
 //莫比乌斯函数线性筛
-const int N = 10000000; //150ms
-int prime[N], tot, miu[N];
-bool isPrime[N];
+const int N = 10000000; //95ms
+bitset<N> isprime;
+int prime[N], miu[N + 5] = { 0, 1 };
 void getMiu() {
-  memset(isPrime, -1, sizeof(isPrime));
-  miu[1] = 1;
-  for (int i = 2; i < N; i++) {
-    if (isPrime[i]) { prime[++tot] = i; miu[i] = -1; }
-    for (int j = 1; j <= tot; j++) {
-      if (i * prime[j] >= N) { break; }
-      isPrime[i * prime[j]] = false;
-      if (i % prime[j] == 0) { miu[i * prime[j]] = 0; break; }
-      miu[i * prime[j]] = -miu[i];
+  isprime.set(); isprime[0] = isprime[1] = false;
+  for (int i = 2; i <= N; i++) {
+    if (isprime[i]) { prime[++prime[0]] = i; miu[i] = -1; }
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+      isprime[prime[j] * i] = false;
+      if (i % prime[j] == 0) { miu[prime[j] * i] = 0; break; }
+      miu[prime[j] * i] = -miu[i];
     }
   }
 }
