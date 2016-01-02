@@ -23,7 +23,7 @@ template<typename T> struct Matrix {
       for (int k = 0; k < w; k++) {
         const T &tmp = (*this)[i][k];
         if (isZero(tmp)) { continue; }
-        for (int j = 0; j < b.w; j++) { c[i][j] += tmp * b[k][j]; }
+        for (int j = 0; j < b.w; j++) { c[i][j] = (c[i][j] + tmp * b[k][j])/*%M*/; }
       }
     }
     swap(a, c.a); h = c.h; w = c.w; return *this;

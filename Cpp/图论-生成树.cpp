@@ -2,21 +2,20 @@
 //Prim + 邻接矩阵 O(V^2)
 //每次找与当前节点相连的边中权值最小且另一边的节点未被访问过的边加入到生成树中, 直到所有点都被访问
 const int INF = 0x3f3f3f3f;
-int n, cost[N][N];
-int dist[N];
+int n, mp[N][N], dist[N];
 bool vis[N];
 int Prim(int src) {
-  memset(vis, 0, sizeof(vis)); memcpy(dist, cost[src], sizeof(dist));
+  memset(vis, 0, sizeof(vis)); memcpy(dist, mp[src], sizeof(dist));
   int ret = 0; vis[src] = true;
-  for (int i = 1; i < n; i++) {
-    int minc = INF, p = -1;
-    for (int j = 0; j < n; j++) {
-      if (!vis[j] && minc > dist[j]) { minc = dist[j]; p = j; }
+  for (int j = 1; j < n; j++) {
+    int mn = INF, u = -1;
+    for (int i = 0; i < n; i++) {
+      if (!vis[i] && mn > dist[i]) { mn = dist[i]; u = i; }
     }
-    if (minc == INF) { return -1; } //原图不连通
-    vis[p] = true; ret += minc;
-    for (int j = 0; j < n; j++) {
-      if (!vis[j] && dist[j] > cost[p][j]) { dist[j] = cost[p][j]; }
+    if (mn == INF) { return -1; } //原图不连通
+    vis[u] = true; ret += mn;
+    for (int v = 0; v < n; v++) {
+      if (!vis[v] && dist[v] > mp[u][v]) { dist[v] = mp[u][v]; }
     }
   }
   return ret;
@@ -155,8 +154,7 @@ int Kruskal(int k) {
 //求最小生成树时, 用数组Mx[i][j]来表示MST中i到j最大边权
 //求完后, 直接枚举所有不在MST中的边, 替换掉最大边权的边, 更新答案
 const int INF = 0x3f3f3f3f;
-int n, cost[N][N];
-int dist[N], pre[N], Mx[N][N]; //Mx[i][j]表示在最小生成树中从i到j的路径中的最大边权
+int n, mp[N][N], dist[N], pre[N], Mx[N][N]; //Mx[i][j]表示在最小生成树中从i到j的路径中的最大边权
 bool vis[N], used[N][N];
 int Prim() {
   memset(Mx, 0, sizeof(Mx));
@@ -165,17 +163,17 @@ int Prim() {
   memset(used, 0, sizeof(used));
   int ret = 0;
   vis[0] = true; pre[0] = -1;
-  for (int i = 1; i < n; i++) { dist[i] = cost[0][i]; }
-  for (int i = 1; i < n; i++) {
-    int minc = INF, p = -1;
+  for (int i = 1; i < n; i++) { dist[i] = mp[0][i]; }
+  for (int j = 1; j < n; j++) {
+    int mn = INF, u = -1;
     for (int j = 0; j < n; j++)
-      if (!vis[j] && minc > dist[j]) { minc = dist[j]; p = j; }
-    if (minc == INF) { return -1; } //原图不连通
-    ret += minc; vis[p] = true;
-    used[p][pre[p]] = used[pre[p]][p] = true;
-    for (int j = 0; j < n; j++) {
-      if (vis[j]) { Mx[j][p] = Mx[p][j] = max(Mx[j][pre[p]], dist[p]); }
-      if (!vis[j] && dist[j] > cost[p][j]) { dist[j] = cost[p][j]; pre[j] = p; }
+      if (!vis[j] && mn > dist[j]) { mn = dist[j]; u = j; }
+    if (mn == INF) { return -1; } //原图不连通
+    vis[u] = true; ret += mn;
+    used[u][pre[u]] = used[pre[u]][u] = true;
+    for (int v = 0; v < n; v++) {
+      if (vis[v]) { Mx[v][u] = Mx[u][v] = max(Mx[v][pre[u]], dist[u]); }
+      if (!vis[v] && dist[v] > mp[u][v]) { dist[v] = mp[u][v]; pre[v] = u; }
     }
   }
   return ret;

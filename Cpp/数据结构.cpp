@@ -1916,7 +1916,7 @@ void build(int l, int r, int dep = 0) {
   build(lson);
   build(rson);
 }
-priority_queue<pair<int, point> > pq;
+priority_queue<pair<int, point>> pq;
 void query(const point &x, int k, int l, int r, int dep = 0) {
   if (l > r) { return; }
   int m = l + r >> 1, cur = dep % K;
@@ -2141,7 +2141,7 @@ int main() {
 template<typename T> struct HfmTree {
   int n, l[N << 1], r[N << 1]; T w[N << 1];
   void build(int _n, T weight[]) {
-    priority_queue<pair<T, int>, vector<pair<T, int> >, greater<pair<T, int> > > que;
+    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
     pair<T, int> x, y; n = _n;
     for (int i = 0; i < n; i++) {
       w[i] = weight[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));
@@ -2157,7 +2157,7 @@ template<typename T> struct Huffman {
   int l[N << 1], r[N << 1], p[N << 1], n, tot; T w[N << 1]; char key[N];
   void init() { n = tot = 0; }
   void build(char s[], T weight[]) {
-    priority_queue<pair<T, int>, vector<pair<T, int> >, greater<pair<T, int> > > que;
+    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
     pair<T, int> x, y; n = strlen(s); tot = (n << 1) - 1;
     for (int i = 0; i < n; i++) {
       w[i] = weight[i]; key[i] = s[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));

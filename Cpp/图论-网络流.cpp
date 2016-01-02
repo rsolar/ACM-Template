@@ -289,7 +289,7 @@ int HLPP(int n = n) {
   memset(vis, 0, sizeof(vis));
   bfs();
   int todo = -1;
-  vector<queue<int> > que(n << 1);
+  vector<queue<int>> que(n << 1);
   vis[src] = vis[sink] = true;
   for (int i = 0; i < e[src].size(); i++) {
     Edge &arc = edge[e[src][i]], &cra = edge[e[src][i] ^ 1];

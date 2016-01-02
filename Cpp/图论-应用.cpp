@@ -324,7 +324,7 @@ bool solvable(int n) { //n是总个数,需要选择一半
 }
 //拓扑排序求任意一组解部分
 queue<int> q1, q2;
-vector<vector<int> > dag; //缩点后的逆向DAG图
+vector<vector<int>> dag; //缩点后的逆向DAG图
 char color[N]; //染色, 为'R'是选择的
 int indeg[N]; //入度
 int cf[N];
