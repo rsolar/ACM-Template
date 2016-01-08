@@ -2,16 +2,17 @@
 //queue->普通判断用, priority_queue->字典序
 //邻接矩阵
 int n, mp[N][N], in[N], ret[N];
-bool topoSort() {
-  queue<int> que; int k = 0;
+int topoSort() {
+  queue<int> que; int k = 0; bool flag = false;
   for (int i = 0; i < n; i++) { if (in[i] == 0) { que.push(i); } }
   while (!que.empty()) {
-    int u = que.top(); que.pop(); ret[k++] = u;
+    if (que.size() > 1) { flag = true; }
+    int u = que.front(); que.pop(); ret[k++] = u;
     for (int v = 0; v < n; v++) {
       if (mp[u][v] && --in[v] == 0) { que.push(v); }
     }
   }
-  return k == n;
+  return k < n ? -1 : flag ? 0 : 1; //有环, 不唯一, 唯一
 }
 //邻接表
 int head[N], to[M], Next[M], tot;

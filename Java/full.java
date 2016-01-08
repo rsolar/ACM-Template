@@ -18,7 +18,7 @@ public class Main {
   }
 
   void run() {
-    sc = new Scanner(new BufferedInputStream(System.in));
+    sc = new Scanner(new BufferedInputStream(System.in, 1024));
     out = new PrintWriter(System.out);
     solve();
     out.flush();

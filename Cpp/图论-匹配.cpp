@@ -1,5 +1,5 @@
 //二分图最大匹配
-//Hungary + dfs + 邻接矩阵 O(V*E)
+//Hungary + dfs + 邻接矩阵 O(V^2)
 bool g[N][N];
 int uN, vN; //左右点的数目
 int match[N];
@@ -31,6 +31,7 @@ int head[N], to[M], Next[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
 int uN, match[N];
+bool check[N];
 bool dfs(int u) {
   for (int i = head[u]; ~i; i = Next[i]) {
     int v = to[i];
@@ -112,7 +113,7 @@ int Hungary() {
         int u = que.front(); que.pop();
         for (int i = head[u]; ~i && !flag; i = Next[i]) {
           int v = to[i];
-          if (g[u][v] && check[v] != i) {
+          if (check[v] != i) {
             check[v] = i;
             que.push(match[v]);
             if (~match[v]) { pre[match[v]] = u; }

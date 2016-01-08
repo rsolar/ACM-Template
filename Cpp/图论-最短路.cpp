@@ -66,7 +66,7 @@ void Dijkstra(int src) {
     if (vis[u]) { continue; }
     vis[u] = true;
     for (size_t i = 0; i < e[u].size(); i++) {
-      int &v = e[u][i].v, &w = e[u][i].w;
+      int v = e[u][i].v, w = e[u][i].w;
       if (!vis[v] && dist[v] > dist[u] + w) {
         dist[v] = dist[u] + w; que.push(Node(v, dist[v]));
       }
@@ -87,7 +87,7 @@ void Dijkstra(int src) {
     int u = que.top().v, w = que.top().w; que.pop();
     if (w != dist[u]) { continue; }
     for (int i = head[u]; ~i; i = Next[i]) {
-      int &v = to[i];
+      int v = to[i];
       if (w + len[i] < dist[v]) {
         dist[v] = w + len[i]; que.push(Node(v, dist[v]));
       }
@@ -113,7 +113,7 @@ bool SPFA(int src) {
     int u = que.front(); que.pop(); //int u = que.top(); que.pop();
     vis[u] = false;
     for (size_t i = 0; i < e[u].size(); i++) {
-      int &v = e[u][i].v, &w = e[u][i].w;
+      int v = e[u][i].v, w = e[u][i].w;
       if (dist[v] > dist[u] + w) {
         dist[v] = dist[u] + w;
         if (!vis[v]) {
@@ -138,7 +138,7 @@ void SPFA(int src) {
     if (!que.empty() && (ll)dist[u] * que.size() > sum) { que.push_back(u); continue; }
     sum -= dist[u]; vis[u] = false;
     for (int i = head[u]; ~i; i = Next[i]) {
-      int &v = to[i], d = dist[u] + len[i];
+      int v = to[i], d = dist[u] + len[i];
       if (d < dist[v]) {
         if (vis[v]) { sum += d - dist[v]; }
         dist[v] = d;
@@ -164,13 +164,13 @@ bool BellmanFord(int src) {
   for (int i = 1; i < n; i++) {
     bool flag = false;
     for (size_t j = 0; j < e.size(); j++) {
-      int &u = e[j].u, &v = e[j].v, &w = e[j].w;
+      int u = e[j].u, v = e[j].v, w = e[j].w;
       if (dist[v] > dist[u] + w) { dist[v] = dist[u] + w; flag = true; }
     }
     if (!flag) { return true; } //没有负环回路
   }
   for (size_t j = 0; j < e.size(); j++) {
-    int &u = e[j].u, &v = e[j].v, &w = e[j].w;
+    int u = e[j].u, v = e[j].v, w = e[j].w;
     if (dist[v] > dist[u] + w) { return false; } //有负环回路
   }
   return true; //没有负环回路
