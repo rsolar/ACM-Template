@@ -177,7 +177,7 @@ struct Trie {
     int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (~Next[now][c]) { Next[now][c] = newnode(); }
+      if (Next[now][c] == -1) { Next[now][c] = newnode(); }
       now = Next[now][c];
     }
     End[now]++;
@@ -186,7 +186,7 @@ struct Trie {
     int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (~Next[now][c]) { return -1; }
+      if (Next[now][c] == -1) { return -1; }
       now = Next[now][c];
     }
     return End[now];
@@ -205,7 +205,7 @@ struct Trie {
     int len = strlen(buf), now = root;
     for (int i = 0; i < len; i++) {
       int c = buf[i] - 'a';
-      if (~Next[now][c]) { Next[now][c] = newnode(); }
+      if (Next[now][c] == -1) { Next[now][c] = newnode(); }
       now = Next[now][c];
     }
     End[now]++;
@@ -214,7 +214,7 @@ struct Trie {
     queue<int> que;
     Fail[root] = root;
     for (int i = 0; i < 26; i++) {
-      if (~Next[root][i]) { Next[root][i] = root; }
+      if (Next[root][i] == -1) { Next[root][i] = root; }
       else { Fail[Next[root][i]] = root; que.push(Next[root][i]); }
     }
     while (!que.empty()) {

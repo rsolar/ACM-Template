@@ -2152,7 +2152,7 @@ template<typename T> struct HfmTree {
     }
   }
 };
-//带编码解码功能
+//带编码解码
 template<typename T> struct Huffman {
   int l[N << 1], r[N << 1], p[N << 1], n, tot; T w[N << 1]; char key[N];
   void init() { n = tot = 0; }
