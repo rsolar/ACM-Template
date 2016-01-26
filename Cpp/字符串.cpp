@@ -4,47 +4,75 @@ inline size_t __stl_hash_string(const char *s) {
   for (; *s; ++s) { h = 5 * h + *s; }
   return h;
 }
-//BKDR Hash Function
-inline size_t BKDRHash(const char *str) { /* const */
-  size_t h = 0, seed = 131; // 31 131 1313 13131 131313 etc..
-  while (*str) { h = h * seed + (*str++); }
-  return h & 0x7FFFFFFF;
-}
 //hash_map<string, XXX>
-//C++: using namespace stdext;
-//G++: using namespace __gnu_cxx;
 struct str_hash {
   size_t operator()(const string &str)const {
     return __stl_hash_string(str.c_str());
   }
 };
+//BKDR Hash Function
+inline size_t BKDRHash(const char *str) {
+  size_t h = 0, seed = 131; //31 131 1313 13131 131313 etc..
+  while (*str) { h = h * seed + (*str++); }
+  return h & 0x7FFFFFFF;
+}
+//手写hash_map
+const int N = 100005;
+char key[N][M];
+struct Node {
+  Node *nxt; int id, val;
+  Node(Node *_nxt, int _id, int _val): nxt(_nxt), id(_id), val(_val) {}
+};
+template<size_t(*hash)(const char *str)> struct hash_map {
+  Node *head[N];
+  void init() {
+    for (int i = 0; i < N; i++) {
+      for (Node * p; p = head[i]; head[i] = p->nxt, delete p);
+    }
+  }
+  void insert(int id, int val) {
+    int hs = hash(key[id]) % N; head[hs] = new Node(head[hs], id, val);
+  }
+  bool erase(char *buf) {
+    for (Node *p = head[hash(buf) % N]; p; p = p->nxt) {
+      if (!strcmp(buf, key[p->id])) { Node *t = p->nxt; *p = *p->nxt; delete t; return true; }
+    }
+    return false;
+  }
+  int query(char *buf) {
+    for (Node *p = head[hash(buf) % N]; p; p = p->nxt) {
+      if (!strcmp(buf, key[p->id])) { return p->val; }
+    }
+    return -1;
+  }
+};
+hash_map<BKDRHash> mp;
 //Manacher 最长回文子串
 //最长回文子串对应原串T中的位置: l = (i - R[i]) / 2; r = (i + R[i]) / 2 - 2;
-char s[N];
-char Mstr[N << 1];
-int Mdp[N << 1];
-void Manacher(char s[], int len) {
-  int l = 0, mx = 0, id = 0; Mstr[l++] = '$'; Mstr[l++] = '#';
-  for (int i = 0; i < len; i++) { Mstr[l++] = s[i]; Mstr[l++] = '#'; }
-  Mstr[l] = 0;
+char s[N], tmp[N << 1];
+int dp[N << 1];
+void Manacher(char *s, int len) {
+  int l = 0, mx = 0, id = 0; tmp[l++] = '$'; tmp[l++] = '#';
+  for (int i = 0; i < len; i++) { tmp[l++] = s[i]; tmp[l++] = '#'; }
+  tmp[l] = 0;
   for (int i = 0; i < l; i++) {
-    Mdp[i] = mx > i ? min(Mdp[(id << 1) - i], mx - i) : 1;
-    while (Mstr[i + Mdp[i]] == Mstr[i - Mdp[i]]) { Mdp[i]++; }
-    if (i + Mdp[i] > mx) { mx = i + Mdp[i]; id = i; }
+    dp[i] = mx > i ? min(dp[(id << 1) - i], mx - i) : 1;
+    while (tmp[i + dp[i]] == tmp[i - dp[i]]) { dp[i]++; }
+    if (i + dp[i] > mx) { mx = i + dp[i]; id = i; }
   }
 }
 int main() {
   while (~scanf("%s", s)) {
-    int len = strlen(s), Mlen = (len << 1) + 2, mxlen = 0, mxpos = 0;
+    int len = strlen(s), mlen = (len << 1) + 2, mxlen = 0, mxpos = 0;
     Manacher(s, len);
-    for (int i = 0; i < Mlen; i++) {
-      if (mxlen < Mdp[i]) { mxlen = Mdp[i]; mxpos = i; }
+    for (int i = 0; i < mlen; i++) {
+      if (mxlen < dp[i]) { mxlen = dp[i]; mxpos = i; }
     }
     printf("%d\n", mxlen - 1); //s.substr((mxpos - mxlen) >> 1, mxlen - 1);
   }
 }
 //字符串最小表示
-int minString(char s[]) {
+int minString(char *s) {
   int m = strlen(s), i, j, k;
   char ss[m << 1]; strcpy(ss, s); strcpy(ss + m, s);
   for (i = k = 0, j = 1; k < m && i < m && j < m;) {
@@ -60,79 +88,79 @@ int minString(char s[]) {
 //strstr 在str1中查找str2的第一次出现 无则返回NULL
 char *strstr(const char *str1, const char *str2);
 //KMP O(M+N)
-//Next[]的含义：x[i-Next[i]...i-1]=x[0...Next[i]-1]
-//Next[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
+//nxt[]的含义：x[i-nxt[i]...i-1]=x[0...nxt[i]-1]
+//nxt[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
 char x[N], y[N];
-int Next[N];
-void getNext(char x[], int m, int Next[]) {
-  int i = 0, j = -1; Next[0] = -1;
+int nxt[N];
+void getnxt(char *x, int m, int nxt[]) {
+  int i = 0, j = -1; nxt[0] = -1;
   while (i < m) {
-    while (j != -1 && x[i] != x[j]) { j = Next[j]; }
-    Next[++i] = ++j;
+    while (j != -1 && x[i] != x[j]) { j = nxt[j]; }
+    nxt[++i] = ++j;
   }
 }
 //改进版
-void getNext(char x[], int m, int Next[]) {
-  int i = 0, j = -1; Next[0] = -1;
+void getnxt(char *x, int m, int nxt[]) {
+  int i = 0, j = -1; nxt[0] = -1;
   while (i < m) {
-    while (j != -1 && x[i] != x[j]) { j = Next[j]; }
-    if (x[++i] == x[++j]) { Next[i] = Next[j]; }
-    else { Next[i] = j; }
+    while (j != -1 && x[i] != x[j]) { j = nxt[j]; }
+    if (x[++i] == x[++j]) { nxt[i] = nxt[j]; }
+    else { nxt[i] = j; }
   }
 }
 //返回x在y中出现的次数, 可以重叠
 //x是模式串, y是主串
-int KMP_Count(char x[], int m, char y[], int n, int Next[]/*, int &longest, int &lp*/) {
+int KMPCount(char *x, int m, char *y, int n, int nxt[]/*, int &longest, int &lp*/) {
   int i = 0, j = 0, ans = 0; //longest = 0; lp = 0;
   while (i < n) {
-    while (j != -1 && y[i] != x[j]) { j = Next[j]; }
+    while (j != -1 && y[i] != x[j]) { j = nxt[j]; }
     i++; j++;
     //if (j > longest) { longest = j; lp = i − j; }
-    if (j >= m) { j = Next[j]; ans++; }
+    if (j >= m) { j = nxt[j]; ans++; }
   }
   return ans;
 }
 //扩展KMP
-//Next[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
-//Extend[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
-int Next[N], Extend[N];
-void getNext(char x[], int m, int Next[]) {
+//nxt[i]:x[i...m-1]与x[0...m-1]的最长公共前缀
+//ext[i]:y[i...n-1]与x[0...m-1]的最长公共前缀
+int nxt[N], ext[N];
+void getnxt(char *x, int m, int nxt[]) {
   int i = 2, j = 0, k = 1;
   while (j + 1 < m && x[j] == x[j + 1]) { j++; }
-  Next[0] = m; Next[1] = j;
+  nxt[0] = m; nxt[1] = j;
   for (; i < m; i++) {
-    int p = Next[k] + k - 1, l = Next[i - k];
-    if (i + l < p + 1) { Next[i] = l; }
+    int p = nxt[k] + k - 1, l = nxt[i - k];
+    if (i + l < p + 1) { nxt[i] = l; }
     else {
       j = max(0, p - i + 1);
       while (i + j < m && x[i + j] == x[j]) { j++; }
-      Next[i] = j; k = i;
+      nxt[i] = j; k = i;
     }
   }
 }
-void getExtend(char x[], int m, char y[], int n, int Next[], int Extend[]) {
-  getNext(x, m);
+void getext(char *x, int m, char *y, int n, int nxt[], int ext[]) {
+  getnxt(x, m);
   int i = 1, j = 0, k = 0;
   while (j < n && j < m && x[j] == y[j]) { j++; }
-  Extend[0] = j;
+  ext[0] = j;
   for (; i < n; i++) {
-    int p = Extend[k] + k - 1, l = Next[i - k];
-    if (i + l < p + 1) { Extend[i] = l; }
+    int p = ext[k] + k - 1, l = nxt[i - k];
+    if (i + l < p + 1) { ext[i] = l; }
     else {
       j = max(0, p - i + 1);
       while (i + j < n && j < m && y[i + j] == x[j]) { j++; }
-      Extend[i] = j; k = i;
+      ext[i] = j; k = i;
     }
   }
 }
 //Sunday
-int Sunday(char x[], int m, char y[], int n) {
-  int next[26] = {0};
-  for (int j = 0; j < 26; j++) { next[j] = m + 1; }
-  for (int j = 0; j < m; j++) { next[x[j] - 'a'] = m - j; }
+int Sunday(char *x, int m, char *y, int n) {
+  int nxt[26] = {0};
+  for (int j = 0; j < 26; j++) { nxt[j] = m + 1; }
+  for (int j = 0; j < m; j++) { nxt[x[j] - 'a'] = m - j; }
   for (int pos = 0, i, j; pos <= n - m;) {
     for (i = pos, j = 0; j < m; i++, j++) {
-      if (y[i] != x[j]) { pos += next[y[pos + m] - 'a']; break; }
+      if (y[i] != x[j]) { pos += nxt[y[pos + m] - 'a']; break; }
     }
     if (j == m) { return pos; }
   }
@@ -165,75 +193,83 @@ int hashMatch(char *s, int m, char *p, int n) {
   return -1;
 }
 //Trie
-char buf[M];
+//数组实现
 struct Trie {
-  int Next[N * 20][26], End[N * 20], root, L;
-  int newnode() { return L++; }
-  void init() {
-    memset(Next, -1, sizeof(Next)); memset(End, 0, sizeof(End));
-    L = 0; root = newnode();
-  }
-  void insert(char buf[]) {
+  int nxt[N * 20][26], val[N * 20], root, tot;
+  void init() { memset(nxt, 0, sizeof(nxt)); memset(val, 0, sizeof(val)); root = tot = 1; }
+  void insert(char *buf, int id) {
     int len = strlen(buf), now = root;
-    for (int i = 0; i < len; i++) {
-      int c = buf[i] - 'a';
-      if (Next[now][c] == -1) { Next[now][c] = newnode(); }
-      now = Next[now][c];
+    for (int i = 0, c; i < len; i++) {
+      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = ++tot; }
+      now = nxt[now][c];
     }
-    End[now]++;
+    val[now] = id;
   }
-  int query(char buf[]) {
+  int query(char *buf) {
     int len = strlen(buf), now = root;
-    for (int i = 0; i < len; i++) {
-      int c = buf[i] - 'a';
-      if (Next[now][c] == -1) { return -1; }
-      now = Next[now][c];
+    for (int i = 0, c; i < len; i++) {
+      if (!nxt[now][c = buf[i] - 'a']) { return -1; }
+      now = nxt[now][c];
     }
-    return End[now];
+    return val[now];
+  }
+} tr;
+//指针实现
+struct Node { Node *nxt[26]; int val; };
+struct Trie {
+  Node *root;
+  void init() { erase(root); root = new Node(); }
+  void insert(char *buf, int id) {
+    int len = strlen(buf); Node *now = root;
+    for (int i = 0, c; i < len; i++) {
+      if (!now->nxt[c = buf[i] - 'a']) { now->nxt[c] = new Node(); }
+      now = now->nxt[c];
+    }
+    now->val = id;
+  }
+  void erase(Node *p) {
+    if (p) { for (int i = 0; i < 26; i++) { erase(p->nxt[i]); } delete p; }
+  }
+  int query(char *buf) {
+    int len = strlen(buf); Node *now = root;
+    for (int i = 0, c; i < len; i++) {
+      if (!now->nxt[c = buf[i] - 'a']) { return -1; }
+      now = now->nxt[c];
+    }
+    return now->val;
   }
 } tr;
 //AC自动机
-char buf[M];
-struct Trie {
-  int Next[N * 20][26], Fail[N * 20], End[N * 20], root, L;
-  int newnode() { return L++; }
-  void init() {
-    memset(Next, -1, sizeof(Next)); memset(End, 0, sizeof(End));
-    L = 0; root = newnode();
-  }
-  void insert(char buf[]) {
+struct AC {
+  int nxt[N * 20][26], fail[N * 20], val[N * 20], root, tot;
+  void init() { memset(nxt, 0, sizeof(nxt)); memset(val, 0, sizeof(val)); root = tot = 1; }
+  void insert(char *buf, int id) {
     int len = strlen(buf), now = root;
-    for (int i = 0; i < len; i++) {
-      int c = buf[i] - 'a';
-      if (Next[now][c] == -1) { Next[now][c] = newnode(); }
-      now = Next[now][c];
+    for (int i = 0, c; i < len; i++) {
+      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = ++tot; }
+      now = nxt[now][c];
     }
-    End[now]++;
+    val[now] = id;
   }
   void build() {
-    queue<int> que;
-    Fail[root] = root;
+    queue<int> que; fail[root] = root;
     for (int i = 0; i < 26; i++) {
-      if (Next[root][i] == -1) { Next[root][i] = root; }
-      else { Fail[Next[root][i]] = root; que.push(Next[root][i]); }
+      if (!nxt[root][i]) { nxt[root][i] = root; }
+      else { fail[nxt[root][i]] = root; que.push(nxt[root][i]); }
     }
     while (!que.empty()) {
       int now = que.front(); que.pop();
       for (int i = 0; i < 26; i++) {
-        if (Next[now][i] == -1) { Next[now][i] = Next[Fail[now]][i]; }
-        else { Fail[Next[now][i]] = Next[Fail[now]][i]; que.push(Next[now][i]); }
+        if (!nxt[now][i]) { nxt[now][i] = nxt[fail[now]][i]; }
+        else { fail[nxt[now][i]] = nxt[fail[now]][i]; que.push(nxt[now][i]); }
       }
     }
   }
-  int query(char buf[]) {
+  int query(char *buf) {
     int len = strlen(buf), now = root, res = 0;
-    for (int i = 0; i < len; i++) {
-      int c = buf[i] - 'a';
-      int tmp = now = Next[now][c];
-      while (tmp != root) {
-        res += End[tmp];
-        //End[tmp] = 0;
-        tmp = Fail[tmp];
+    for (int i = 0, c; i < len; i++) {
+      for (int tmp = now = nxt[now][c = buf[i] - 'a']; tmp != root; tmp = fail[tmp]) {
+        res += val[tmp]; //val[tmp] = 0;
       }
     }
     return res;
@@ -358,11 +394,10 @@ void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
 //后缀自动机
 const int N = 250005;
 struct SAM_Node {
-  SAM_Node *fa, *next[26];
-  int len;
-  int id, pos;
+  SAM_Node *fa, *nxt[26];
+  int len, id, pos;
   SAM_Node() {}
-  SAM_Node(int _len) : len(_len), fa(NULL) { memset(next, 0, sizeof(next)); }
+  SAM_Node(int _len) : len(_len), fa(NULL) { memset(nxt, 0, sizeof(nxt)); }
 };
 SAM_Node SAM_node[N * 2], *SAM_root, *SAM_last;
 int SAM_size;
@@ -388,15 +423,15 @@ void SAM_add(int x, int len) {
   SAM_Node *p = SAM_last, *np = newSAM_Node(p->len + 1);
   np->pos = len;
   SAM_last = np;
-  for (; p && !p->next[x]; p = p->fa) { p->next[x] = np; }
+  for (; p && !p->nxt[x]; p = p->fa) { p->nxt[x] = np; }
   if (!p) { np->fa = SAM_root; return; }
-  SAM_Node *q = p->next[x];
+  SAM_Node *q = p->nxt[x];
   if (q->len == p->len + 1) { np->fa = q; return; }
   SAM_Node *nq = newSAM_Node(q);
   nq->len = p->len + 1;
   q->fa = nq;
   np->fa = nq;
-  for (; p && p->next[x] == q; p = p->fa) { p->next[x] = nq; }
+  for (; p && p->nxt[x] == q; p = p->fa) { p->nxt[x] = nq; }
 }
 
 void SAM_build(char *s) {
@@ -418,48 +453,45 @@ void SAM_build(char *s) {
   int len = strlen(s);
   SAM_last = SAM_root;
   for (int i = 0; i < len; i++) {
-    if (!SAM_last->next[s[i] - '0'] || !(SAM_last->next[s[i] - '0']->len == i + 1)) {
+    if (!SAM_last->nxt[s[i] - '0'] || !(SAM_last->nxt[s[i] - '0']->len == i + 1)) {
       SAM_add(s[i] - '0', i + 1);
     } else {
-      SAM_last = SAM_last->next[s[i] - '0'];
+      SAM_last = SAM_last->nxt[s[i] - '0'];
     }
   }
 }
-//回文自动机
-char buf[M];
+//回文树
 struct PalindromicTree {
-  int Next[N][26], Fail[N], cnt[N], len[N];
-  int num[N]; //以i节点为回文串的末尾字符结尾的但不包含本条路径上的回文串的数目
-  int tol, S[N];
-  int root, L;
-  int newnode(int l) {
-    memset(Next[L], 0, sizeof(Next[L]));
-    cnt[L] = 0; num[L] = 0; len[L] = l;
-    return L++;
-  }
+  int nxt[N][26]; //指向的串为当前串两端加上同一个字符构成
+  int fail[N]; //表示失配后跳转到长度小于该串且以该节点表示回文串的最后一个字符结尾的最长回文串表示的节点
+  int cnt[N]; //表示节点表示的本质不同的串的个数(建树时求出的不是完全的, 最后count函数跑一遍以后才是正确的)
+  int num[N]; //表示以节点表示的最长回文串的最右端点为回文串结尾的回文串个数
+  int len[N]; //表示节点表示的回文串长度
+  int S[N]; //表示第i次添加的字符(S[0] = -1(任意一个在串中不会出现的字符))
+  int last; //指向新添加一个字母后所形成的最长回文串表示的节点
+  int n; //表示添加的字符个数
+  int tot; //表示节点个数
+  int newnode(int l) { len[tot] = l; return tot++; }
   void init() {
-    L = 0; tol = 0; S[tol] = -1; root = newnode(0); Fail[root] = newnode(-1);
+    memset(nxt, 0, sizeof(nxt)); memset(cnt, 0, sizeof(cnt)); memset(len, 0, sizeof(len));
+    newnode(0); newnode(-1); tot = last = n = 0; S[n] = -1; fail[0] = 1;
   }
-  int getFail(int x) {
-    while (S[tol - len[x] - 1] != S[tol]) { x = Fail[x]; }
+  int getfail(int x) { //失配后找一个尽量最长的
+    while (S[n - len[x] - 1] != S[n]) { x = fail[x]; }
     return x;
   }
-  void Insert(char buf[]) {
-    int len = strlen(buf);
-    int cur = root, now;
-    for (int i = 0; i < len; i++) {
-      int c = buf[i] - 'a';
-      S[++tol] = c;
-      cur = getFail(cur);
-      if (Next[cur][c] == 0) {
-        now = newnode(len[cur] + 2);
-        Fail[now] = Next[getFail(Fail[cur])][c];
-        Next[cur][c] = now;
-        num[now] = num[Fail[now]] + 1;
-      }
-      cur = Next[cur][c];
-      cnt[cur]++;
+  void add(int c) {
+    c -= 'a'; S[++n] = c;
+    int cur = getfail(last); //通过上一个回文串找这个回文串的匹配位置
+    if (!nxt[cur][c]) { //如果这个回文串没有出现过, 说明出现了一个新的本质不同的回文串
+      int now = newnode(len[cur] + 2); //新建节点
+      fail[now] = nxt[getfail(fail[cur])][c]; //和AC自动机一样建立fail指针, 以便失配后跳转
+      nxt[cur][c] = now; num[now] = num[fail[now]] + 1;
     }
-    for (int i = L - 1; i >= 0; --i) { cnt[Fail[i]] += cnt[i]; }
+    cnt[last = nxt[cur][c]]++;
+  }
+  void count() {
+    for (int i = tot - 1; i >= 0; i--) { cnt[fail[i]] += cnt[i]; }
+    //父亲累加儿子的cnt, 因为如果fail[v] = u, 则u一定是v的子回文串
   }
 } pat;
