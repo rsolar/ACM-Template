@@ -17,33 +17,24 @@ inline size_t BKDRHash(const char *str) {
   return h & 0x7FFFFFFF;
 }
 //手写hash_map
-const int N = 100005;
+const int P = 13131;
 char key[N][M];
-struct Node {
-  Node *nxt; int id, val;
-  Node(Node *_nxt, int _id, int _val): nxt(_nxt), id(_id), val(_val) {}
-};
-template<size_t(*hash)(const char *str)> struct hash_map {
-  Node *head[N];
-  void init() {
-    for (int i = 0; i < N; i++) {
-      for (Node * p; p = head[i]; head[i] = p->nxt, delete p);
-    }
-  }
+typedef struct Node { int id, val; } etype;
+template<size_t(*Hash)(const char *)> struct hash_map {
+  vector<etype> hs[P];
+  void init() { for (int i = 0; i < P; i++) { hs[i].clear(); } }
   void insert(int id, int val) {
-    int hs = hash(key[id]) % N; head[hs] = new Node(head[hs], id, val);
+    int h = Hash(key[id]) % P; hs[h].push_back((etype){id, val});
   }
   bool erase(char *buf) {
-    for (Node *p = head[hash(buf) % N]; p; p = p->nxt) {
-      if (!strcmp(buf, key[p->id])) { Node *t = p->nxt; *p = *p->nxt; delete t; return true; }
-    }
+    int h = Hash(buf) % P;
+    for (size_t i = 0; i < n; i++) { if (!strcmp(buf, key[hs[h][i].id])) { hs[h].erase(hs[h].begin() + i); return true; } }
     return false;
   }
   int query(char *buf) {
-    for (Node *p = head[hash(buf) % N]; p; p = p->nxt) {
-      if (!strcmp(buf, key[p->id])) { return p->val; }
-    }
-    return -1;
+    int h = Hash(buf) % P;
+    for (size_t i = 0; i < n; i++) { if (!strcmp(buf, key[hs[h][i].id])) { return hs[h][i].val; } }
+    return false;
   }
 };
 hash_map<BKDRHash> mp;

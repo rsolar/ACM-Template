@@ -4,18 +4,19 @@ ll powMod(ll a, ll b, ll m) {
   for (a %= m; b; b >>= 1) { if (b & 1) { r = r * a % m; } a = a * a % m; }
   return r;
 }
-//素数筛 Eratosthenes O(nloglogn) [0, N)
+//素数筛
+//Eratosthenes O(nloglogn)
 const int N = 10000000; //~80ms
-bitset<N> isprime;
+bitset<N + 5> isprime;
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i < N; i++) {
+  for (int i = 2; i <= N; i++) {
     if (isprime[i]) {
-      for (ll j = (ll)i * i; j < N; j += i) { isprime[j] = false; }
+      for (ll j = (ll)i * i; j <= N; j += i) { isprime[j] = false; }
     }
   }
 }
-//素数表 Euler O(n) [2, N] prime[0]为个数
+//Euler O(n) prime[0]为个数
 const int N = 10000000; //~65ms
 int prime[N + 5]; //3711111 for [2, 10^9)
 void getPrime() {
@@ -27,15 +28,15 @@ void getPrime() {
     }
   }
 }
-//素数筛 + 素数表 Euler [0, N)
+//Euler O(n)
 const int N = 10000000; //~95ms
-bitset<N> isprime;
+bitset<N + 5> isprime;
 int prime[N];
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i <= N; i++) {
     if (isprime[i]) { prime[++prime[0]] = i; }
-    for (int j = 1; j <= prime[0] && prime[j] <= N / i; j++) {
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
       isprime[prime[j] * i] = false;
       if (i % prime[j] == 0) { break; }
     }
@@ -73,12 +74,8 @@ int getFactors(ll x) {
 const int Times = 7; //错误概率为1/4^Times
 //大数乘法
 ll mulMod(ll a, ll b, ll m) {
-  ll r = 0; a %= m; b %= m;
-  while (b) {
-    if (b & 1) { r = (r + a) % m; }
-    a = (a << 1) % m;
-    b >>= 1;
-  }
+  ll r = 0;
+  for (a %= m, b %= m; b; b >>= 1) { if (b & 1) { r = (r + a) % m; } a = (a << 1) % m; }
   return r;
 }
 //大数快速幂
@@ -137,9 +134,9 @@ int getFacEul(ll n, ll factor[][2] = factor) {
   }
   return n;
 }
-//约数个数筛
+//约数个数筛 O(n)
 const int N = 10000000; //~125ms
-bitset<N> isprime;
+bitset<N + 5> isprime;
 int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
 void getFaccnt() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -149,8 +146,7 @@ void getFaccnt() {
       isprime[prime[j] * i] = false;
       if (i % prime[j] == 0) {
         faccnt[prime[j] * i] = faccnt[i] / (d[i] + 1) * (d[i] + 2);
-        d[prime[j] * i] = d[i] + 1;
-        break;
+        d[prime[j] * i] = d[i] + 1; break;
       }
       faccnt[prime[j] * i] = faccnt[i] << 1; d[prime[j] * i] = 1;
     }
@@ -164,7 +160,7 @@ ll eular(ll n) {
   }
   return n > 1 ? ans - ans / n ? ans;
 }
-//欧拉函数筛
+//欧拉函数筛 O(nloglogn)
 const int N = 10000000; //~320ms
 int phi[N + 5] = { 0, 1 };
 void getPhi() {
@@ -176,9 +172,9 @@ void getPhi() {
     }
   }
 }
-//素数 + 欧拉函数线性筛
+//素数 + 欧拉函数筛 O(n)
 const int N = 10000000; //~95ms
-bitset<N> isprime;
+bitset<N + 5> isprime;
 int prime[N], phi[N + 5] = { 0, 1 };
 void getPrimePhi() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -364,9 +360,9 @@ int main() {
     }
   }
 }
-//莫比乌斯函数线性筛
+//莫比乌斯函数筛 O(n)
 const int N = 10000000; //95ms
-bitset<N> isprime;
+bitset<N + 5> isprime;
 int prime[N], miu[N + 5] = { 0, 1 };
 void getMiu() {
   isprime.set(); isprime[0] = isprime[1] = false;

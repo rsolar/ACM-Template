@@ -157,6 +157,7 @@ struct BigInt {
   operator string()const { return this->toString(); }
 };
 //高精度开方
+const int MAXBIT = 5005;
 bool bigger(char *s1, char *s2) {
   int beg = 0;
   while (s1[beg] == '0') { beg++; } strcpy(s1, s1 + beg);

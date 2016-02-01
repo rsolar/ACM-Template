@@ -3,12 +3,10 @@
 int n;
 template<typename T> struct BIT {
   T A[N]; //T B[N]; //区间增减/维护最值
-  int lowbit(int x) { return x & (-x); }
+  int lowbit(int x) { return x & -x; }
   void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B));*/ }
   //单点增减
   void add(int i, T v) { while (i <= n) { A[i] += v; i += lowbit(i); } }
-  //单点赋值
-  void set(int i, T v) { add(i, v - query(i, i)); }
   //不带区间修改时求前缀和 [1, i]
   T sum(int i) { T ret = 0; while (i) { ret += A[i]; i -= lowbit(i); } return ret; }
   //区间和[i, j]
@@ -16,7 +14,7 @@ template<typename T> struct BIT {
 
   //带区间修改时求前缀和 区间求和用query(i, j)
   T sum(int x) {
-    if (x == 0) { return 0; }
+    if (!x) { return 0; }
     T ret1 = 0, ret2 = 0;
     for (int i = x; i <= n; i += lowbit(i)) { ret1 += A[i]; }
     for (int i = x - 1; i > 0; i -= lowbit(i)) { ret2 += B[i]; }
@@ -65,7 +63,7 @@ BIT<int> bit;
 int n, m;
 template<typename T> struct BIT {
   T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //区域求和
-  int lowbit(int x) { return x & (-x); }
+  int lowbit(int x) { return x & -x; }
   void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));*/ }
   //区域和[1][1]-[x][y]
   T sum(int x, int y) {
