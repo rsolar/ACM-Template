@@ -42,10 +42,10 @@ ll maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
 //最长上升子序列 LIS O(nlogn) 非降如注释
 int b[N];
 int BS(int len, int x) {
-  int l = 0, r = len - 1, mid;
+  int l = 1, r = len - 1, mid;
   while (l <= r) {
     mid = (l + r) >> 1;
-    if (x > b[mid - 1] && x <= b[mid]) { return mid; } // > && <= 换为 >= && <
+    if (x > b[mid - 1] && x <= b[mid]) { return mid; } //> && <= 换为 >= && <
     else if (x >= b[mid]) { l = mid + 1; }
     else { r = mid - 1; }
   }
@@ -53,8 +53,8 @@ int BS(int len, int x) {
 int LIS(int a[], int n) {
   int len = 1; b[0] = a[0];
   for (int i = 1, j; i < n; i++) {
-    if (a[i] <= b[0]) { j = 0; }  // <= 换为 <
-    else if (a[i] > b[len - 1]) { j = len++; } // > 换为 >=
+    if (a[i] <= b[0]) { j = 0; } //<= 换为 <
+    else if (a[i] > b[len - 1]) { j = len++; } //> 换为 >=
     else { j = BS(len, a[i]); }
     b[j] = a[i];
   }

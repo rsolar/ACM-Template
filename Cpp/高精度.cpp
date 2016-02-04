@@ -55,14 +55,6 @@ struct BigInt {
     for (int i = 0; i < (int)num.size(); i++) { s[i] = num[i]; }
     trim(); return *this;
   }
-  BigInt &operator*=(int v) {
-    if (v < 0) { sign = -sign, v = -v; }
-    for (int i = 0, is = 0; i < (int)s.size() || is; i++) {
-      if (i == (int)s.size()) { s.push_back(0); }
-      ll a = s[i] * (ll)v + is; is = a / BASE; s[i] = a % BASE;
-    }
-    trim(); return *this;
-  }
   //除法, 商为first, 余数为second
   friend pair<BigInt, BigInt> divmod(const BigInt &a, const BigInt &b) {
     int norm = BASE / (b.s.back() + 1);
@@ -80,13 +72,6 @@ struct BigInt {
     return make_pair(q, r / norm);
   }
   BigInt &operator/=(const BigInt &v) { return *this = divmod(*this, v).first; }
-  BigInt &operator/=(int v) {
-    if (v < 0) { sign = -sign, v = -v; }
-    for (int i = s.size() - 1, rem = 0; i >= 0; i--) {
-      ll a = s[i] + rem * (ll)BASE; s[i] = a / v; rem = a % v;
-    }
-    trim(); return *this;
-  }
   BigInt &operator%=(const BigInt &v) { return *this = divmod(*this, v).second; }
   BigInt operator-()const { BigInt ret(*this); ret.sign = -sign; return ret; }
   BigInt operator+(const BigInt &v)const { return BigInt(*this) += v; }
@@ -96,6 +81,22 @@ struct BigInt {
   BigInt operator/(const BigInt &v)const { return divmod(*this, v).first; }
   BigInt operator/(int v)const { return BigInt(*this) /= v; }
   BigInt operator%(const BigInt &v)const { return divmod(*this, v).second; }
+  //乘除法辅助函数
+  BigInt &operator*=(int v) {
+    if (v < 0) { sign = -sign, v = -v; }
+    for (int i = 0, is = 0; i < (int)s.size() || is; i++) {
+      if (i == (int)s.size()) { s.push_back(0); }
+      ll a = s[i] * (ll)v + is; is = a / BASE; s[i] = a % BASE;
+    }
+    trim(); return *this;
+  }
+  BigInt &operator/=(int v) {
+    if (v < 0) { sign = -sign, v = -v; }
+    for (int i = s.size() - 1, rem = 0; i >= 0; i--) {
+      ll a = s[i] + rem * (ll)BASE; s[i] = a / v; rem = a % v;
+    }
+    trim(); return *this;
+  }
   int operator%(int v)const {
     if (v < 0) { v = -v; }
     int m = 0;

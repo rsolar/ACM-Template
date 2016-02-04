@@ -103,7 +103,7 @@ template<typename T> struct BIT {
   }
 };
 BIT<int> bit;
-//线段树  单点修改 + 单点查询 + 区间查询
+//线段树  单点修改 + 区间查询
 #define lson l,m,rt<<1
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
@@ -139,7 +139,7 @@ template<typename T> struct SegmentTree {
   }
 };
 SegmentTree<int> st;
-//线段树 单点修改 + 单点查询 + 区间修改(延迟标记) + 区间查询
+//线段树 区间查询/修改(延迟标记)
 #define lson l,m,rt<<1
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
@@ -149,16 +149,16 @@ template<typename T> struct SegmentTree {
   //区间求和的标记下推
   void push_down(int rt, int len) {
     if (lazy[rt]) {
-      lazy[rt << 1] += lazy[rt]; data[rt << 1] += lazy[rt] * (len - (len >> 1));
-      lazy[rt << 1 | 1] += lazy[rt]; data[rt << 1 | 1] += lazy[rt] * (len >> 1);
+      data[rt << 1] += lazy[rt] * (len - (len >> 1)); lazy[rt << 1] += lazy[rt];
+      data[rt << 1 | 1] += lazy[rt] * (len >> 1); lazy[rt << 1 | 1] += lazy[rt];
       lazy[rt] = 0;
     }
   }
   //区间最值的标记下推
   void push_down(int rt) {
     if (lazy[rt]) {
-      lazy[rt << 1] += lazy[rt]; data[rt << 1] += lazy[rt];
-      lazy[rt << 1 | 1] += lazy[rt]; data[rt << 1 | 1] += lazy[rt];
+      data[rt << 1] += lazy[rt]; lazy[rt << 1] += lazy[rt];
+      data[rt << 1 | 1] += lazy[rt]; lazy[rt << 1 | 1] += lazy[rt];
       lazy[rt] = 0;
     }
   }
@@ -171,23 +171,11 @@ template<typename T> struct SegmentTree {
     build(rson);
     push_up(rt);
   }
-  //单点修改
-  void update(int p, T val, int l, int r, int rt) {
-    if (l == r) {
-      data[rt] += val; //data[rt] = val;
-      return;
-    }
-    push_down(rt, r - l + 1); //push_down(rt);
-    int m = (l + r) >> 1;
-    if (p <= m) { update(p, val, lson); }
-    else { update(p, val, rson); }
-    push_up(rt);
-  }
   //区间增减
   void update(int L, int R, T val, int l, int r, int rt) {
     if (L <= l && r <= R) {
-      lazy[rt] += val;
       data[rt] += val * (r - l + 1); //data[rt] += val;
+      lazy[rt] += val;
       return;
     }
     push_down(rt, r - l + 1); //push_down(rt);
@@ -237,7 +225,7 @@ template<typename T> struct zkwSegmentTree {
     while (top--) { pushdown(stack[top]); }
   }
   //区间求和
-  T query(int tl , int tr) {
+  T query(int tl, int tr) {
     T res = 0;
     for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
       if (~tl & 1) {
@@ -252,7 +240,7 @@ template<typename T> struct zkwSegmentTree {
     return res;
   }
   //区间修改
-  void update(int tl , int tr , T val) {
+  void update(int tl, int tr, T val) {
     for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
       if (~tl & 1) {
         if (!insl) { pushpath(insl = tl ^ 1); }

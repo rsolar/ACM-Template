@@ -10,10 +10,10 @@
 //#include <algorithm>
 //#include <string>
 //#include <vector>
-//#include <map>
-//#include <set>
 //#include <queue>
 //#include <stack>
+//#include <map>
+//#include <set>
 //#include <list>
 //#include <bitset>
 //#include <functional>
@@ -21,8 +21,6 @@
 //#include <cassert>
 #include <bits/stdc++.h>
 using namespace std;
-#include <hash_map>
-using namespace __gnu_cxx;
 
 typedef long long ll;
 const int N = 100005;

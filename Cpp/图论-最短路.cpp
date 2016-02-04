@@ -48,7 +48,7 @@ void Dijkstra(int src) {
     }
   }
 }
-//Dijkstra + priority_queue + vector存边 O(V^2)
+//Dijkstra + priority_queue + vector存边 O((V+E)logV)
 struct Node {
   int v, w;
   Node(int _v, int _w): v(_v), w(_w) {}

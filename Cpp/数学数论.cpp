@@ -7,7 +7,7 @@ ll powMod(ll a, ll b, ll m) {
 //素数筛
 //Eratosthenes O(nloglogn)
 const int N = 10000000; //~80ms
-bitset<N + 5> isprime;
+bitset < N + 5 > isprime;
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i <= N; i++) {
@@ -30,7 +30,7 @@ void getPrime() {
 }
 //Euler O(n)
 const int N = 10000000; //~95ms
-bitset<N + 5> isprime;
+bitset < N + 5 > isprime;
 int prime[N];
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -136,7 +136,7 @@ int getFacEul(ll n, ll factor[][2] = factor) {
 }
 //约数个数筛 O(n)
 const int N = 10000000; //~125ms
-bitset<N + 5> isprime;
+bitset < N + 5 > isprime;
 int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
 void getFaccnt() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -174,7 +174,7 @@ void getPhi() {
 }
 //素数 + 欧拉函数筛 O(n)
 const int N = 10000000; //~95ms
-bitset<N + 5> isprime;
+bitset < N + 5 > isprime;
 int prime[N], phi[N + 5] = { 0, 1 };
 void getPrimePhi() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -248,12 +248,11 @@ void printCatalan(int n) {
 //组合数
 ll Com(ll n, ll m) {
   if (m > n) { return 0; }
-  if (n - m > m) { m = n - m; }
+  if (n - m < m) { m = n - m; }
   if (m == 0) { return 1; }
   ll ret = 1;
   for (ll i = 0, j = 1; i < m; i++) {
-    ret *= n - i;
-    for (; j <= m && ret % j == 0; j++) { ret /= j; }
+    for (ret *= n - i; j <= m && ret % j == 0; j++) { ret /= j; }
   }
   return ret;
 }
@@ -362,7 +361,7 @@ int main() {
 }
 //莫比乌斯函数筛 O(n)
 const int N = 10000000; //95ms
-bitset<N + 5> isprime;
+bitset < N + 5 > isprime;
 int prime[N], miu[N + 5] = { 0, 1 };
 void getMiu() {
   isprime.set(); isprime[0] = isprime[1] = false;
@@ -443,7 +442,7 @@ bool solve(int &m0, int &a0, int m, int a) {
 }
 //无解返回false, 有解返回true
 //解的形式最后为a0 + m0 * t (0 <= a0 < m0)
-bool MLES(int &m0 , int &a0, int n) { //解为X = a0 + m0 * k
+bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
   bool flag = true;
   m0 = 1; a0 = 0;
   for (int i = 0; i < n; i++) {
