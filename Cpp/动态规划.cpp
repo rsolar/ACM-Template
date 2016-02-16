@@ -39,64 +39,51 @@ ll maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   }
   return ret;
 }
-//最长上升子序列 LIS O(nlogn) 非降如注释
+//最长上升子序列 LIS O(nlogn)
 int b[N];
-int BS(int len, int x) {
-  int l = 1, r = len - 1, mid;
-  while (l <= r) {
-    mid = (l + r) >> 1;
-    if (x > b[mid - 1] && x <= b[mid]) { return mid; } //> && <= 换为 >= && <
-    else if (x >= b[mid]) { l = mid + 1; }
-    else { r = mid - 1; }
-  }
-}
 int LIS(int a[], int n) {
   int len = 1; b[0] = a[0];
-  for (int i = 1, j; i < n; i++) {
-    if (a[i] <= b[0]) { j = 0; } //<= 换为 <
-    else if (a[i] > b[len - 1]) { j = len++; } //> 换为 >=
-    else { j = BS(len, a[i]); }
-    b[j] = a[i];
+  for (int i = 1; i < n; i++) {
+    b[a[i] > b[len - 1] ? len++ : upper_bound(b, b + len, a[i]) - b] = a[i]; //非降换为lower_bound
   }
   return len;
 }
-//最长上升子序列LIS个数
-ll dp[M][N];
-void add(int id, int v, ll d) {
-  for (; v < N; v |= v + 1) { dp[id][v] += d; }
-}
-ll get(int id, int r) {
-  ll res = 0;
-  for (; r > 0; r = (r & (r + 1)) - 1) { res += dp[id][r]; }
-  return res;
+//长度为k的上升子序列个数 O(knlogn)
+int n, k;
+ll bit[M][N];
+inline int lowbit(int x) { return x & -x; }
+void add(int id, int i, ll val) { while (i <= n) { bit[id][i] += val; i += lowbit(i); } }
+ll sum(int id, int i) {
+  ll ret = 0;
+  while (i) { ret += bit[id][i]; i -= lowbit(i); }
+  return ret;
 }
 int main() {
   scanf("%d%d", &n, &k);
-  add(0, 0, 1);
-  for (int i = 0; i < n; i++) {
+  add(0, 1, 1);
+  for (int i = 1, x; i <= n; i++) {
     scanf("%d", &x);
-    for (int j = k; j > 0; j--) { add(j, x, get(j - 1, x)); }
+    for (int j = 1; j <= k; j++) { add(j, x, sum(j - 1, x - 1)); } //非降改为x
   }
-  printf("%I64d\n", get(k, n));
+  printf("%I64d\n", sum(k, n)); //n为元素最大值
 }
 //最长公共子序列 LCS O(n^2)
 int dp[N][N];
-int LCS(const char *s1, const char *s2) {
-  int m = strlen(s1), n = strlen(s2);
+int LCS(char *a, char *b) {
+  int m = strlen(a), n = strlen(b);
   for (int i = 1; i <= m; i++) {
     for (int j = 1; j <= n; j++) {
-      if (s1[i - 1] == s2[j - 1]) { dp[i][j] = dp[i - 1][j - 1] + 1; }
+      if (a[i - 1] == b[j - 1]) { dp[i][j] = dp[i - 1][j - 1] + 1; }
       else { dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]); }
     }
   }
   return dp[m][n];
 }
-void printLCS(const char *s1, const char *s2) {
+void printLCS(char *a, char *b) {
   char s[N] = {0};
-  int i = strlen(s1), j = strlen(s2), k = dp[i][j];
-  while (i && j) {
-    if (s1[i - 1] == s2[j - 1] && dp[i][j] == dp[i - 1][j - 1] + 1) { s[--k] = s1[i - 1]; --i; --j; }
-    else if (s1[i - 1] != s2[j - 1] && dp[i - 1][j] > dp[i][j - 1]) { i--; }
+  for (int i = strlen(a), j = strlen(b), k = dp[i][j]; i && j;) {
+    if (a[i - 1] == b[j - 1] && dp[i][j] == dp[i - 1][j - 1] + 1) { s[--k] = a[--i]; --j; }
+    else if (dp[i - 1][j] > dp[i][j - 1]) { i--; }
     else { j--; }
   }
   puts(s);
@@ -104,7 +91,7 @@ void printLCS(const char *s1, const char *s2) {
 //最长公共子串 LCSubstring
 //DP O(n^2)
 int dp[2][N];
-int LCS_dp(const char *s1, const char *s2, int &start1, int &start2) {
+int LCS_dp(char *s1, char *s2, int &start1, int &start2) {
   int m = strlen(s1), n = strlen(s2), longest = 0, cur = 0; start1 = start2 = -1;
   for (int i = 0; i < m; i++, cur ^= 1) {
     for (int j = 0; j < n; j++) {
@@ -131,7 +118,7 @@ int comlen_suf(const char *p, const char *q) {
   }
   return 0;
 }
-int LCS_suffix(const char *s1, const char *s2) {
+int LCS_suffix(char *s1, char *s2) {
   int m = strlen(s1), n = strlen(s2), longest = 0, suf_index = 0, len_suf = m + n + 1;
   char *arr = new char[len_suf + 1];
   strcpy(arr, s1); arr[m] = '#'; strcpy(arr + m + 1, s2);
@@ -144,7 +131,7 @@ int LCS_suffix(const char *s1, const char *s2) {
   //outputLCS(suf[suf_index], longest);
   return longest;
 }
-void outputLCS(const char *s, int longest, int start = 0) {
+void outputLCS(char *s, int longest, int start = 0) {
   int i = start;
   while (longest--) {
     printf("%c", s[i++]);
