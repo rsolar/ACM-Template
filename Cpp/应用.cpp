@@ -68,75 +68,8 @@ void work(int n) {
 }
 //水仙花数 A023052 Powerful numbers(3): numbers n that are the sum of some fixed power of their digits.
 int Nar[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 153, 370, 371, 407, 1634, 4150, 4151, 8208, 9474, 54748, 92727, 93084,
-                       194979, 548834, 1741725, 4210818, 9800817, 9926315, 14459929, 24678050, 24678051, 88593477
-                     };
-//水仙花数生成器 40位以内
-const int base = 100000000;
-const int ds = 5;
-int powD[10][ds], sum[ds], num[10], N;
-clock_t st, ed;
-void init() {
-  memset(powD, 0, sizeof(powD));
-  memset(num, 0, sizeof(num));
-  for (int i = 1; i <= 9; i++) { powD[i][0] = i; }
-}
-void nextPower() {
-  for (int i = 2; i <= 9; i ++) {
-    for (int j = 0, t = 0; j < ds; j ++) {
-      t = powD[i][j] * i + t;
-      if (t >= base) { powD[i][j] = t % base; t /= base; }
-      else { powD[i][j] = t; t = 0; }
-    }
-  }
-}
-bool sort() {
-  int tmp[ds] = { 0 }, d[10] = { 0 };
-  for (int i = 0; i < ds; i ++) { sum[i] = 0; }
-  for (int i = 1; i <= 9; i ++) {
-    if (num[i]) {
-      for (int j = 0, t = 0; j < ds; j++) {
-        t = powD[i][j] * num[i] + t;
-        if (t >= base) { tmp[j] = t % base; t /= base; }
-        else { tmp[j] = t; t = 0; }
-      }
-      for (int j = 0, t = 0; j < ds; j++) {
-        t = tmp[j] + sum[j] + t;
-        if (t >= base) { sum[j] = t - base; t = 1; }
-        else { sum[j] = t; t = 0; }
-      }
-    }
-  }
-  for (int i = ds - 1, t; i >= 0; i--) {
-    t = sum[i];
-    if (t > 0) { while (t > 0) { d[t % 10]++; t /= 10; } }
-  }
-  for (int i = 1; i <= 9; i++) { if (num[i] != d[i]) { return false; } }
-  return true;
-}
-void circle(int n, int b) {
-  if (n == 0) {
-    if (sort()) {
-      int k = ds - 1;
-      while (sum[k] == 0 && k > 0) { k--; }
-      ed = clock();
-      printf("%dms  %2d: %d", (int)(ed - st), N, sum[k]);
-      if (k > 0) { for (int i = k - 1; i >= 0; i--) { printf("%08d", sum[i]); } }
-      puts("");
-    }
-  } else {
-    for (int i = 0; i <= b; i ++) { num[i]++; circle(n - 1, i); num[i]--; }
-  }
-}
-int main() {
-  st = clock();
-  init();
-  for (int i = 2; i <= 40; i++) {
-    N = i;
-    printf("Search %d...\n", i);
-    nextPower();
-    circle(N, 9);
-  }
-}
+              194979, 548834, 1741725, 4210818, 9800817, 9926315, 14459929, 24678050, 24678051, 88593477
+            };
 //完数
 string str[] = {
   "6",
@@ -153,4 +86,3 @@ string str[] = {
   "14474011154664524427946373126085988481573677491474835889066354349131199152128",
   "23562723457267347065789548996709904988477547858392600710143027597506337283178622239730365539602600561360255566462503270175052892578043215543382498428777152427010394496918664028644534128033831439790236838624033171435922356643219703101720713163527487298747400647801939587165936401087419375649057918549492160555646976"
 };
-

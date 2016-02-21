@@ -248,7 +248,7 @@ void printCatalan(int n) {
 //组合数
 ll Com(ll n, ll m) {
   if (m > n) { return 0; }
-  if (n - m < m) { m = n - m; }
+  if (m > n - m) { m = n - m; }
   if (m == 0) { return 1; }
   ll ret = 1;
   for (ll i = 0, j = 1; i < m; i++) {
@@ -277,7 +277,7 @@ ll Lucas(ll n, ll m, ll p) {
 //组合数取模 Lucas定理 p <= 10^9 需要快速幂
 ll Com(ll n, ll m, ll p) {
   if (m > n) { return 0; }
-  if (n - m > m) { m = n - m; }
+  if (m > n - m) { m = n - m; }
   if (m == 0) { return 1; }
   ll ret = 1;
   for (ll i = 1; i <= m; i++) {
