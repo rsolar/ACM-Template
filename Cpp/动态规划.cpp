@@ -1,8 +1,10 @@
 //最大子段和 O(n)
 ll maxSum(int a[], int n, int &st, int &ed) {
   ll ret = a[0], sum = 0; st = ed = 0;
-  for (int i = 0, s = 0; i < n; i++, s = sum > 0 ? s : i) {
-    if ((sum = max(sum, 0LL) + a[i]) > ret) { ret = sum; st = s; ed = i; }
+  for (int i = 1; i < n; i++) {
+    if (sum > 0) { sum += a[i]; }
+    else { sum = a[i]; s = i; }
+    if (sum > ret) { ret = sum; st = s; ed = i; }
   }
   return ret;
 }
@@ -12,12 +14,27 @@ ll maxSum_adj(int a[], int n) {
   if (ret_notadj < 0) { return ret_notadj; }
   ll sum = 0, mnsum = INT_MAX, mntmp = 0;
   for (int i = 0; i < n; i++) {
-    if (mntmp > 0) { mntmp = a[i]; } else { mntmp += a[i]; }
+    if (mntmp > 0) { mntmp = a[i]; }
+    else { mntmp += a[i]; }
     if (mntmp < mnsum) { mnsum = mntmp; }
     sum += a[i];
   }
   ll ret_adj = sum - mnsum;
   return max(ret_notadj, ret_adj);
+}
+//最大M子段和 O(nm)
+ll dp[N], mxsum[N];
+ll mxMSum(int a[], int n, int m) {
+  for (int i = 1; i <= m; i++) {
+    ll mx = LLONG_MIN >> 1;
+    for (int j = i; j <= n; j++) {
+      dp[j] = max(dp[j - 1], mxsum[j - 1]) + a[j];
+      mxsum[j - 1] = mx;
+      mx = max(mx, dp[j]);
+    }
+    mxsum[n] = mx;
+  }
+  return mxsum[n];
 }
 //最大子阵和 O(n^3)
 ll presum[N][N];
@@ -47,6 +64,26 @@ int LIS(int a[], int n) {
     b[a[i] > b[len - 1] ? len++ : upper_bound(b, b + len, a[i]) - b] = a[i]; //非降换为lower_bound
   }
   return len;
+}
+//最长上升子序列数量 O(nlogn)?
+int b[N], l[N]; ll cnt[N];
+vector<int> v[N];
+ll LIS(int a[], int n) {
+  int len = 1; b[0] = a[0]; l[0] = 1; v[1].push_back(0);
+  for (int i = 1; i < n; i++) {
+    int pos = a[i] > b[len - 1] ? len++ : lower_bound(b, b + len, a[i]) - b;
+    b[pos] = a[i]; l[i] = pos + 1;
+    v[l[i]].push_back(i);
+  }
+  ll ret = 0;
+  for (int i = 0; i < n; i++) {
+    if (l[i] == 1) { cnt[i] = 1; continue; }
+    for (int j = 0, ll = l[i] - 1; j < v[ll].size() && v[ll][j] <= i; j++) {
+      if (a[v[ll][j]] < a[i]) { cnt[i] += cnt[v[ll][j]]; }
+    }
+    if (l[i] == len) { ret += cnt[i]; }
+  }
+  return ret;
 }
 //长度为k的上升子序列个数 O(knlogn)
 int n, k;
