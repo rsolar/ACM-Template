@@ -118,43 +118,41 @@ uint64_t __builtin_bswap64(uint64_t x);
 //自带的tree_order_statistics_node_update统计的是子树size
 //稍加修改就可以统计容易合并的任意信息
 //以下代码实现了区间求和
-//template<class Node_CItr, class Node_Itr,
-//         class Cmp_Fn, class _Alloc>
-//struct my_node_update {
-//  virtual Node_CItr node_begin()const = 0;
-//  virtual Node_CItr node_end()const = 0;
-//  typedef int metadata_type; //节点上记录的额外信息的类型
-//  inline void operator()(Node_Itr it, Node_CItr end_it) {
-//    Node_Itr l = it.get_l_child(), r = it.get_r_child();
-//    int left = 0, right = 0;
-//    if (l != end_it) { left = l.get_metadata(); }
-//    if (r != end_it) { right = r.get_metadata(); }
-//    const_cast<metadata_type &>(it.get_metadata()) = left + right + (*it)->second;
-//  }
-//  inline int prefix_sum(int x) {
-//    int ans = 0;
-//    Node_CItr it = node_begin();
-//    while (it != node_end()) {
-//      Node_CItr l = it.get_l_child(), r = it.get_r_child();
-//      if (Cmp_Fn()(x, (*it)->first)) { it = l; }
-//      else {
-//        ans += (*it)->second;
-//        if (l != node_end()) { ans += l.get_metadata(); }
-//        it = r;
-//      }
-//    }
-//    return ans;
-//  }
-//  inline int interval_sum(int l, int r) {
-//    return prefix_sum(r) - prefix_sum(l - 1);
-//  }
-//};
-//int main() {
-//  __gnu_pbds::tree<int, int, std::less<int>, __gnu_pbds::rb_tree_tag, my_node_update> T;
-//  T[2] = 100; T[3] = 1000; T[4] = 10000;
-//  printf("%d\n", T.interval_sum(3, 4));
-//  printf("%d\n", T.prefix_sum(3));
-//}
+template<class Node_CItr, class Node_Itr, class Cmp_Fn, class _Alloc>
+struct my_node_update {
+  virtual Node_CItr node_begin()const = 0;
+  virtual Node_CItr node_end()const = 0;
+  typedef int metadata_type; //节点上记录的额外信息的类型
+  inline void operator()(Node_Itr it, Node_CItr end_it) {
+    Node_Itr l = it.get_l_child(), r = it.get_r_child();
+    int left = 0, right = 0;
+    if (l != end_it) { left = l.get_metadata(); }
+    if (r != end_it) { right = r.get_metadata(); }
+    const_cast<metadata_type &>(it.get_metadata()) = left + right + (*it)->second;
+  }
+  inline int prefix_sum(int x) {
+    int ans = 0;
+    Node_CItr it = node_begin();
+    while (it != node_end()) {
+      Node_CItr l = it.get_l_child(), r = it.get_r_child();
+      if (Cmp_Fn()(x, (*it)->first)) { it = l; }
+      else {
+        ans += (*it)->second;
+        if (l != node_end()) { ans += l.get_metadata(); }
+        it = r;
+      }
+    }
+    return ans;
+  }
+  inline int interval_sum(int l, int r) {
+    return prefix_sum(r) - prefix_sum(l - 1);
+  }
+};
+int main() {
+  tree<int, int, std::less<int>, rb_tree_tag, my_node_update> T;
+  T[2] = 100; T[3] = 1000; T[4] = 10000;
+  printf("%d\n%d\n", T.interval_sum(3, 4), T.prefix_sum(3));
+}
 //注意：
 //对Node_Itr可以做的事情：用get_l_child和get_r_child获取左右儿子，用两个星号（一个星号只是获取了iterator）获取节点信息，用get_metadata获取节点额外信息
 //operator()的功能是将节点it的信息更新，传入的end_it表示空节点

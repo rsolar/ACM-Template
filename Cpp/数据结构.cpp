@@ -5,28 +5,22 @@ template<typename T> struct BIT {
   T A[N]; //T B[N]; //区间增减/维护最值
   int lowbit(int x) { return x & -x; }
   void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B));*/ }
-  //单点增减
-  void add(int i, T v) { while (i <= n) { A[i] += v; i += lowbit(i); } }
-  //不带区间修改时求前缀和 [1, i]
-  T sum(int i) { T ret = 0; while (i) { ret += A[i]; i -= lowbit(i); } return ret; }
-  //区间和[i, j]
-  T query(int i, int j) { return sum(j) - sum(i - 1); }
-
-  //带区间修改时求前缀和 区间求和用query(i, j)
-  T sum(int x) {
+  void update(int i, T v) { while (i <= n) { A[i] += v; i += lowbit(i); } }
+  T query(int i) { T ret = 0; while (i) { ret += A[i]; i -= lowbit(i); } return ret; }
+  T query(int i, int j) { return query(j) - query(i - 1); }
+  //区间修改
+  T query(int x) {
     if (!x) { return 0; }
     T ret1 = 0, ret2 = 0;
     for (int i = x; i <= n; i += lowbit(i)) { ret1 += A[i]; }
     for (int i = x - 1; i > 0; i -= lowbit(i)) { ret2 += B[i]; }
     return ret1 * x + ret2;
   }
-  //带区间修改时区间增减
-  void add(int x, T v) {
+  void update(int x, T v) {
     for (int i = x; i > 0; i -= lowbit(i)) { A[i] += v; }
     for (int i = x; i <= n; i += lowbit(i)) { B[i] += x * v; }
   }
-  void add(int i, int j, T v) { add(j, v); if (i > 1) { add(i - 1, -v); } }
-
+  void update(int i, int j, T v) { update(j, v); if (i > 1) { update(i - 1, -v); } }
   //维护区间最值 O(log^2(n))
   void modify(int x, T v) {
     B[x] = v;
@@ -46,12 +40,11 @@ template<typename T> struct BIT {
     }
     return ret;
   }
-
   //求区间第K大的下标/值 O(log^2(n))
   int getK(int l, int r, int k) {
     while (l <= r) {
       int mid = l + ((r - l) >> 1);
-      if (sum(mid) >= k) { r = mid - 1; }
+      if (query(mid) >= k) { r = mid - 1; }
       else { l = mid + 1; }
     }
     return l; //A[l]
@@ -59,58 +52,51 @@ template<typename T> struct BIT {
 };
 BIT<int> bit;
 //二维树状数组
-//单点修改 + 单点求和 + 区域修改 + 区域求和
+//单点修改 + 单点查询 + 区域修改 + 区域查询
 int n, m;
 template<typename T> struct BIT {
   T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //区域求和
   int lowbit(int x) { return x & -x; }
   void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));*/ }
-  //区域和[1][1]-[x][y]
-  T sum(int x, int y) {
+  T get(int x, int y) {
     T ret = 0;
     for (int i = x; i > 0; i -= lowbit(i)) { for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; } }
     return ret;
   }
-  //单点查询
-  T sumv(int x, int y) { return sum(x, y) + sum(x - 1, y - 1) - sum(x, y - 1) - sum(x - 1, y); }
-  //单点增减
-  void add(int x, int y, T v) {
+  T query(int x, int y) { return get(x, y) - get(x, y - 1) - get(x - 1, y) + get(x - 1, y - 1); }
+  void update(int x, int y, T v) {
     for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; } }
   }
-  //单点赋值
-  void set(int x, int y, T v) { add(x, y, v - sumv(x, y)); }
-
   //区域和[x1][y1]-[x2][y2]
-  T sum1(int x, int y) {
-    return (x + 1) * (y + 1) * sum(x, y) - (y + 1) * sum(x, y) - (x + 1) * sum(x, y) + sum(x, y);
+  T get1(int x, int y) {
+    return (x + 1) * (y + 1) * get(x, y) - (y + 1) * get(x, y) - (x + 1) * get(x, y) + get(x, y);
   }
-  T sum(int x1, int y1, int x2, int y2) {
-    return sum1(x2, y2) - sum1(x1 - 1, y2) - sum1(x2, y1 - 1) + sum1(x1 - 1, y1 - 1);
+  T query(int x1, int y1, int x2, int y2) {
+    return get1(x2, y2) - get1(x1 - 1, y2) - get1(x2, y1 - 1) + get1(x1 - 1, y1 - 1);
   }
   //区域增减
-  void add(int x, int y, T v, T a[][N]) {
+  void update(int x, int y, T v, T a[][N]) {
     for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; } }
   }
-  void add(int x1, int y1, int x2, int y2, T v) {
-    add(x1, y1, v, A); add(x2 + 1, y1, -v, A);
-    add(x1, y2 + 1, -v, A); add(x2 + 1, y2 + 1, v, A);
-    add(x1, y1, v * x1, B); add(x2 + 1, y1, -v * (x2 + 1), B);
-    add(x1, y2 + 1, -v * x1, B); add(x2 + 1, y2 + 1, v * (x2 + 1), B);
-    add(x1, y1, v * y1, C); add(x2 + 1, y1, -v * y1, C);
-    add(x1, y2 + 1, -v * (y2 + 1), C); add(x2 + 1, y2 + 1, v * (y2 + 1), C);
-    add(x1, y1, v * x1 * y1, D); add(x2 + 1, y1, -v * (x2 + 1) * y1, D);
-    add(x1, y2 + 1, -v * x1 * (y2 + 1), D); add(x2 + 1, y2 + 1, v * (x2 + 1) * (y2 + 1), D);
+  void update(int x1, int y1, int x2, int y2, T v) {
+    update(x1, y1, v, A); update(x2 + 1, y1, -v, A);
+    update(x1, y2 + 1, -v, A); update(x2 + 1, y2 + 1, v, A);
+    update(x1, y1, v * x1, B); update(x2 + 1, y1, -v * (x2 + 1), B);
+    update(x1, y2 + 1, -v * x1, B); update(x2 + 1, y2 + 1, v * (x2 + 1), B);
+    update(x1, y1, v * y1, C); update(x2 + 1, y1, -v * y1, C);
+    update(x1, y2 + 1, -v * (y2 + 1), C); update(x2 + 1, y2 + 1, v * (y2 + 1), C);
+    update(x1, y1, v * x1 * y1, D); update(x2 + 1, y1, -v * (x2 + 1) * y1, D);
+    update(x1, y2 + 1, -v * x1 * (y2 + 1), D); update(x2 + 1, y2 + 1, v * (x2 + 1) * (y2 + 1), D);
   }
 };
 BIT<int> bit;
-//线段树  单点修改 + 区间查询
+//线段树 单点修改 + 区间查询
 #define lson l,m,rt<<1
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
   T data[N << 2];
   T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
-  //初始化/建树
   void build(int l, int r, int rt) {
     if (l == r) { scanf("%d", &data[rt]); return; }
     int m = (l + r) >> 1;
@@ -118,18 +104,13 @@ template<typename T> struct SegmentTree {
     build(rson);
     push_up(rt);
   }
-  //单点修改
   void update(int p, T val, int l, int r, int rt) {
-    if (l == r) {
-      data[rt] += val; //data[rt] = val;
-      return;
-    }
+    if (l == r) { data[rt] += val; return; }
     int m = (l + r) >> 1;
     if (p <= m) { update(p, val, lson); }
     else { update(p, val, rson); }
     push_up(rt);
   }
-  //区间和
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return data[rt]; }
     int m = (l + r) >> 1; T ret = 0;
@@ -139,14 +120,14 @@ template<typename T> struct SegmentTree {
   }
 };
 SegmentTree<int> st;
-//线段树 区间查询/修改(延迟标记)
+//线段树 区间查询/修改 + 延迟标记
 #define lson l,m,rt<<1
 #define rson m+1,r,rt<<1|1
 template<typename T> struct SegmentTree {
   T data[N << 2], lazy[N << 2];
   T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
-  //区间求和的标记下推
+  //区间求和标记
   void push_down(int rt, int len) {
     if (lazy[rt]) {
       data[rt << 1] += lazy[rt] * (len - (len >> 1)); lazy[rt << 1] += lazy[rt];
@@ -154,7 +135,7 @@ template<typename T> struct SegmentTree {
       lazy[rt] = 0;
     }
   }
-  //区间最值的标记下推
+  //区间最值标记
   void push_down(int rt) {
     if (lazy[rt]) {
       data[rt << 1] += lazy[rt]; lazy[rt << 1] += lazy[rt];
@@ -162,16 +143,14 @@ template<typename T> struct SegmentTree {
       lazy[rt] = 0;
     }
   }
-  //初始化/建树
   void build(int l, int r, int rt) {
     lazy[rt] = 0;
-    if (l == r) { scanf("%d", &data[rt]); return; } //mx[rt] = a[i];
+    if (l == r) { scanf("%d", &data[rt]); return; }
     int m = (l + r) >> 1;
     build(lson);
     build(rson);
     push_up(rt);
   }
-  //区间增减
   void update(int L, int R, T val, int l, int r, int rt) {
     if (L <= l && r <= R) {
       data[rt] += val * (r - l + 1); //data[rt] += val;
@@ -184,7 +163,6 @@ template<typename T> struct SegmentTree {
     if (m < R) { update(L, R, val, rson); }
     push_up(rt);
   }
-  //区间和
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return data[rt]; }
     push_down(rt, r - l + 1); //push_down(rt);
@@ -224,7 +202,6 @@ template<typename T> struct zkwSegmentTree {
     for (top = 0;; x; x >>= 1) { stack[++top] = x; }
     while (top--) { pushdown(stack[top]); }
   }
-  //区间求和
   T query(int tl, int tr) {
     T res = 0;
     for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
@@ -239,7 +216,6 @@ template<typename T> struct zkwSegmentTree {
     }
     return res;
   }
-  //区间修改
   void update(int tl, int tr, T val) {
     for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
       if (~tl & 1) {

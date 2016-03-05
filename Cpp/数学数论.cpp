@@ -4,6 +4,15 @@ ll powMod(ll a, ll b, ll m) {
   for (a %= m; b; b >>= 1) { if (b & 1) { r = r * a % m; } a = a * a % m; }
   return r;
 }
+//级数求和
+ll sumPow(ll a, ll b, ll m) {
+  ll r = 1;
+  for (ll t = 1; b; b >>= 1) {
+    if (b & 1) { r = (r * a + t) % m; }
+    t = t * (a + 1) % m; a = a * a % m;
+  }
+  return r;
+}
 //素数筛
 //Eratosthenes O(nloglogn)
 const int N = 10000000; //~80ms
@@ -42,33 +51,31 @@ void getPrime() {
     }
   }
 }
-//分解质因数 需素数表
-ll factor[100];
-int getFactors(ll x) {
-  int fatCnt = 0;
-  for (int i = 1; prime[i] <= x / prime[i]; i++) {
-    if (x % prime[i] == 0) {
-      factor[fatCnt++] = prime[i];
-      while (x % prime[i] == 0) { x /= prime[i]; }
+//分解质因数
+ll factor[100], facCnt;
+void getFactors(ll x) {
+  facCnt = 0;
+  for (int i = 2, xx = sqrt(x + 0.5); i <= xx; i++) {
+    if (x % i == 0) {
+      factor[facCnt++] = i;
+      while (x % i == 0) { x /= i; }
     }
   }
-  if (x != 1) { factor[fatCnt++] = x; }
-  return fatCnt;
+  if (x != 1) { factor[facCnt++] = x; }
 }
-//分解质因数及求个数 需素数表
-ll factor[100][2];
-int getFactors(ll x) {
-  int fatCnt = 0;
+//分解质因数及个数 预处理素数表
+ll factor[100][2], facCnt;
+void getFactors(ll x) {
+  facCnt = 0;
   for (int i = 1; prime[i] <= x / prime[i]; i++) {
-    factor[fatCnt][1] = 0;
+    factor[facCnt][1] = 0;
     if (x % prime[i] == 0) {
-      factor[fatCnt][0] = prime[i];
-      while (x % prime[i] == 0) { factor[fatCnt][1]++; x /= prime[i]; }
-      fatCnt++;
+      factor[facCnt][0] = prime[i];
+      while (x % prime[i] == 0) { factor[facCnt][1]++; x /= prime[i]; }
+      facCnt++;
     }
   }
-  if (x != 1) { factor[fatCnt][0] = x; factor[fatCnt++][1] = 1; }
-  return fatCnt;
+  if (x != 1) { factor[facCnt][0] = x; factor[facCnt++][1] = 1; }
 }
 //Miller Rabin素数测试
 const int Times = 7; //错误概率为1/4^Times
@@ -129,7 +136,7 @@ void findfac(ll n, int k = 107) {
 }
 //求单个数的欧拉函数 + 合数分解
 int getFacEul(ll n, ll factor[][2] = factor) {
-  for (int i = 0, fatCnt = getFactors(n); i < fatCnt; i++) {
+  for (int i = 0, facCnt = getFactors(n); i < facCnt; i++) {
     n = n / factor[i][0] * (factor[i][0] - 1);
   }
   return n;
@@ -187,8 +194,6 @@ void getPrimePhi() {
     }
   }
 }
-//gcd
-ll gcd(ll a, ll b) { while (b) { ll t = a % b; a = b; b = t; } return a; }
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
 ll extendGcd(ll a, ll b, ll &x, ll &y) {
@@ -212,8 +217,7 @@ void getInv(int m) {
   for (ll i = 2; i < m; i++) { inv[i] = (m - m / i) * inv[m % i] % m; }
 }
 //预处理卡特兰数
-int a[105][105]; //大数
-int b[105]; //长度
+int a[105][105], b[105]; //大数, 长度
 void Catalan() {
   int i, j, len, carry, temp;
   a[1][0] = b[1] = len = 1;
@@ -294,8 +298,8 @@ ll Lucas(ll n, ll m, ll p) {
 const int maxc = 1005;
 ll C[maxc][maxc];
 void calC() { // C(n,k),n个数里选k个
-  for (int i = 0; i < 1005; i++) { C[i][i] = C[i][0] = 1LL; }
-  for (int i = 2; i < 1005; i++) {
+  for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1LL; }
+  for (int i = 2; i < maxc; i++) {
     for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD; }
   }
 }
