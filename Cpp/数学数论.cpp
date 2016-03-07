@@ -4,15 +4,6 @@ ll powMod(ll a, ll b, ll m) {
   for (a %= m; b; b >>= 1) { if (b & 1) { r = r * a % m; } a = a * a % m; }
   return r;
 }
-//级数求和
-ll sumPow(ll a, ll b, ll m) {
-  ll r = 1;
-  for (ll t = 1; b; b >>= 1) {
-    if (b & 1) { r = (r * a + t) % m; }
-    t = t * (a + 1) % m; a = a * a % m;
-  }
-  return r;
-}
 //素数筛
 //Eratosthenes O(nloglogn)
 const int N = 10000000; //~80ms
