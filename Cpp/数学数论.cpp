@@ -187,13 +187,13 @@ void getPrimePhi() {
 }
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
-ll extendGcd(ll a, ll b, ll &x, ll &y) {
+ll exgcd(ll a, ll b, ll &x, ll &y) {
   if (b == 0) { x = 1; y = 0; return a; }
-  ll d = extendGcd(b, a % b, y, x); return y -= a / b * x, d;
+  ll d = exgcd(b, a % b, y, x); return y -= a / b * x, d;
 }
 //扩展欧几里得求逆元
 ll modReverse(ll a, ll m) {
-  ll x, y, d = extendGcd(a, m, x, y);
+  ll x, y, d = exgcd(a, m, x, y);
   if (d == 1) { return (x % m + m) % m; } else { return -1; }
 }
 //只能求0 < a < m的情况,a和m互质
@@ -285,11 +285,11 @@ ll Lucas(ll n, ll m, ll p) {
   if (m == 0) { return 1; }
   return Com(n % p, m % p, p) * Lucas(n / p, m / p, p) % p;
 }
-//组合数打表
-const int maxc = 1005;
+//组合数打表 / 杨辉三角
+const int maxc = 105;
 ll C[maxc][maxc];
 void calC() { // C(n,k),n个数里选k个
-  for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1LL; }
+  for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1; }
   for (int i = 2; i < maxc; i++) {
     for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD; }
   }
@@ -425,7 +425,7 @@ ll BSGS(ll a, ll b, ll p) { //a^x=b(mod p), 已知a,b,p,求x
 int m[10], a[10]; //模数为m, 余数为a, X % m = a
 bool solve(int &m0, int &a0, int m, int a) {
   ll y, x;
-  int g = extendGcd(m0, m, x, y);
+  int g = exgcd(m0, m, x, y);
   if (abs(a - a0) % g) { return false; }
   x *= (a - a0) / g;
   x %= m / g;

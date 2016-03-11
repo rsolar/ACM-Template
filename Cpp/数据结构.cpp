@@ -127,19 +127,10 @@ template<typename T> struct SegmentTree {
   T data[N << 2], lazy[N << 2];
   T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
-  //区间求和标记
   void push_down(int rt, int len) {
     if (lazy[rt]) {
       data[rt << 1] += lazy[rt] * (len - (len >> 1)); lazy[rt << 1] += lazy[rt];
       data[rt << 1 | 1] += lazy[rt] * (len >> 1); lazy[rt << 1 | 1] += lazy[rt];
-      lazy[rt] = 0;
-    }
-  }
-  //区间最值标记
-  void push_down(int rt) {
-    if (lazy[rt]) {
-      data[rt << 1] += lazy[rt]; lazy[rt << 1] += lazy[rt];
-      data[rt << 1 | 1] += lazy[rt]; lazy[rt << 1 | 1] += lazy[rt];
       lazy[rt] = 0;
     }
   }
@@ -153,11 +144,11 @@ template<typename T> struct SegmentTree {
   }
   void update(int L, int R, T val, int l, int r, int rt) {
     if (L <= l && r <= R) {
-      data[rt] += val * (r - l + 1); //data[rt] += val;
+      data[rt] += val * (r - l + 1);
       lazy[rt] += val;
       return;
     }
-    push_down(rt, r - l + 1); //push_down(rt);
+    push_down(rt, r - l + 1);
     int m = (l + r) >> 1;
     if (L <= m) { update(L, R, val, lson); }
     if (m < R) { update(L, R, val, rson); }
@@ -165,7 +156,7 @@ template<typename T> struct SegmentTree {
   }
   T query(int L, int R, int l, int r, int rt) {
     if (L <= l && r <= R) { return data[rt]; }
-    push_down(rt, r - l + 1); //push_down(rt);
+    push_down(rt, r - l + 1);
     int m = (l + r) >> 1; T ret = 0;
     if (L <= m) { ret = calc(ret, query(L, R, lson)); }
     if (m < R) { ret = calc(ret, query(L, R, rson)); }
@@ -173,62 +164,71 @@ template<typename T> struct SegmentTree {
   }
 };
 SegmentTree<int> st;
-//非递归版线段树
+//非递归版线段树 单点修改 + 区间查询
 const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
-#define l(x) ((x)<<1) //x的左儿子, 利用堆的性质
-#define r(x) (((x)<<1)|1) //x的右儿子, 利用堆的性质
+#define l(x) ((x)<<1) //x的左儿子
+#define r(x) (((x)<<1)|1) //x的右儿子
 template<typename T> struct zkwSegmentTree {
-  int M, dl[N], dr[N]; //底层的节点数 节点的左右端点
-  int stack[30], top;//栈
-  T sum[N]; //节点的区间和
-  T add[N]; //延迟标记
+  int m; //底层节点数
+  T sum[N]; //区间和
+  void build(int n) {
+    for (m = 1; m < n + 2; m <<= 1);
+    for (int i = 1; i <= n; i++) { scanf("%d", &sum[m + i]); }
+    for (int i = m - 1; i; i--) { sum[i] = sum[l(i)] + sum[r(i)]; }
+  }
+  void update(int p, T val) {
+    for (sum[p += m] += val, p >>= 1; p; p >>= 1) {
+      sum[p] = sum[l(p)] + sum[r(p)];
+    }
+  }
+  T query(int l, int r) {
+    T ret = 0;
+    for (l += m - 1, r += m + 1; l ^ r ^ 1; l >>= 1, r >>= 1) {
+      if (~l & 1) { ret += sum[l ^ 1]; }
+      if (r & 1) { ret += sum[r ^ 1]; }
+    }
+    return ret;
+  }
+};
+zkwSegmentTree<int> st;
+//非递归版线段树 区间查询/修改 + 延迟标记
+const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
+#define l(x) ((x)<<1) //x的左儿子
+#define r(x) (((x)<<1)|1) //x的右儿子
+template<typename T> struct zkwSegmentTree {
+  int m, h; //底层节点数 高度
+  T sum[N], add[N]; //区间和 延迟标记
   void pushdown(int rt) {
-    if (add[rt] && rt < M) {
-      add[l(rt)] += add[rt]; sum[l(rt)] += add[rt] * (dr[l(rt)] - dl[l(rt)] + 1);
-      add[r(rt)] += add[rt]; sum[r(rt)] += add[rt] * (dr[r(rt)] - dl[r(rt)] + 1);
-      add[rt] = 0;
+    for (int i = h, p; i; i--) { //自顶向下
+      if (add[p = rt >> i]) {
+        add[p] >>= 1; //add[p]为节点增加总量, 子节点增加一半
+        sum[l(p)] += add[p]; add[l(p)] += add[p];
+        sum[r(p)] += add[p]; add[r(p)] += add[p];
+        add[p] = 0;
+      }
     }
   }
   void build(int n) {
-    for (M = 1; M < n + 2; M <<= 1);
-    for (int i = 1; i <= n; i++) { //建树
-      scanf("%d", &sum[M + i]); dl[M + i] = dr[M + i] = i;
-    }
-    for (int i = M - 1; i >= 1; i--) { //预处理节点左右端点
-      sum[i] = sum[l(i)] + sum[r(i)]; dl[i] = dl[l(i)]; dr[i] = dr[r(i)];
-    }
+    for (m = 1, h = 0; m < n + 2; m <<= 1, h++);
+    for (int i = 1; i <= n; i++) { scanf("%d", &sum[m + i]); }
+    for (int i = m - 1; i; i--) { sum[i] = sum[l(i)] + sum[r(i)]; }
   }
-  void pushpath(int x) {
-    for (top = 0;; x; x >>= 1) { stack[++top] = x; }
-    while (top--) { pushdown(stack[top]); }
-  }
-  T query(int tl, int tr) {
-    T res = 0;
-    for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
-      if (~tl & 1) {
-        if (!insl) { pushpath(insl = tl ^ 1); }
-        res += sum[tl ^ 1];
-      }
-      if (tr & 1) {
-        if (!insr) { pushpath(insr = tl ^ 1); }
-        res += sum[tr ^ 1];
-      }
+  void update(int l, int r, T val) {
+    l += m - 1, r += m + 1; int ll = l >> 1, rr = r >> 1;
+    for (pushdown(l), pushdown(r); l ^ r ^ 1; l >>= 1, r >>= 1, val <<= 1) {
+      if (~l & 1) { sum[l ^ 1] += val; add[l ^ 1] += val; }
+      if (r & 1) { sum[r ^ 1] += val; add[r ^ 1] += val; }
     }
-    return res;
+    for (; ll; ll >>= 1) { sum[ll] = sum[l(ll)] + sum[r(ll)]; }
+    for (; rr; rr >>= 1) { sum[rr] = sum[l(rr)] + sum[r(rr)]; }
   }
-  void update(int tl, int tr, T val) {
-    for (int tl = tl + M - 1, tr = tr + M + 1; tl ^ tr ^ 1; tl >>= 1, tr >>= 1) {
-      if (~tl & 1) {
-        if (!insl) { pushpath(insl = tl ^ 1); }
-        add[tl ^ 1] += val; sum[tl ^ 1] += val * (dr[tl ^ 1] - dl[tl ^ 1] + 1);
-      }
-      if (tr & 1) {
-        if (!insr) { pushpath(insr = tr ^ 1); }
-        add[tr ^ 1] += val; sum[tr ^ 1] += val * (dr[tr ^ 1] - dl[tr ^ 1] + 1);
-      }
+  T query(int l, int r) {
+    T ret = 0; l += m - 1, r += m + 1;
+    for (pushdown(l), pushdown(r); l ^ r ^ 1; l >>= 1, r >>= 1) {
+      if (~l & 1) { ret += sum[l ^ 1]; }
+      if (r & 1) { ret += sum[r ^ 1]; }
     }
-    for (int insl = insl >> 1; insl; insl >>= 1) { sum[insl] = sum[l(insl)] + sum[r(insl)]; }
-    for (int insr = insr >> 1; insr; insr >>= 1) { sum[insr] = sum[l(insr)] + sum[r(insr)]; }
+    return ret;
   }
 };
 zkwSegmentTree<int> st;
