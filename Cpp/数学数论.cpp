@@ -185,6 +185,18 @@ void getPrimePhi() {
     }
   }
 }
+//A^B的约数之和为:
+//sum = [1+p1+p1^2+...+p1^(a1*B)]*...*[1+pn+pn^2+...+pn^(an*B)].
+//等比数列求和 1+a+a^2+...+a^b
+ll sumPow(ll a, ll b, ll m) {
+  ll r = 1; a %= m;
+  for (ll t = 1; b; b >>= 1) {
+    if (b & 1) { r = (r * a + t) % m; }
+    t = t * (a + 1) % m;
+    a = a * a % m;
+  }
+  return r;
+}
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
 ll exgcd(ll a, ll b, ll &x, ll &y) {
