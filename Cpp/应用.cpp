@@ -1,8 +1,14 @@
-//Joseph 问题
-int Joseph(int n, int m) {
-  int ret = 0;
+//Joseph问题 O(n)
+int Joseph(int n, int m, int s) {
+  int ret = s - 1;
   for (int i = 2; i <= n; i++) { ret = (ret + m) % i; }
   return ret + 1;
+}
+//O(logn) 0 <= k < n
+int Joseph(int n, int m, int k) {
+  if (m == 1) { return n - 1; }
+  for (k = k * m + m - 1; k >= n; k = k - n + (k - n) / (m - 1));
+  return k;
 }
 //二叉树前序 + 中序求后序遍历
 void getPost(char *pre, char *in, int len) {
@@ -70,7 +76,7 @@ void work(int n) {
 int Nar[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 153, 370, 371, 407, 1634, 4150, 4151, 8208, 9474, 54748, 92727, 93084,
               194979, 548834, 1741725, 4210818, 9800817, 9926315, 14459929, 24678050, 24678051, 88593477
             };
-//完数
+//完数 A000396 Perfect numbers n: n is equal to the sum of the proper divisors of n.
 string str[] = {
   "6",
   "28",
