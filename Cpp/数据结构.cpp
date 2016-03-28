@@ -68,11 +68,8 @@ template<typename T> struct BIT {
     for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; } }
   }
   //区域和[x1][y1]-[x2][y2]
-  T get1(int x, int y) {
-    return (x + 1) * (y + 1) * get(x, y) - (y + 1) * get(x, y) - (x + 1) * get(x, y) + get(x, y);
-  }
   T query(int x1, int y1, int x2, int y2) {
-    return get1(x2, y2) - get1(x1 - 1, y2) - get1(x2, y1 - 1) + get1(x1 - 1, y1 - 1);
+    return get(x2, y2) - get(x1 - 1, y2) - get(x2, y1 - 1) + get(x1 - 1, y1 - 1);
   }
   //区域增减
   void update(int x, int y, T v, T a[][N]) {
