@@ -28,35 +28,32 @@ template<typename T> inline bool getNum(T &x) {
   if (neg) { x = -x; } return true;
 }
 //空格作为分隔 读取一行的整数
+const int BUFSIZE = 20 << 20;
+char BUF[BUFSIZE];
 inline void getLine(int a[]) {
-  int i = 0; gets(buf);
-  for (char *p = strtok(buf, " "); p; p = strtok(NULL, " ")) {
+  int i = 0; gets(BUF);
+  for (char *p = strtok(BUF, " "); p; p = strtok(NULL, " ")) {
     sscanf(p, "%d", &a[i++]);
   }
 }
 //配合fread
 const int BUFSIZE = 20 << 20;
 char BUF[BUFSIZE], *pt, *ed;
-inline void Read() { pt = BUF; ed = BUF +  fread(BUF, sizeof(char), BUFSIZE, stdin); }
+inline void read() { pt = BUF; ed = BUF + fread(BUF, sizeof(char), BUFSIZE, stdin); }
 inline bool hasNext() {
-  for (char *x = pt; x < ed; ++x) {
+  for (char *x = pt; x < ed; x++) {
     if (isspace(*x)) { continue; }
     if (isalnum(*x)) { return true; }
   }
   return false;
 }
-template<typename T> inline void getInt(T &x) {
+template<typename T> inline void nextInt(T &x) {
   x = 0;
-  for (bool flag = 0, neg = 0;; ++pt) {
-    if (isdigit(*pt)) { x = (x << 3) + (x << 1) + *pt - '0'; flag = true; }
+  for (bool flag = 0, neg = 0;; pt++) {
+    if (isdigit(*pt)) { x = x * 10 + *pt - '0'; flag = true; }
     else if (flag) { if (neg) { x = -x; } break; }
     else if (*pt == '-') { neg = true; }
   }
 }
-inline void getChar(char &x) { x = *pt; ++pt; }
-inline void getStr(char *s) { for (; *pt; ++s, ++pt) { *s = *pt; } *s = 0; }
-//输出一个整数
-template<typename T> inline void printInt(T x) {
-  if (x > 9) { printInt(x / 10); }
-  putchar(x % 10 + '0');
-}
+inline void nextChar(char &x) { x = *pt; ++pt; }
+inline void nextStr(char *s) { for (; *pt; s++, pt++) { *s = *pt; } *s = 0; }

@@ -1,25 +1,27 @@
-//#include <algorithm>
-//#include <bitset>
-//#include <cassert>
-//#include <cctype>
-//#include <climits>
-//#include <cmath>
-//#include <complex>
-//#include <cstdio>
-//#include <cstdlib>
-//#include <cstring>
-//#include <ctime>
-//#include <iomanip>
-//#include <iostream>
-//#include <list>
-//#include <map>
-//#include <numeric>
-//#include <queue>
-//#include <set>
-//#include <stack>
-//#include <string>
-//#include <vector>
+#if __cplusplus >= 201103L
 #include <bits/stdc++.h>
+#endif
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
 using namespace std;
 
 typedef long long ll;

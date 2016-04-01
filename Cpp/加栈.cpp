@@ -3,14 +3,17 @@ void Main() {
 
 }
 int main() {
-  int sz = 256 << 20; //256Mb
+  int sz = 100 << 20; //100MB
   char *p = (char *)malloc(sz) + sz;
-  //Windows
-  __asm__ __volatile__("movl %0, %%esp\n" "pushl $_exit\n" :: "r"(p));
-  //Linux
-  //__asm__ __volatile__("movq %0, %%rsp\n" "pushq $exit\n" :: "r"(p));
+  __asm__ __volatile__(
+#if __x86_64__ || __ppc64__ || _WIN64 //64-bit
+    "movq %0, %%rsp\n pushq $_exit\n"
+#else //32-bit
+    "movl %0, %%esp\n pushl $_exit\n"
+#endif
+    :: "r"(p));
   Main();
   exit(0);
 }
-//VC++
-#pragma comment(linker, "/STACK:1024000000,1024000000")
+//VC++ 100MB
+#pragma comment(linker, "/STACK:102400000,102400000")
