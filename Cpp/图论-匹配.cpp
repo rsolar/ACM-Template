@@ -1,7 +1,7 @@
 //二分图最大匹配
 //Hungary + dfs + 邻接矩阵 O(V^2)
-bool g[N][N];
 int uN, vN; //左右点的数目
+bool g[N][N];
 int match[N];
 bool check[N];
 bool dfs(int u) {

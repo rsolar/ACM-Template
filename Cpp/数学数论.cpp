@@ -70,19 +70,16 @@ void getFactors(ll x) {
 }
 //Miller Rabin素数测试
 const int Times = 7; //错误概率为1/4^Times
-//大数乘法
 ll mulMod(ll a, ll b, ll m) {
   ll r = 0;
   for (a %= m, b %= m; b; b >>= 1) { if (b & 1) { r = (r + a) % m; } a = (a << 1) % m; }
   return r;
 }
-//大数快速幂
 ll powMod(ll a, ll b, ll m) {
   ll r = 1;
   for (a %= m; b; b >>= 1) { if (b & 1) { r = mulMod(r, a, m); } a = mulMod(a, a, m); }
   return r;
 }
-//Miller Rabin
 bool Miller_Rabin(ll n) {
   if (n == 2) { return true; }
   if (n < 2 || (n & 1) == 0) { return false; }

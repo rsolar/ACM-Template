@@ -314,3 +314,47 @@ int getMax(int x1, int y1, int x2, int y2) {
   x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
   return max(max(dpmx[x1][y1][k1][k2], dpmx[x1][y2][k1][k2]), max(dpmx[x2][y1][k1][k2], dpmx[x2][y2][k1][k2]));
 }
+//TSP问题 O(V^2*2^V)
+int n, mp[N][N], dp[1 << N][N];
+int TSP() {
+  memset(dp, 0x1f, sizeof(dp));
+  dp[1][0] = 0;
+  for (int s = 0; s < 1 << n; s++) {
+    for (int v = 0; v < n; v++) {
+      if (dp[s][v] == 0x1f1f1f1f) { continue; }
+      for (int u = 0; u < n; u++) {
+        if (s & 1 << u) { continue; }
+        dp[s | 1 << u][u] = min(dp[s | 1 << u][u], dp[s][v] + mp[v][u]);
+      }
+    }
+  }
+  int ans = 0x1f1f1f1f;
+  for (int i = 0; i < n; i++) { ans = min(ans, dp[(1 << n) - 1][i] + mp[i][0]); }
+  return ans;
+}
+//mTSP问题 O(V^2*2^V)
+int n, mp[N][N], dp[1 << N][N], best[1 << N];
+bool ok[N]; //该集合状态是否可行
+int mTSP() {
+  memset(dp, 0x1f, sizeof(dp));
+  memset(best, 0x1f, sizeof(best));
+  dp[1][0] = 0;
+  for (int s = 0; s < 1 << n; s++) {
+    if (!ok[s]) { continue; }
+    for (int v = 0; v < n; v++) {
+      if (!(s & (1 << v)) || dp[s][v] == 0x1f1f1f1f) { continue; }
+      best[s] = min(best[s], dp[s][v] + mp[v][0]);
+      for (int u = 0; u < n; u++) {
+        if (s & (1 << u)) { continue; }
+        dp[s | 1 << u][u] = min(dp[s | 1 << u][u], dp[s][v] + mp[v][u]);
+      }
+    }
+  }
+  for (int s = 0; s < 1 << n; s++) {
+    if (!(s & 1)) { continue; }
+    for (int i = s & (s - 1); i; i = s & (i - 1)) {
+      best[s] = min(best[s], best[i] + best[(s ^ i) | 1]);
+    }
+  }
+  return best[(1 << n) - 1];
+}
