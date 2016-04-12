@@ -3,7 +3,7 @@ template<typename T> struct Matrix {
   vector<T> a; int h, w;
   Matrix(): a(), h(), w() {}
   Matrix(const Matrix &v): a(v.a), h(v.h), w(v.w) {}
-  Matrix(const int &_h, const int &_w): a(_h *_w), h(_h), w(_w) { }
+  Matrix(const int &_h, const int &_w): a(_h * _w), h(_h), w(_w) { }
   static Matrix e(const int &_h, const int &_w) {
     Matrix res(_h, _w);
     for (int i = 0, n = min(_h, _w); i < n; i++) { res[i][i] = T(1); }
@@ -66,7 +66,7 @@ template<typename T> struct Matrix {
     for (int i = 0, n = b.h * b.w; i < n; i++) { out << b.a[i] << (i % b.w == b.w - 1 ? '\n' : ' '); }
     return out;
   }
-  //求逆矩阵 限double 可逆则返回true
+  //求逆矩阵 限double 可逆则返回true 结果在参数中
   bool inv(Matrix &v)const {
     if (h != w) { return false; }
     int is[N], js[N]; v = *this;

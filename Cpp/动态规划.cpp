@@ -1,26 +1,25 @@
 //最大子段和 O(n)
 ll maxSum(int a[], int n, int &st, int &ed) {
-  ll ret = a[0], sum = 0; st = ed = 0;
+  ll mx = a[0], mxc = 0; st = ed = 0;
   for (int i = 1; i < n; i++) {
-    if (sum > 0) { sum += a[i]; }
-    else { sum = a[i]; s = i; }
-    if (sum > ret) { ret = sum; st = s; ed = i; }
+    if (mxc > 0) { mxc += a[i]; }
+    else { mxc = a[i]; s = i; }
+    if (mxc > mx) { mx = mxc; st = s; ed = i; }
   }
-  return ret;
+  return mx;
 }
 //循环数组最大子段和 O(n)
+const ll INF = 0x7f7f7f7f7f7fLL;
 ll maxSum_adj(int a[], int n) {
-  ll ret_notadj = maxSum(a, n); //不跨界最大子段和
-  if (ret_notadj < 0) { return ret_notadj; }
-  ll sum = 0, mnsum = INT_MAX, mntmp = 0;
+  ll mx = -INF, mxc = 0, mn = INF, mnc = 0, sum = 0;
   for (int i = 0; i < n; i++) {
-    if (mntmp > 0) { mntmp = a[i]; }
-    else { mntmp += a[i]; }
-    if (mntmp < mnsum) { mnsum = mntmp; }
+    mxc = x + (mxc > 0 ? mxc : 0);
+    if (mx < mxc) { mx = mxc; }
+    mnc = x + (mnc > 0 ? 0 : mnc);
+    if (mn > mnc) { mn = mnc; }
     sum += a[i];
   }
-  ll ret_adj = sum - mnsum;
-  return max(ret_notadj, ret_adj);
+  return mx < 0 || mx > sum - mn ? mx : sum - mn;
 }
 //最大M子段和 O(nm)
 ll dp[N], mxsum[N];

@@ -10,6 +10,28 @@ int Joseph(int n, int m, int k) {
   for (k = k * m + m - 1; k >= n; k = k - n + (k - n) / (m - 1));
   return k;
 }
+//康托展开 fac[]为阶乘
+ll Cantor(char *s) {
+  ll ans = 0;
+  for (int i = 0, len = strlen(s); i < len; i++) {
+    int cnt = 0;
+    for (int j = i + 1; j < len; j++) { if (s[j] < s[i]) { cnt++; } }
+    ans += cnt * fac[len - i - 1];
+  }
+  return ans;
+}
+//康托展开逆运算
+vector<int> revCantor(ll n, ll k) {
+  vector<int> v, ret; k--;
+  for (int i = 1; i <= n; i++) { v.push_back(i); }
+  for (int i = n; i >= 1; i--) {
+    ll t = k / fac[i - 1]; k %= fac[i - 1];
+    sort(v.begin(), v.end());
+    ret.push_back(v[t]);
+    v.erase(v.begin() + t);
+  }
+  return ret;
+}
 //二叉树前序 + 中序求后序遍历
 void getPost(char *pre, char *in, int len) {
   if (len == 0) { return; }

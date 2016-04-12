@@ -1,7 +1,5 @@
 //G++
-void Main() {
-
-}
+void Main() { }
 int main() {
   int sz = 100 << 20; //100MB
   char *p = (char *)malloc(sz) + sz;
