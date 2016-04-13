@@ -10,27 +10,23 @@ double TS(double l, double r) {
 }
 //归并排序 求逆序数
 ll cnt;
-template<typename T> void mergeSort(T a[], int l, int r) {
+void mergeSort(int a[], int l, int r) {
   if (l >= r) { return; }
   int mid = (l + r) >> 1;
   mergeSort(a, l, mid);
   mergeSort(a, mid + 1, r);
-  vector<T> res(r - l + 1);
+  vector<int> res(r - l + 1);
   int i = l, j = mid + 1, k = 0;
   while (i <= mid && j <= r) {
-    if (a[i] > a[j]) {
-      res[k++] = a[j++];
-      cnt += mid + 1 - i;
-    } else {
-      res[k++] = a[i++];
-    }
+    if (a[i] > a[j]) { res[k++] = a[j++]; cnt += mid + 1 - i; }
+    else { res[k++] = a[i++]; }
   }
   while (i <= mid) { res[k++] = a[i++]; }
   while (j <= r) { res[k++] = a[j++]; }
   for (k = l; k <= r; k++) { a[k] = res[k - l]; }
 }
 //快排
-template<typename T> void quickSort(T a[], int l, int r) {
+void quickSort(int a[], int l, int r) {
   if (l >= r) { return; }
   int i = l, j = r, v = a[l];
   while (i < j) {

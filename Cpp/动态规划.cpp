@@ -13,9 +13,9 @@ const ll INF = 0x7f7f7f7f7f7fLL;
 ll maxSum_adj(int a[], int n) {
   ll mx = -INF, mxc = 0, mn = INF, mnc = 0, sum = 0;
   for (int i = 0; i < n; i++) {
-    mxc = x + (mxc > 0 ? mxc : 0);
+    mxc = a[i] + (mxc > 0 ? mxc : 0);
     if (mx < mxc) { mx = mxc; }
-    mnc = x + (mnc > 0 ? 0 : mnc);
+    mnc = a[i] + (mnc > 0 ? 0 : mnc);
     if (mn > mnc) { mn = mnc; }
     sum += a[i];
   }
@@ -24,38 +24,37 @@ ll maxSum_adj(int a[], int n) {
 //最大M子段和 O(nm)
 ll dp[N], mxsum[N];
 ll mxMSum(int a[], int n, int m) {
+  ll mx;
   for (int i = 1; i <= m; i++) {
-    ll mx = LLONG_MIN >> 1;
+    mx = 0x8f8f8f8f8f8f8f8fLL;
     for (int j = i; j <= n; j++) {
       dp[j] = max(dp[j - 1], mxsum[j - 1]) + a[j];
-      mxsum[j - 1] = mx;
-      mx = max(mx, dp[j]);
+      mxsum[j - 1] = mx; mx = max(mx, dp[j]);
     }
-    mxsum[n] = mx;
   }
-  return mxsum[n];
+  return mx;
 }
 //最大子阵和 O(n^3)
 ll presum[N][N];
 ll maxSum(int a[][N], int h, int w, int &x1, int &y1, int &x2, int &y2) {
   ll ret = a[0][0], sum; x1 = y1 = x2 = y2 = 0;
-  for (int i = 0, j; i < h; i++) {
-    for (presum[i][j = 0] = 0; j < w; j++) {
-      presum[i][j + 1] = presum[i][j] + a[i][j];
-    }
+  for (int i = 0; i < h; i++) {
+    presum[i][0] = 0;
+    for (int j = 0; j < w; j++) { presum[i][j + 1] = presum[i][j] + a[i][j]; }
   }
-  for (int j = 0, k, i, s; j < w; j++) {
-    for (k = j; k < w; k++) {
-      for (sum = s = i = 0; i < h; i++, s = (sum > 0 ? s : i)) {
-        if ((sum = max(sum, 0LL) + presum[i][k + 1] - presum[i][j]) > ret) {
-          ret = sum; x1 = s; y1 = i; x2 = j; y2 = k;
+  for (int j = 0; j < w; j++) {
+    for (int k = j, s; k < w; k++) {
+      sum = s = 0;
+      for (int i = 0; i < h; i++, s = sum > 0 ? s : i) {
+        if ((sum = (sum > 0 ? sum : 0) + presum[i][k + 1] - presum[i][j]) > ret) {
+          ret = sum; x1 = s; y1 = j; x2 = i; y2 = k;
         }
       }
     }
   }
   return ret;
 }
-//最长上升子序列 LIS O(nlogn)
+//最长上升子序列 Longest Increasing Subsequence O(nlogn)
 int b[N];
 int LIS(int a[], int n) {
   int len = 1; b[0] = a[0];
@@ -77,7 +76,7 @@ ll LIS(int a[], int n) {
   ll ret = 0;
   for (int i = 0; i < n; i++) {
     if (l[i] == 1) { cnt[i] = 1; continue; }
-    for (int j = 0, ll = l[i] - 1; j < v[ll].size() && v[ll][j] <= i; j++) {
+    for (int j = 0, ll = l[i] - 1; j < (int)v[ll].size() && v[ll][j] <= i; j++) {
       if (a[v[ll][j]] < a[i]) { cnt[i] += cnt[v[ll][j]]; }
     }
     if (l[i] == len) { ret += cnt[i]; }
@@ -89,11 +88,7 @@ int n, k;
 ll bit[M][N];
 inline int lowbit(int x) { return x & -x; }
 void add(int id, int i, ll val) { while (i <= n) { bit[id][i] += val; i += lowbit(i); } }
-ll sum(int id, int i) {
-  ll ret = 0;
-  while (i) { ret += bit[id][i]; i -= lowbit(i); }
-  return ret;
-}
+ll sum(int id, int i) { ll ret = 0; while (i) { ret += bit[id][i]; i -= lowbit(i); } return ret; }
 int main() {
   scanf("%d%d", &n, &k);
   add(0, 1, 1);
@@ -103,7 +98,7 @@ int main() {
   }
   printf("%I64d\n", sum(k, n)); //n为元素最大值
 }
-//最长公共子序列 LCS O(n^2)
+//最长公共子序列 Longest Common Subsequence O(n^2)
 int dp[N][N];
 int LCS(char *a, char *b) {
   int m = strlen(a), n = strlen(b);
@@ -124,22 +119,21 @@ void printLCS(char *a, char *b) {
   }
   puts(s);
 }
-//最长公共子串 LCSubstring
+//最长公共子串 Longest Common Substring
 //DP O(n^2)
 int dp[2][N];
-int LCS_dp(char *s1, char *s2, int &start1, int &start2) {
-  int m = strlen(s1), n = strlen(s2), longest = 0, cur = 0; start1 = start2 = -1;
+int LCS_dp(char *a, char *b, int &st1, int &st2) {
+  int m = strlen(a), n = strlen(b), ret = 0, cur = 0; st1 = st2 = -1;
   for (int i = 0; i < m; i++, cur ^= 1) {
     for (int j = 0; j < n; j++) {
-      if (s1[i] == s2[j]) {
-        if (i == 0 || j == 0) { dp[cur][j] = 1; }
-        else { dp[cur][j] = dp[cur ^ 1][j - 1] + 1; }
-        if (dp[cur][j] > longest) { longest = dp[cur][j]; start1 = i + 1 - longest; start2 = j + 1 - longest; }
+      if (a[i] == b[j]) {
+        dp[cur][j] = i == 0 || j == 0 ? 1 : dp[cur ^ 1][j - 1] + 1;
+        if (dp[cur][j] > ret) { ret = dp[cur][j]; st1 = i + 1 - ret; st2 = j + 1 - ret; }
       }
     }
   }
-  //outputLCS(s1, longest, start1);
-  return longest;
+  //outputLCS(a, ret, st1);
+  return ret;
 }
 //后缀数组 O(nlogn)
 char *suf[N];
@@ -147,68 +141,72 @@ int pstrcmp(const void *p, const void *q) {
   return strcmp(*(char **)p, *(char **)q);
 }
 int comlen_suf(const char *p, const char *q) {
-  int len = 0;
-  while (*p && *q && *p++ == *q++) {
+  for (int len = 0; *p && *q && *p++ == *q++;) {
     len++;
     if (*p == '#' || *q == '#') { return len; }
   }
   return 0;
 }
-int LCS_suffix(char *s1, char *s2) {
-  int m = strlen(s1), n = strlen(s2), longest = 0, suf_index = 0, len_suf = m + n + 1;
+int LCS_suffix(char *a, char *b) {
+  int m = strlen(a), n = strlen(b), ret = 0, suf_index = 0, len_suf = m + n + 1;
   char *arr = new char[len_suf + 1];
-  strcpy(arr, s1); arr[m] = '#'; strcpy(arr + m + 1, s2);
+  strcpy(arr, a); arr[m] = '#'; strcpy(arr + m + 1, b);
   for (int i = 0; i < len_suf; i++) { suf[i] = &arr[i]; }
   qsort(suf, len_suf, sizeof(char *), pstrcmp);
   for (int i = 0; i < len_suf - 1; i++) {
     int len = comlen_suf(suf[i], suf[i + 1]);
-    if (len > longest) { longest = len; suf_index = i; }
+    if (len > ret) { ret = len; suf_index = i; }
   }
-  //outputLCS(suf[suf_index], longest);
-  return longest;
+  //outputLCS(suf[suf_index], ret);
+  delete[] arr; return ret;
 }
-void outputLCS(char *s, int longest, int start = 0) {
-  int i = start;
-  while (longest--) {
-    printf("%c", s[i++]);
+void outputLCS(char *s, int len, int i = 0) {
+  for (; len--; i++) { putchar(s[i]); } puts("");
+}
+//DP 下界O(nlogn) 上界O(nmlog(nm))
+int c[N * N], d[N * N];
+int LCS_dp(char *a, char *b) {
+  vector<int> pos[26]; int k = 0, len = 1; d[0] = c[0];
+  for (int i = strlen(b) - 1; i >= 0; i--) { pos[b[i] - 'a'].push_back(i); }
+  for (int i = 0; a[i]; i++) {
+    for (int j = 0; j < (int)pos[a[i] - 'a'].size(); j++) { c[k++] = pos[a[i] - 'a'][j]; }
   }
-  puts("");
+  for (int i = 1; i < k; i++) {
+    d[c[i] > d[len - 1] ? len++ : lower_bound(d, d + len, c[i]) - d] = c[i];
+  }
+  return len;
 }
 //最长公共递增子序列 GCIS O(n^2)
-int f[N][N], dp[N];
+int dp[N], f[N][N];
 int GCIS(int a[], int la, int b[], int lb, int ans[]) {
   //a[1...la], b[1...lb]
-  int i, j, k, mx;
+  int mx = 0;
   memset(f, 0, sizeof(f));
   memset(dp, 0, sizeof(dp));
-  for (i = 1; i <= la; i++) {
+  for (int i = 1; i <= la; i++) {
     memcpy(f[i], f[i - 1], sizeof(f[0]));
-    for (k = 0, j = 1; j <= lb; j++) {
-      if (b[j - 1] < a[i - 1] && dp[j] > dp[k]) { k = j; }
-      if (b[j - 1] == a[i - 1] && dp[k] + 1 > dp[j]) {
-        dp[j] = dp[k] + 1; f[i][j] = i * (lb + 1) + k;
-      }
+    for (int j = 1, k = 0; j <= lb; j++) {
+      if (a[j - 1] > b[i - 1] && dp[k] < dp[j]) { k = j; }
+      if (b[j - 1] == a[i - 1] && dp[k] + 1 > dp[j]) { dp[j] = dp[k] + 1; f[i][j] = i * (lb + 1) + k; }
     }
   }
-  for (mx = 0, i = 1; i <= lb; i++) {
-    if (dp[i] > dp[mx]) { mx = i; }
-  }
-  for (i = la * lb + la + mx, j = dp[mx]; j; i = f[i / (lb + 1)][i % (lb + 1)], j--) {
+  for (int i = 1; i <= lb; i++) { if (dp[i] > dp[mx]) { mx = i; } }
+  for (int i = la * lb + la + mx, j = dp[mx]; j; i = f[i / (lb + 1)][i % (lb + 1)], j--) {
     ans[j - 1] = b[i % (lb + 1) - 1];
   }
   return dp[mx];
 }
 //字符串编辑距离 (Levenshtein距离)
-char S[N], T[N];
+//操作包括将替换一个字符, 插入一个字符, 删除一个字符
 int dp[N][N];
-int LenvDist(char S[], char T[]) {
-  int n = strlen(S), m = strlen(T);
+int LevDist(char *a, char *b) {
+  int n = strlen(a), m = strlen(b);
   for (int i = 0; i <= n; i++) { dp[i][0] = i; }
   for (int i = 0; i <= m; i++) { dp[0][i] = i; }
   for (int i = 1; i <= n; i++) {
     for (int j = 1; j <= m; j++) {
       dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + 1;
-      if (S[i - 1] == T[j - 1]) { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); }
+      if (a[i - 1] == b[j - 1]) { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); }
       else { dp[i][j] = min(dp[i][j], dp[i - 1][j - 1] + 1); }
     }
   }
@@ -216,102 +214,57 @@ int LenvDist(char S[], char T[]) {
 }
 //字符串距离
 //非空格字符的距离定义为它们的ASCII码的差的绝对值, 空格字符与其它任意字符之间的距离为已知的定值k
-char S[N], T[N];
 int dp[N][N];
-int Dist(char S[], char T[], int k) {
-  int n = strlen(S), m = strlen(T);
+int dist(char *a, char *b, int k) {
+  int n = strlen(a), m = strlen(b);
   for (int i = 0; i <= n; i++) { dp[i][0] = i * k; }
   for (int i = 1; i <= m; i++) { dp[0][i] = i * k; }
   for (int i = 1; i <= n; i++) {
     for (int j = 1; j <= m; j++) {
-      dp[i][j] = min(dp[i - 1][j - 1] + abs(S[i - 1] - T[j - 1]), min(dp[i - 1][j], dp[i][j - 1]) + k);
+      dp[i][j] = min(dp[i - 1][j - 1] + abs(a[i - 1] - b[j - 1]), min(dp[i - 1][j], dp[i][j - 1]) + k);
     }
   }
   return dp[n][m];
 }
-//RMQ 一维
-//Sparse Table 返回值
-int n, a[N];
-int dpmn[N][30], dpmx[N][30];
+//稀疏表 Sparse Table
+//一维RMQ 预处理O(nlogn) 查询O(1)
+//返回最大值 下标从1开始 修改即可返回下标
+int p[N] = { -1}, dp[N][20];
 void initRMQ() {
-  for (int i = 1; i <= n; i++) { dpmn[i][0] = dpmx[i][0] = a[i]; }
-  for (int j = 1; (1 << j) <= n; j++) {
+  for (int i = 1; i <= n; i++) { p[i] = p[i - 1] + !(i & (i - 1)); dp[i][0] = a[i]; }
+  for (int j = 1; j <= p[n]; j++) {
     for (int i = 1; i + (1 << j) - 1 <= n; i++) {
-      dpmn[i][j] = min(dpmn[i][j - 1], dpmn[i + (1 << (j - 1))][j - 1]);
-      dpmx[i][j] = max(dpmx[i][j - 1], dpmx[i + (1 << (j - 1))][j - 1]);
+      dp[i][j] = dp[i][j - 1] > dp[i + (1 << (j - 1))][j - 1] ? dp[i][j - 1] : dp[i + (1 << (j - 1))][j - 1];
     }
   }
 }
-int getMin(int l, int r) {
-  int k = (int)(log(r - l + 1.0) / log(2.0));
-  return min(dpmn[l][k], dpmn[r - (1 << k) + 1][k]);
+inline int query(int l, int r) {
+  int k = p[r - l + 1];
+  return dp[l][k] > dp[r - (1 << k) + 1][k] ? dp[l][k] : dp[r - (1 << k) + 1][k];
 }
-int getMax(int l, int r) {
-  int k = (int)(log(r - l + 1.0) / log(2.0));
-  return max(dpmx[l][k], dpmx[r - (1 << k) + 1][k]);
-}
-//ST 返回下标
-int n, a[N];
-int dpmn[N][30], dpmx[N][30];
-void initRMQ() {
-  for (int i = 1; i <= n; i++) { dpmn[i][0] = dpmx[i][0] = i; }
-  for (int j = 1; (1 << j) <= n; j++) {
-    for (int i = 1; i + (1 << j) - 1 <= n; i++) {
-      dpmn[i][j] = a[dpmn[i][j - 1]] < a[dpmn[i + (1 << (j - 1))][j - 1]] ? dpmn[i][j - 1] : dpmn[i + (1 << (j - 1))][j - 1];
-      dpmx[i][j] = a[dpmx[i][j - 1]] > a[dpmx[i + (1 << (j - 1))][j - 1]] ? dpmx[i][j - 1] : dpmx[i + (1 << (j - 1))][j - 1];
-    }
-  }
-}
-int getMin(int l, int r) {
-  int k = (int)(log(r - l + 1.0) / log(2.0));
-  return a[dpmn[l][k]] < a[dpmn[r - (1 << k) + 1][k]] ? dpmn[l][k] : dpmn[r - (1 << k) + 1][k];
-}
-int getMax(int l, int r) {
-  int k = (int)(log(r - l + 1.0) / log(2.0));
-  return a[dpmx[l][k]] > a[dpmx[r - (1 << k) + 1][k]] ? dpmx[l][k] : dpmx[r - (1 << k) + 1][k];
-}
-//RMQ 二维
-int n, a[N][N];
-int mm[N], dpmn[N][N][9][9], dpmx[N][N][9][9]; //mm[]为二进制位数减一，使用前初始化
-void initmm() {
-  mm[0] = -1;
-  for (int i = 1; i < N; i++) {
-    mm[i] = ((i & (i - 1)) == 0) ? mm[i - 1] + 1 : mm[i - 1];
-  }
-}
+//二维RMQ 预处理O(nmlognlogm) 查询O(1) 下标从1开始
+int p[N] = { -1}, dp[N][N][9][9];
 void initRMQ() {
   for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= n; j++) {
-      dpmn[i][j][0][0] = dpmx[i][j][0][0] = a[i][j];
-    }
+    p[i] = p[i - 1] + !(i & (i - 1));
+    for (int j = 1; j <= n; j++) { dp[i][j][0][0] = a[i][j]; }
   }
-  for (int ii = 0; ii <= mm[n]; ii++) {
-    for (int jj = 0; jj <= mm[m]; jj++) {
+  for (int ii = 0; ii <= p[n]; ii++) {
+    for (int jj = 0; jj <= p[m]; jj++) {
       if (ii + jj) {
         for (int i = 1; i + (1 << ii) - 1 <= n; i++) {
           for (int j = 1; j + (1 << jj) - 1 <= m; j++) {
-            if (ii) {
-              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii - 1][jj], dpmn[i + (1 << (ii - 1))][j][ii - 1][jj]);
-              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii - 1][jj], dpmx[i + (1 << (ii - 1))][j][ii - 1][jj]);
-            } else {
-              dpmn[i][j][ii][jj] = min(dpmn[i][j][ii][jj - 1], dpmn[i][j + (1 << (jj - 1))][ii][jj - 1]);
-              dpmx[i][j][ii][jj] = max(dpmx[i][j][ii][jj - 1], dpmx[i][j + (1 << (jj - 1))][ii][jj - 1]);
-            }
+            if (ii) { dp[i][j][ii][jj] = max(dp[i][j][ii - 1][jj], dp[i + (1 << (ii - 1))][j][ii - 1][jj]); }
+            else { dp[i][j][ii][jj] = max(dp[i][j][ii][jj - 1], dp[i][j + (1 << (jj - 1))][ii][jj - 1]); }
           }
         }
       }
     }
   }
 }
-int getMin(int x1, int y1, int x2, int y2) {
-  int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
-  x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
-  return min(min(dpmn[x1][y1][k1][k2], dpmn[x1][y2][k1][k2]), min(dpmn[x2][y1][k1][k2], dpmn[x2][y2][k1][k2]));
-}
-int getMax(int x1, int y1, int x2, int y2) {
-  int k1 = mm[x2 - x1 + 1], k2 = mm[y2 - y1 + 1];
-  x2 = x2 - (1 << k1) + 1; y2 = y2 - (1 << k2) + 1;
-  return max(max(dpmx[x1][y1][k1][k2], dpmx[x1][y2][k1][k2]), max(dpmx[x2][y1][k1][k2], dpmx[x2][y2][k1][k2]));
+inline int query(int x1, int y1, int x2, int y2) {
+  int k1 = p[x2 - x1 + 1], k2 = p[y2 - y1 + 1]; x2 -= (1 << k1) - 1; y2 -= (1 << k2) - 1;
+  return max(max(dp[x1][y1][k1][k2], dp[x1][y2][k1][k2]), max(dp[x2][y1][k1][k2], dp[x2][y2][k1][k2]));
 }
 //TSP问题 O(V^2*2^V)
 int n, mp[N][N], dp[1 << N][N];

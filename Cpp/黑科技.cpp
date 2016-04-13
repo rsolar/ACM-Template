@@ -23,27 +23,21 @@
 int __builtin_ffs(int x);
 int __builtin_ffsll(long long);
 //Returns one plus the index of the least significant 1-bit of x, or if x is zero, returns zero.
-
 int __builtin_clz(unsigned int x);
 int __builtin_clzll(unsigned long long);
 //Returns the number of leading 0-bits in x, starting at the most significant bit position. If x is 0, the result is undefined.
-
 int __builtin_ctz(unsigned int x);
 int __builtin_ctzll(unsigned long long);
 //Returns the number of trailing 0-bits in x, starting at the least significant bit position. If x is 0, the result is undefined.
-
 int __builtin_clrsb(int x);
 int __builtin_clrsbll(long long);
 //Returns the number of leading redundant sign bits in x, i.e. the number of bits following the most significant bit that are identical to it. There are no special cases for 0 or other values.
-
 int __builtin_popcount(unsigned int x);
 int __builtin_popcountll(unsigned long long);
 //Returns the number of 1-bits in x.
-
 int __builtin_parity(unsigned int x);
 int __builtin_parityll(unsigned long long);
 //Returns the parity of x, i.e. the number of 1-bits in x modulo 2.
-
 uint32_t __builtin_bswap32(uint32_t x);
 uint64_t __builtin_bswap64(uint64_t x);
 //Returns x with the order of the bytes reversed; for example, 0xaabb becomes 0xbbaa. Byte here always means exactly 8 bits.

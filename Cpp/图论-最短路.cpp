@@ -2,9 +2,9 @@
 const int N = 100005;
 const int M = 200005;
 const int INF = 0x3f3f3f3f;
-int head[N], to[M], Next[M], len[M], tot;
+int head[N], to[M], nxt[M], len[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; Next[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; nxt[tot] = head[x]; head[x] = tot++; }
 //Dijkstra + 邻接矩阵 O(V^2)
 int n, mp[N][N], dist[N], pre[N]; //邻接矩阵初始化为INF, pre[i]记录src到i路径上的父结点, pre[src] = -1
 bool vis[N];
@@ -86,7 +86,7 @@ void Dijkstra(int src) {
   while (!que.empty()) {
     int u = que.top().v, w = que.top().w; que.pop();
     if (w != dist[u]) { continue; }
-    for (int i = head[u]; ~i; i = Next[i]) {
+    for (int i = head[u]; ~i; i = nxt[i]) {
       int v = to[i];
       if (w + len[i] < dist[v]) {
         dist[v] = w + len[i]; que.push(Node(v, dist[v]));
@@ -137,7 +137,7 @@ void SPFA(int src) {
     int u = que.front(); que.pop_front();
     if (!que.empty() && (ll)dist[u] * que.size() > sum) { que.push_back(u); continue; }
     sum -= dist[u]; vis[u] = false;
-    for (int i = head[u]; ~i; i = Next[i]) {
+    for (int i = head[u]; ~i; i = nxt[i]) {
       int v = to[i], d = dist[u] + len[i];
       if (d < dist[v]) {
         if (vis[v]) { sum += d - dist[v]; }

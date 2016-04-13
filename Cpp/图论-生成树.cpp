@@ -21,9 +21,9 @@ int Prim(int src) {
 }
 //Prim + priority_queue + 邻接表 O(ElogV)
 const int INF = 0x3f3f3f3f;
-int head[N], to[M], Next[M], len[M], tot;
+int head[N], to[M], nxt[M], len[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; Next[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; nxt[tot] = head[x]; head[x] = tot++; }
 struct Node {
   int v, w;
   Node(int _v, int _w): v(_v), w(_w) {}
@@ -35,7 +35,7 @@ int Prim(int src) {
   memset(dist, 0x3f, sizeof(dist)); memset(vis, 0, sizeof(vis));
   int ret = 0;
   priority_queue<Node> que;
-  for (int i = head[0]; ~i; i = Next[i]) {
+  for (int i = head[0]; ~i; i = nxt[i]) {
     int v = to[i];
     if (len[i] < dist[v]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
   }
@@ -44,7 +44,7 @@ int Prim(int src) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
     vis[u] = true; ret += dist[u];
-    for (int i = head[u]; ~i; i = Next[i]) {
+    for (int i = head[u]; ~i; i = nxt[i]) {
       int v = to[i];
       if (!vis[v] && dist[v] > len[i]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
     }

@@ -5,7 +5,8 @@ const double gs = (sqrt(5.0) + 1.0) / 2.0;
 bool Wizov(ll a, ll b) {
   return min(a, b) == (ll)(abs(a - b) * gs);
 }
-//威佐夫博弈 1 <= N <= 10^18
+//威佐夫博弈 1 <= N <= 1e18
+const int N = 95; //~95 for 1e18
 ll fib[N] = { 0, 1 }; //预处理fibonacci数列
 bool s[N];
 bool Wizov(ll a, ll b) {
@@ -62,7 +63,5 @@ void printNim(int n) { //石子堆数
     for (int i = 0; i < cnt; i++) {
       printf("%d %d\n", ans[i][0], ans[i][1]);  //输出若先手为胜的走法
     }
-  } else {
-    puts("No");
-  }
+  } else { puts("No"); }
 }

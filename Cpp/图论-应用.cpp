@@ -15,16 +15,15 @@ int topoSort() {
   return k < n ? -1 : flag ? 0 : 1; //有环, 不唯一, 唯一
 }
 //邻接表
-int head[N], to[M], Next[M], tot;
+int head[N], to[M], nxt[M], tot, n, in[N], ret[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) { to[tot] = y; Next[tot] = head[x]; head[x] = tot++; }
-int n, in[N], ret[N];
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 bool topoSort() {
   priority_queue<int> que; int k = 0;
   for (int i = 0; i < n; i++) { if (in[i] == 0) { que.push(i); } }
   while (!que.empty()) {
     int u = que.top(); que.pop(); ret[k++] = u;
-    for (int i = head[u]; ~i; i = Next[i]) {
+    for (int i = head[u]; ~i; i = nxt[i]) {
       if (--in[to[i]] == 0) { que.push(to[i]); }
     }
   }
@@ -33,11 +32,11 @@ bool topoSort() {
 //欧拉回路: 每条边只经过一次, 要求回到起点
 //欧拉路径: 每条边只经过一次, 不要求回到起点
 //欧拉路径的判断:
-//无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数或者仅有两个点的度数为偶数。
+//无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数或者仅有两个点的度数为偶数
 //有向图: 基图连通(把边当成无向边, 同样不考虑度为0的点), 每个顶点出度等于入度
-//或者有且仅有一个点的出度比入度多1, 有且仅有一个点的出度比入度少1, 其余出度等于入度。
+//或者有且仅有一个点的出度比入度多1, 有且仅有一个点的出度比入度少1, 其余出度等于入度
 //混合图: 如果存在欧拉回路, 一点存在欧拉路径了。否则如果有且仅有两个点的(出度 - 入度)是奇数,
-//那么给这个两个点加边, 判断是否存在欧拉回路。
+//那么给这个两个点加边, 判断是否存在欧拉回路
 //欧拉回路判断:
 //无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数
 //有向图: 基图连通(同样不考虑度为0的点), 每个顶点出度等于入度
@@ -68,17 +67,17 @@ void dfsd(int u) {
   path[cnt++] = u;
 }
 //无向图 SGU101
-int head[N], to[M], Next[M], tot, deg[N], path[M], cnt;
+int head[N], to[M], nxt[M], tot, deg[N], path[M], cnt;
 bool vis[M];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y) {
-  to[tot] = y; Next[tot] = head[x]; head[x] = tot++;
-  to[tot] = x; Next[tot] = head[y]; head[y] = tot++;
+  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
 }
 void dfs(int u) {
   for (int &i = head[u]; ~i;) {
     if (!vis[i]) { vis[i] = vis[i ^ 1] = true; int t = i; dfs(to[i]); path[cnt++] = t; }
-    else { i = Next[i]; }
+    else { i = nxt[i]; }
   }
 }
 int main() {
@@ -104,17 +103,17 @@ int main() {
 }
 //有向图 POJ2337
 //给出n个小写字母组成的单词, 要求将n个单词连接起来, 输出字典序最小的解
-int head[N], to[M], Next[M], tot, in[N], out[N], path[N], cnt;
+int head[N], to[M], nxt[M], tot, in[N], out[N], path[N], cnt;
 bool vis[M];
 string str[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y) {
-  to[tot] = y; Next[tot] = head[x]; head[x] = tot++;
+  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
 }
 void dfs(int u) {
   for (int &i = head[u]; ~i;) {
     if (!vis[i]) { vis[i] = true; int t = i; dfs(to[i]); path[cnt++] = n - t - 1; }
-    else { i = Next[i]; }
+    else { i = nxt[i]; }
   }
 }
 int main() {
@@ -212,7 +211,7 @@ int main() {
     }
     if (!flag) { puts("impossible"); continue; }
     ISAP(0, n + 1, n + 2);
-    for (int i = head[0]; ~i; i = Next[i]) {
+    for (int i = head[0]; ~i; i = nxt[i]) {
       if (cap[i] > 0 && cap[i] > flow[i]) { flag = false; break; }
     }
     puts(flag ? "possible" : "impossible");
@@ -222,25 +221,21 @@ int main() {
 //染色法
 const int N = 20005;
 const int M = 100005;
-struct Edge {
-  int to, next;
-} edge[M];
-int head[N], tot;
+int head[N], to[M], nxt[M], tot;
 bool vis[N]; //染色标记
 int S[N], top; //栈
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int u, int v) { edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++; }
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 bool dfs(int u) {
   if (vis[u ^ 1]) { return false; }
   if (vis[u]) { return true; }
-  vis[u] = true;
-  S[top++] = u;
-  for (int i = head[u]; i != -1; i = edge[i].next) {
-    if (!dfs(edge[i].to)) { return false; }
+  vis[u] = true; S[top++] = u;
+  for (int i = head[u]; ~i; i = nxt[i]) {
+    if (!dfs(to[i])) { return false; }
   }
   return true;
 }
-bool twoSat(int n) {
+bool twoSAT(int n) {
   memset(vis, 0, sizeof(vis));
   for (int i = 0; i < n; i += 2) {
     if (vis[i] || vis[i ^ 1]) { continue; }
@@ -252,17 +247,17 @@ bool twoSat(int n) {
   }
   return true;
 }
-//HDU1814
+//HDU 1814
 int main() {
   int n, m, u, v;
-  while (scanf("%d%d", &n, &m) == 2) {
+  while (~scanf("%d%d", &n, &m)) {
     init();
     while (m--) {
       scanf("%d%d", &u, &v); u--; v--;
       addedge(u, v ^ 1); addedge(v, u ^ 1);
     }
-    if (Twosat(n << 1)) {
-      for (int i = 0; i < 2 * n; i++) {
+    if (twoSAT(n << 1)) {
+      for (int i = 0; i < n << 1; i++) {
         if (vis[i]) { printf("%d\n", i + 1); }
       }
     } else { printf("NIE\n"); }
@@ -271,129 +266,84 @@ int main() {
 //Tarjan强连通缩点
 const int N = 1005;
 const int M = 100005;
-struct Edge {
-  int to, next;
-} edge[M];
-int head[N], tot;
-void init() {
-  tot = 0; memset(head, -1, sizeof(head));
-}
-void addedge(int u, int v) {
-  edge[tot].to = v; edge[tot].next = head[u]; head[u] = tot++;
-}
-int Low[N], DFN[N], Stack[N], Belong[N]; //Belong数组的值1~scc
-int Index, top;
-int scc;
-bool Instack[N];
-int num[N];
+int head[N], to[M], nxt[M], tot;
+int num[N], Low[N], DFN[N], S[N], Belong[N], idx, top, scc; //Belong数组的值1~scc
+bool instack[N];
+void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 void Tarjan(int u) {
-  int v;
-  Low[u] = DFN[u] = ++Index;
-  Stack[top++] = u;
-  Instack[u] = true;
-  for (int i = head[u]; i != -1; i = edge[i].next) {
-    v = edge[i].to;
-    if (!DFN[v]) {
-      Tarjan(v);
-      if (Low[u] > Low[v]) { Low[u] = Low[v]; }
-    } else if (Instack[v] && Low[u] > DFN[v]) {
-      Low[u] = DFN[v];
-    }
+  Low[u] = DFN[u] = ++idx; S[top++] = u; instack[u] = true;
+  for (int i = head[u]; ~i; i = nxt[i]) {
+    int v = to[i];
+    if (!DFN[v]) { Tarjan(v); Low[u] = min(Low[u], Low[v]); }
+    else if (instack[v] && Low[u] > DFN[v]) { Low[u] = DFN[v]; }
   }
   if (Low[u] == DFN[u]) {
     scc++;
-    do {
-      v = Stack[--top];
-      Instack[v] = false;
-      Belong[v] = scc;
-      num[scc]++;
-    } while (v != u);
+    do { v = S[--top]; instack[v] = false; Belong[v] = scc; num[scc]++; } while (v != u);
   }
 }
-bool solvable(int n) { //n是总个数,需要选择一半
+bool solvable(int n) { //n是总个数, 需要选择一半
   memset(DFN, 0, sizeof(DFN));
-  memset(Instack, false, sizeof(Instack));
+  memset(instack, 0, sizeof(instack));
   memset(num, 0, sizeof(num));
-  Index = scc = top = 0;
-  for (int i = 0; i < n; i++) {
-    if (!DFN[i]) { Tarjan(i); }
-  }
-  for (int i = 0; i < n; i += 2) {
-    if (Belong[i] == Belong[i ^ 1]) { return false; }
-  }
+  idx = scc = top = 0;
+  for (int i = 0; i < n; i++) { if (!DFN[i]) { Tarjan(i); } }
+  for (int i = 0; i < n; i += 2) { if (Belong[i] == Belong[i ^ 1]) { return false; } }
   return true;
 }
 //拓扑排序求任意一组解部分
 queue<int> q1, q2;
 vector<vector<int>> dag; //缩点后的逆向DAG图
 char color[N]; //染色, 为'R'是选择的
-int indeg[N]; //入度
-int cf[N];
+int cf[N], indeg[N]; //入度
 void solve(int n) {
   dag.assign(scc + 1, vector<int>());
   memset(indeg, 0, sizeof(indeg));
   memset(color, 0, sizeof(color));
   for (int u = 0; u < n; u++) {
-    for (int i = head[u]; i != -1; i = edge[i].next) {
-      int v = edge[i].to;
-      if (Belong[u] != Belong[v]) {
-        dag[Belong[v]].push_back(Belong[u]);
-        indeg[Belong[u]]++;
-      }
+    for (int i = head[u]; ~i; i = nxt[i]) {
+      int v = to[i];
+      if (Belong[u] != Belong[v]) { dag[Belong[v]].push_back(Belong[u]); indeg[Belong[u]]++; }
     }
   }
   for (int i = 0; i < n; i += 2) {
-    cf[Belong[i]] = Belong[i ^ 1];
-    cf[Belong[i ^ 1]] = Belong[i];
+    cf[Belong[i]] = Belong[i ^ 1]; cf[Belong[i ^ 1]] = Belong[i];
   }
   while (!q1.empty()) { q1.pop(); }
   while (!q2.empty()) { q2.pop(); }
-  for (int i = 1; i <= scc; i++) {
-    if (indeg[i] == 0) { q1.push(i); }
-  }
+  for (int i = 1; i <= scc; i++) { if (indeg[i] == 0) { q1.push(i); } }
   while (!q1.empty()) {
     int u = q1.front(); q1.pop();
-    if (color[u] == 0) {
-      color[u] = 'R'; color[cf[u]] = 'B';
-    }
-    int sz = dag[u].size();
-    for (int i = 0; i < sz; i++) {
-      indeg[dag[u][i]]--;
-      if (indeg[dag[u][i]] == 0) { q1.push(dag[u][i]); }
+    if (color[u] == 0) { color[u] = 'R'; color[cf[u]] = 'B'; }
+    for (int i = 0; i < (int)dag[u].size(); i++) {
+      if (--indeg[dag[u][i]] == 0) { q1.push(dag[u][i]); }
     }
   }
 }
 int change(char s[]) {
   int ret = 0, i = 0;
-  while (s[i] >= '0' && s[i] <= '9') {
-    ret *= 10; ret += s[i++] - '0';
-  }
-  if (s[i] == 'w') { return 2 * ret; }
-  else { return 2 * ret + 1; }
+  while (s[i] >= '0' && s[i] <= '9') { ret *= 10; ret += s[i++] - '0'; }
+  return (ret << 1) + (s[i] != 'w');
 }
 //POJ3648
 int main() {
-  int n, m;
+  int n, m, u, v;
   char s1[10], s2[10];
-  while (scanf("%d%d", &n, &m) == 2) {
-    if (n == 0 && m == 0) { break; }
+  while (scanf("%d%d", &n, &m), (n || m)) {
     init();
     while (m--) {
-      scanf("%s%s", s1, s2);
-      int u = change(s1);
-      int v = change(s2);
-      addedge(u ^ 1, v);
-      addedge(v ^ 1, u);
+      scanf("%s%s", s1, s2); u = change(s1); v = change(s2);
+      addedge(u ^ 1, v); addedge(v ^ 1, u);
     }
     addedge(1, 0);
-    if (solvable(2 * n)) {
-      solve(2 * n);
+    if (solvable(n << 1)) {
+      solve(n << 1);
       for (int i = 1; i < n; i++) {
         //注意这一定是判断color[Belong[
-        if (color[Belong[2 * i]] == 'R') { printf("%dw", i); }
+        if (color[Belong[i << 1]] == 'R') { printf("%dw", i); }
         else { printf("%dh", i); }
-        if (i < n - 1) { printf(" "); }
-        else { printf("\n"); }
+        putchar(i != n - 1 ? ' ' : '\n');
       }
     } else { printf("bad luck\n"); }
   }

@@ -1,24 +1,24 @@
 //矩阵类
-template<typename T> struct Matrix {
+template<typename T> struct Mat {
   vector<T> a; int h, w;
-  Matrix(): a(), h(), w() {}
-  Matrix(const Matrix &v): a(v.a), h(v.h), w(v.w) {}
-  Matrix(const int &_h, const int &_w): a(_h * _w), h(_h), w(_w) { }
-  static Matrix e(const int &_h, const int &_w) {
-    Matrix res(_h, _w);
+  Mat(): a(), h(), w() {}
+  Mat(const Mat &v): a(v.a), h(v.h), w(v.w) {}
+  Mat(const int &_h, const int &_w): a(_h * _w), h(_h), w(_w) { }
+  static Mat e(const int &_h, const int &_w) {
+    Mat res(_h, _w);
     for (int i = 0, n = min(_h, _w); i < n; i++) { res[i][i] = T(1); }
     return res;
   }
-  static Matrix e(const Matrix &v) { return e(v.h, v.w); }
+  static Mat e(const Mat &v) { return e(v.h, v.w); }
   T *operator[](const int &v) { return &a[v * w]; }
   const T *operator[](const int &v)const { return &a[v * w]; }
-  Matrix &operator+=(const Matrix &b) {
+  Mat &operator+=(const Mat &b) {
     for (int i = 0, n = h * w; i < n; i++) { a[i] += b.a[i]; }
     return *this;
   }
-  Matrix &operator-=(const Matrix &b) { return *this += -b; }
-  Matrix &operator*=(const Matrix &b) {
-    Matrix c(h, b.w);
+  Mat &operator-=(const Mat &b) { return *this += -b; }
+  Mat &operator*=(const Mat &b) {
+    Mat c(h, b.w);
     for (int i = 0; i < h; i++) {
       for (int k = 0; k < w; k++) {
         const T &tmp = (*this)[i][k];
@@ -28,29 +28,29 @@ template<typename T> struct Matrix {
     }
     swap(a, c.a); h = c.h; w = c.w; return *this;
   }
-  Matrix operator-()const {
-    Matrix ret(*this);
+  Mat operator-()const {
+    Mat ret(*this);
     for (int i = 0, n = h * w; i < n; i++) { ret.a[i] = -ret.a[i]; }
     return ret;
   }
-  Matrix operator+(const Matrix &b)const { return Matrix(*this) += b; }
-  Matrix operator-(const Matrix &b)const { return Matrix(*this) -= b; }
-  Matrix operator*(const Matrix &b)const { return Matrix(*this) *= b; }
-  Matrix operator^(const ll &v)const {
-    Matrix ret(e(*this)), t(*this);
+  Mat operator+(const Mat &b)const { return Mat(*this) += b; }
+  Mat operator-(const Mat &b)const { return Mat(*this) -= b; }
+  Mat operator*(const Mat &b)const { return Mat(*this) *= b; }
+  Mat operator^(const ll &v)const {
+    Mat ret(e(*this)), t(*this);
     for (ll b = v; b; b >>= 1) { if (b & 1) { ret *= t; } t *= t; }
     return ret;
   }
-  bool operator==(const Matrix &v)const {
+  bool operator==(const Mat &v)const {
     if (h != v.h || w != v.w) { return false; }
     for (int i = 0, n = h * w; i < n; i++) { if (!isZero(a[i] - v.a[i])) { return false; } }
     return true;
   }
-  bool operator!=(const Matrix &v)const { return !(*this == v); }
+  bool operator!=(const Mat &v)const { return !(*this == v); }
   T abs(const T &v)const { return v < 0 ? -v : v; }
   bool isZero(const T &v)const { return abs(v) < 1e-10; }
   void trans() {
-    Matrix c(w, h);
+    Mat c(w, h);
     for (int i = 0; i < w; i++) { for (int j = 0; j < h; j++) { c[i][j] = a[j][i]; } }
     *this = c;
   }
@@ -58,16 +58,16 @@ template<typename T> struct Matrix {
   void print()const {
     for (int i = 0, n = h * w; i < n; i++) { printf("%d%c", a[i], i % w == w - 1 ? '\n' : ' '); }
   }
-  friend istream &operator>>(istream &in, Matrix &b) {
+  friend istream &operator>>(istream &in, Mat &b) {
     for (int i = 0, n = b.h * b.w; i < n; i++) { in >> b.a[i]; }
     return in;
   }
-  friend ostream &operator<<(ostream &out, const Matrix &b) {
+  friend ostream &operator<<(ostream &out, const Mat &b) {
     for (int i = 0, n = b.h * b.w; i < n; i++) { out << b.a[i] << (i % b.w == b.w - 1 ? '\n' : ' '); }
     return out;
   }
-  //求逆矩阵 限double 可逆则返回true 结果在参数中
-  bool inv(Matrix &v)const {
+  //求逆矩阵 限double 可逆则返回true 结果在参数v中
+  bool inv(Mat &v)const {
     if (h != w) { return false; }
     int is[N], js[N]; v = *this;
     for (int k = 0; k < h; k++) {
@@ -96,7 +96,7 @@ template<typename T> struct Matrix {
   //求行列式 限double
   double det()const {
     if (h != w) { return 0; }
-    int sign = 0; double ret = 1.0; Matrix c(*this);
+    int sign = 0; double ret = 1.0; Mat c(*this);
     for (int i = 0, j, k; i < h; i++) {
       if (isZero(c[i][i])) {
         for (j = i + 1; j < h && isZero(c[j][i]); j++);
