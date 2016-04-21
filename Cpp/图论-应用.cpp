@@ -69,7 +69,10 @@ void dfsd(int u) {
 //无向图 SGU101
 int head[N], to[M], nxt[M], tot, deg[N], path[M], cnt;
 bool vis[M];
-void init() { tot = 0; memset(head, -1, sizeof(head)); }
+void init() {
+  tot = 0; cnt = 0;
+  memset(head, -1, sizeof(head)); memset(vis, 0, sizeof(vis)); memset(deg, 0, sizeof(deg));
+}
 void addedge(int x, int y) {
   to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
   to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
@@ -83,8 +86,7 @@ void dfs(int u) {
 int main() {
   int n, u, v;
   while (~scanf("%d", &n)) {
-    init(); cnt = 0;
-    memset(vis, 0, sizeof(vis)); memset(deg, 0, sizeof(deg));
+    init();
     for (int i = 0; i < n; i++) {
       scanf("%d%d", &u, &v); addedge(u, v); deg[u]++; deg[v]++;
     }

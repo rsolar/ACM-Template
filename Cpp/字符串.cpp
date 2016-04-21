@@ -4,7 +4,7 @@ inline size_t __stl_hash_string(const char *s) {
   for (; *s; ++s) { h = 5 * h + *s; }
   return h;
 }
-//hash_map<string, XXX>
+//for hash_map<string, XXX>
 struct str_hash {
   size_t operator()(const string &str)const {
     return __stl_hash_string(str.c_str());
@@ -24,7 +24,7 @@ template<size_t(*Hash)(const char *)> struct hash_map {
   vector<etype> hs[P];
   void init() { for (int i = 0; i < P; i++) { hs[i].clear(); } }
   void insert(int id, int val) {
-    int h = Hash(key[id]) % P; hs[h].push_back((etype){id, val});
+    int h = Hash(key[id]) % P; hs[h].push_back((etype) {id, val});
   }
   bool erase(char *buf) {
     int h = Hash(buf) % P;
@@ -78,7 +78,7 @@ int minString(char *s) {
 }
 //strstr 在str1中查找str2的第一次出现 无则返回NULL
 char *strstr(const char *str1, const char *str2);
-//KMP O(M+N)
+//KMP O(M + N)
 //nxt[]的含义：x[i-nxt[i]...i-1]=x[0...nxt[i]-1]
 //nxt[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
 char x[N], y[N];
@@ -285,7 +285,6 @@ int rnk[N], height[N], sa[N], t1[N], t2[N], c[N]; //求SA数组需要的中间�
 bool cmp(int *r, int a, int b, int l) {
   return r[a] == r[b] && r[a + l] == r[b + l];
 }
-
 void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
   int i, j, p, *x = t1, *y = t2; n++;
   //第一轮基数排序, 如果s的最大值很大, 可改为快速排序
@@ -332,12 +331,10 @@ int wa[N * 3], wb[N * 3], wv[N * 3], wss[N * 3];
 int c0(int *r, int a, int b) {
   return r[a] == r[b] && r[a + 1] == r[b + 1] && r[a + 2] == r[b + 2];
 }
-
 int c12(int k, int *r, int a, int b) {
   if (k == 2) { return r[a] < r[b] || (r[a] == r[b] && c12(1, r, a + 1, b + 1)); }
   else { return r[a] < r[b] || (r[a] == r[b] && wv[a + 1] < wv[b + 1]); }
 }
-
 void Sort(int *r, int *a, int *b, int n, int m) {
   for (int i = 0; i < n; i++) { wv[i] = r[a[i]]; }
   for (int i = 0; i < m; i++) { wss[i] = 0; }
@@ -345,7 +342,6 @@ void Sort(int *r, int *a, int *b, int n, int m) {
   for (int i = 1; i < m; i++) { wss[i] += wss[i - 1]; }
   for (int i = n - 1; i >= 0; i--) { b[--wss[wv[i]]] = a[i]; }
 }
-
 void dc3(int *r, int *sa, int n, int m) {
   int i, j, *rn = r + n;
   int *san = sa + n, ta = 0, tb = (n + 1) / 3, tbc = 0, p;
@@ -369,7 +365,6 @@ void dc3(int *r, int *sa, int n, int m) {
   for (; i < ta; p++) { sa[p] = wa[i++]; }
   for (; j < tbc; p++) { sa[p] = wb[j++]; }
 }
-
 void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
   for (int i = n; i < n * 3; i++) { str[i] = 0; }
   dc3(str, sa, n + 1, m);
@@ -392,24 +387,20 @@ struct SAM_Node {
 };
 SAM_Node SAM_node[N * 2], *SAM_root, *SAM_last;
 int SAM_size;
-
 SAM_Node *newSAM_Node(int len) {
   SAM_node[SAM_size] = SAM_Node(len);
   SAM_node[SAM_size].id = SAM_size;
   return &SAM_node[SAM_size++];
 }
-
 SAM_Node *newSAM_Node(SAM_Node *p) {
   SAM_node[SAM_size] = *p;
   SAM_node[SAM_size].id = SAM_size;
   return &SAM_node[SAM_size++];
 }
-
 void SAM_init() {
   SAM_size = 0; SAM_node[0].pos = 0;
   SAM_root = SAM_last = newSAM_Node(0);
 }
-
 void SAM_add(int x, int len) {
   SAM_Node *p = SAM_last, *np = newSAM_Node(p->len + 1);
   np->pos = len;
@@ -424,7 +415,6 @@ void SAM_add(int x, int len) {
   np->fa = nq;
   for (; p && p->nxt[x] == q; p = p->fa) { p->nxt[x] = nq; }
 }
-
 void SAM_build(char *s) {
   SAM_init();
   for (int i = 0; i < s[i]; i++) { SAM_add(s[i] - 'a', i + 1); }

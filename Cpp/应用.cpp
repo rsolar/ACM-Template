@@ -27,8 +27,7 @@ vector<int> revCantor(ll n, ll k) {
   for (int i = n; i >= 1; i--) {
     ll t = k / fac[i - 1]; k %= fac[i - 1];
     sort(v.begin(), v.end());
-    ret.push_back(v[t]);
-    v.erase(v.begin() + t);
+    ret.push_back(v[t]); v.erase(v.begin() + t);
   }
   return ret;
 }
@@ -70,8 +69,8 @@ void work(char str[]) {
   if (!flag) { p = b; q = 1; cnt2 = 0; }
   for (int i = 0; i < cnt2; i++) { q = q * 10 + 9; }
   for (int i = 0; i < cnt1; i++) { q = q * 10; }
-  ll g = gcd(p, q); p /= g; q /= g;
-  printf("%I64d/%I64d\n", p, q);
+  ll g = gcd(p, q);
+  printf("%I64d/%I64d\n", p / g, q / g);
 }
 //分数转化为小数
 //定理: 有理数a / b(其中0 < a < b，(a, b) = 1)能表示成纯循环小数的充要条件是(b, 10) = 1

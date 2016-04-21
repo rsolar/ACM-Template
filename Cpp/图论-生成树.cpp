@@ -1,13 +1,14 @@
 //最小生成树
 //Prim + 邻接矩阵 O(V^2)
-const int INF = 0x3f3f3f3f;
-int n, mp[N][N], dist[N];
+typedef int wtype;
+const wtype INF = 0x3f3f3f3f;
+int n; wtype mp[N][N], dist[N];
 bool vis[N];
-int Prim(int src) {
+wtype Prim(int src) {
   memset(vis, 0, sizeof(vis)); memcpy(dist, mp[src], sizeof(dist));
-  int ret = 0; vis[src] = true;
+  wtype ret = 0; vis[src] = true;
   for (int j = 1; j < n; j++) {
-    int mn = INF, u = -1;
+    int u = -1; wtype mn = INF;
     for (int i = 0; i < n; i++) {
       if (!vis[i] && mn > dist[i]) { mn = dist[i]; u = i; }
     }
@@ -20,24 +21,24 @@ int Prim(int src) {
   return ret;
 }
 //Prim + priority_queue + 邻接表 O(ElogV)
-const int INF = 0x3f3f3f3f;
-int head[N], to[M], nxt[M], len[M], tot;
+typedef int wtype;
+const wtype INF = 0x3f3f3f3f;
+int head[N], to[M], nxt[M], tot; wtype len[M];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y, int z) { to[tot] = y; len[tot] = z; nxt[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y, wtype z) { to[tot] = y; len[tot] = z; nxt[tot] = head[x]; head[x] = tot++; }
 struct Node {
-  int v, w;
-  Node(int _v, int _w): v(_v), w(_w) {}
+  int v; wtype w;
   bool operator<(const Node &r)const { return w > r.w; }
 };
-int dist[N];
+wtype dist[N];
 bool vis[N];
-int Prim(int src) {
+wtype Prim(int src) {
   memset(dist, 0x3f, sizeof(dist)); memset(vis, 0, sizeof(vis));
-  int ret = 0;
+  wtype ret = 0;
   priority_queue<Node> que;
   for (int i = head[0]; ~i; i = nxt[i]) {
     int v = to[i];
-    if (len[i] < dist[v]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
+    if (len[i] < dist[v]) { dist[v] = len[i]; que.push((Node) {v, dist[v]}); }
   }
   vis[src] = true;
   while (!que.empty()) {
@@ -46,25 +47,25 @@ int Prim(int src) {
     vis[u] = true; ret += dist[u];
     for (int i = head[u]; ~i; i = nxt[i]) {
       int v = to[i];
-      if (!vis[v] && dist[v] > len[i]) { dist[v] = len[i]; que.push(Node(v, dist[v])); }
+      if (!vis[v] && dist[v] > len[i]) { dist[v] = len[i]; que.push((Node) {v, dist[v]}); }
     }
   }
   return ret;
 }
 //Kruskal + 邻接表 O(ElogE)
 struct Edge {
-  int u, v, w;
+  int u, v; wtype w;
   bool operator<(const Edge &r)const { return w < r.w; }
 } edge[M];
 int n, fa[N], tot; //加边前赋值为0
-void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
+void addedge(int u, int v, wtype w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
 int Kruskal() {
   memset(fa, -1, sizeof(fa));
   sort(edge, edge + tot);
-  int cnt = 0, ret = 0;
+  int cnt = 0; wtype ret = 0;
   for (int i = 0; i < tot; i++) {
-    int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
+    int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
     if (t1 != t2) { ret += w; fa[t1] = t2; cnt++; }
     if (cnt == n - 1) { break; }
   }
@@ -151,19 +152,20 @@ int Kruskal(int k) {
 //Prim + 邻接矩阵 O(V^2 + E)
 //求最小生成树时, 用数组Mx[i][j]来表示MST中i到j最大边权
 //求完后, 直接枚举所有不在MST中的边, 替换掉最大边权的边, 更新答案
-const int INF = 0x3f3f3f3f;
-int n, mp[N][N], dist[N], pre[N], Mx[N][N]; //Mx[i][j]表示在最小生成树中从i到j的路径中的最大边权
+typedef int wtype;
+const wtype INF = 0x3f3f3f3f;
+int n, pre[N];
+wtype mp[N][N], dist[N], Mx[N][N]; //Mx[i][j]表示在最小生成树中从i到j的路径中的最大边权
 bool vis[N], used[N][N];
-int Prim() {
+wtype Prim() {
   memset(Mx, 0, sizeof(Mx));
   memset(pre, 0, sizeof(pre));
   memset(vis, 0, sizeof(vis));
   memset(used, 0, sizeof(used));
-  int ret = 0;
-  vis[0] = true; pre[0] = -1;
+  wtype ret = 0; vis[0] = true; pre[0] = -1;
   for (int i = 1; i < n; i++) { dist[i] = mp[0][i]; }
   for (int j = 1; j < n; j++) {
-    int mn = INF, u = -1;
+    int u = -1; wtype mn = INF;
     for (int j = 0; j < n; j++)
       if (!vis[j] && mn > dist[j]) { mn = dist[j]; u = j; }
     if (mn == INF) { return -1; } //原图不连通
@@ -177,34 +179,35 @@ int Prim() {
   return ret;
 }
 //Kruskal + 邻接表 O(VElogE)
-const int INF = 0x3f3f3f3f;
+typedef int wtype;
+const wtype INF = 0x3f3f3f3f;
 struct Edge {
-  int u, v, w;
+  int u, v; wtype w;
   bool operator<(const Edge &r)const { return w < r.w; }
 } edge[M];
 int n, fa[N], path[N], tot; //加边前赋值为0
-void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
+void addedge(int u, int v, wtype w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
-int Kruskal() {
+wtype Kruskal() {
   memset(fa, -1, sizeof(fa));
   sort(edge, edge + tot);
-  int cnt = 0, ret = 0;
+  int cnt = 0; wtype ret = 0;
   for (int i = 0; i < tot; i++) {
-    int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
+    int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
     if (t1 != t2) { ret += w; fa[t1] = t2; path[cnt++] = i; }
     if (cnt == n - 1) { break; }
   }
   if (cnt < n - 1) { return -1; } //不连通
   return ret;
 }
-int KruskalSec() {
-  int ret = INF;
+wtype KruskalSec() {
+  wtype ret = INF;
   for (int x = 0; x < n - 1; x++) {
     memset(fa, -1, sizeof(fa));
-    int cnt = 0, tmp = 0;
+    int cnt = 0; wtype tmp = 0;
     for (int i = 0; i < tot; i++) {
       if (i != path[x]) {
-        int u = edge[i].u, v = edge[i].v, w = edge[i].w, t1 = findfa(u), t2 = findfa(v);
+        int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
         if (t1 != t2) { tmp += w; fa[t1] = t2; cnt++; }
         if (cnt == n - 1) { if (tmp < ret) { ret = tmp; } break; }
       }
@@ -215,17 +218,15 @@ int KruskalSec() {
 }
 //最小树形图
 //朱刘算法 O(VE)
-typedef int T; //数据类型
+typedef int wtype;
 const int N = 1005;
 const int M = 40005;
-const int INF = 0x3f3f3f3f;
-struct Edge {
-  int u, v; T w;
-} edge[M];
+const wtype INF = 0x3f3f3f3f;
+struct Edge { int u, v; wtype w; } edge[M];
 int n, m, pre[N], id[N], vis[N];
-T g[N][N], in[N];
-T Zhuliu(int root) {
-  T res = 0; int u, v;
+wtype g[N][N], in[N];
+wtype Zhuliu(int root) {
+  wtype res = 0; int u, v;
   for (;;) {
     memset(in, 0x3f, sizeof(in));
     memset(id, -1, sizeof(id));
@@ -238,8 +239,7 @@ T Zhuliu(int root) {
     for (int i = 0; i < n; i++) {
       if (i != root && in[i] == INF) { return -1; } //不存在最小树形图
     }
-    int tn = 0;
-    in[root] = 0;
+    int tn = 0; in[root] = 0;
     for (int i = 0; i < n; i++) {
       res += in[i]; v = i;
       while (vis[v] != i && id[v] == -1 && v != root) {
@@ -280,7 +280,7 @@ int main() {
         if (g[i][j] < INF) { edge[m].u = i; edge[m].v = j; edge[m++].w = g[i][j]; }
       }
     }
-    int ans = Zhuliu(0);
+    wtype ans = Zhuliu(0);
     printf("Case #%d: ", C);
     if (ans == -1) { puts("Possums!"); }
     else { printf("%d\n", ans); }
@@ -300,9 +300,7 @@ struct Matrix {
   void init() { memset(mat, 0, sizeof(mat)); }
   int det(int n) { //求行列式的值模上M，需要使用逆元
     for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        mat[i][j] = (mat[i][j] % M + M) % M;
-      }
+      for (int j = 0; j < n; j++) { mat[i][j] = (mat[i][j] % M + M) % M; }
     }
     int res = 1;
     for (int i = 0; i < n; i++) {
@@ -336,27 +334,23 @@ for (int i = 0; i < n; i++) {
 }
 printf("%d\n", ret.det(n - 1));
 //SPOJ104 不取模
-const double eps = 1e-8;
+const double EPS = 1e-8;
 const int N = 105;
 bool g[N][N];
 double a[N][N], b[N][N];
 inline int sgn(double x) {
-  if (fabs(x) < eps) { return 0; }
+  if (fabs(x) < EPS) { return 0; }
   if (x < 0) { return -1; }
   else { return 1; }
 }
 double det(double a[][N], int n) {
   double ret = 1.0; int sign = 0;
   for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      b[i][j] = a[i][j];
-    }
+    for (int j = 0; j < n; j++) { b[i][j] = a[i][j]; }
   }
   for (int i = 0, j; i < n; i++) {
     if (sgn(b[i][i]) == 0) {
-      for (j = i + 1; j < n; j++) {
-        if (sgn(b[j][i]) != 0) { break; }
-      }
+      for (j = i + 1; j < n; j++) { if (sgn(b[j][i]) != 0) { break; } }
       if (j == n) { return 0; }
       for (int k = i; k < n; k++) { swap(b[i][k], b[j][k]); }
       sign++;
@@ -364,9 +358,7 @@ double det(double a[][N], int n) {
     ret *= b[i][i];
     for (int k = i + 1; k < n; k++) { b[i][k] /= b[i][i]; }
     for (int j = i + 1; j < n; j++) {
-      for (int k = i + 1; k < n; k++) {
-        b[j][k] -= b[j][i] * b[i][k];
-      }
+      for (int k = i + 1; k < n; k++) { b[j][k] -= b[j][i] * b[i][k]; }
     }
   }
   if (sign & 1) { ret = -ret; }
@@ -385,9 +377,7 @@ int main() {
     }
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++) {
-        if (i != j && g[i][j]) {
-          a[i][j] = -1; a[i][i]++;
-        }
+        if (i != j && g[i][j]) { a[i][j] = -1; a[i][i]++; }
       }
     }
     printf("%.0lf\n", det(a, n - 1));

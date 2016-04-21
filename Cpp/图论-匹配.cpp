@@ -362,9 +362,7 @@ void Edmonds() {
 int main() {
   int u, v;
   scanf("%d", &n);
-  while (~scanf("%d%d", &u, &v)) {
-    g[u][v] = g[v][u] = true;
-  }
+  while (~scanf("%d%d", &u, &v)) { g[u][v] = g[v][u] = true; }
   Edmonds();
   int cnt = 0;
   for (int u = 1; u <= n; u++) { cnt += (match[u] > 0); }

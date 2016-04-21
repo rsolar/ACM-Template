@@ -48,7 +48,7 @@ template<typename T> struct Mat {
   }
   bool operator!=(const Mat &v)const { return !(*this == v); }
   T abs(const T &v)const { return v < 0 ? -v : v; }
-  bool isZero(const T &v)const { return abs(v) < 1e-10; }
+  bool isZero(const T &v)const { return abs(v) < 1e-9; }
   void trans() {
     Mat c(w, h);
     for (int i = 0; i < w; i++) { for (int j = 0; j < h; j++) { c[i][j] = a[j][i]; } }
