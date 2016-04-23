@@ -31,7 +31,7 @@ void getPrime() {
 //Euler O(n)
 const int N = 10000000; //~95ms
 bitset < N + 5 > isprime;
-int prime[N];
+int prime[N >> 3];
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i <= N; i++) {
@@ -68,8 +68,9 @@ void getFactors(ll x) {
   }
   if (x != 1) { factor[facCnt][0] = x; factor[facCnt++][1] = 1; }
 }
-//Miller Rabin素数测试
-const int Times = 7; //错误概率为1/4^Times
+//Miller-Rabin素性测试 素数返回true 错误(伪素数)概率为1/4^Times
+const int Times = 7;
+int WIT[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022}; //7 bases for n < 2^64
 ll mulMod(ll a, ll b, ll m) {
   ll r = 0;
   for (a %= m, b %= m; b; b >>= 1) { if (b & 1) { r = (r + a) % m; } a = (a << 1) % m; }
@@ -86,66 +87,42 @@ bool Miller_Rabin(ll n) {
   ll m = n - 1; int k = 0;
   while ((m & 1) == 0) { k++; m >>= 1; }
   for (int i = 0; i < Times; i++) {
-    ll a = rand() % (n - 1) + 1, x = powMod(a, m, n), y = 0;
-    for (int j = 0; j < k; j++) {
+    ll a = WIT[i], x = powMod(a, m, n), y = 0;
+    //ll a = rand() % (n - 1) + 1;
+    for (int j = 0; j < k; j++, x = y) {
       y = mulMod(x, x, n);
       if (y == 1 && x != 1 && x != n - 1) { return false; }
-      x = y;
     }
     if (y != 1) { return false; }
   }
   return true;
 }
 //pollard rho质因素分解
-ll factor[100]; //质因素分解结果(无序)
-int tol; //质因素个数
-//找出一个因子
+//对n进行素因子分解, 存入factor, k设置为107左右即可
+ll factor[100], facCnt; //质因素分解结果(无序)
 ll pollard_rho(ll x, ll c) {
-  srand(time(NULL));
   ll i = 1, k = 2, x0 = rand() % (x - 1) + 1, y = x0;
   while (true) {
-    i++;
     x0 = (mulMod(x0, x0, x) + c) % x;
     ll d = llabs(__gcd(y - x0, x));
     if (d != 1 && d != x) { return d; }
     if (y == x0) { return x; }
-    if (i == k) {y = x0; k += k;}
+    if (++i == k) {y = x0; k += k;}
   }
 }
-//对n进行素因子分解,存入factor,k设置为107左右即可
 void findfac(ll n, int k = 107) {
   if (n == 1) { return; }
-  if (Miller_Rabin(n)) { factor[tol++] = n; return; }
-  ll p = n;
-  int c = k;
-  while (p >= n) { p = pollard_rho(p, c--); } //值变化, 防止死循环k
-  findfac(p, k);
-  findfac(n / p, k);
+  if (Miller_Rabin(n)) { factor[facCnt++] = n; return; }
+  ll p = n; int c = k;
+  while (p >= n) { p = pollard_rho(p, c--); } //k值变化, 防止死循环
+  findfac(p, k); findfac(n / p, k);
 }
 //求单个数的欧拉函数 + 合数分解
-int getFacEul(ll n, ll factor[][2] = factor) {
+int getFacEul(ll n, ll factor[]) {
   for (int i = 0, facCnt = getFactors(n); i < facCnt; i++) {
-    n = n / factor[i][0] * (factor[i][0] - 1);
+    n = n / factor[i] * (factor[i] - 1);
   }
   return n;
-}
-//约数个数筛 O(n)
-const int N = 10000000; //~125ms
-bitset < N + 5 > isprime;
-int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
-void getFaccnt() {
-  isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i <= N; i++) {
-    if (isprime[i]) { prime[++prime[0]] = i; faccnt[i] = 2; d[i] = 1; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
-      isprime[prime[j] * i] = false;
-      if (i % prime[j] == 0) {
-        faccnt[prime[j] * i] = faccnt[i] / (d[i] + 1) * (d[i] + 2);
-        d[prime[j] * i] = d[i] + 1; break;
-      }
-      faccnt[prime[j] * i] = faccnt[i] << 1; d[prime[j] * i] = 1;
-    }
-  }
 }
 //求单个数的欧拉函数
 ll eular(ll n) {
@@ -179,6 +156,24 @@ void getPrimePhi() {
       isprime[prime[j] * i] = false;
       if (i % prime[j] == 0) { phi[prime[j] * i] = phi[i] * prime[j]; break; }
       else { phi[prime[j] * i] = phi[i] * (prime[j] - 1); }
+    }
+  }
+}
+//约数个数筛 O(n)
+const int N = 10000000; //~125ms
+bitset < N + 5 > isprime;
+int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
+void getFaccnt() {
+  isprime.set(); isprime[0] = isprime[1] = false;
+  for (int i = 2; i <= N; i++) {
+    if (isprime[i]) { prime[++prime[0]] = i; faccnt[i] = 2; d[i] = 1; }
+    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+      isprime[prime[j] * i] = false;
+      if (i % prime[j] == 0) {
+        faccnt[prime[j] * i] = faccnt[i] / (d[i] + 1) * (d[i] + 2);
+        d[prime[j] * i] = d[i] + 1; break;
+      }
+      faccnt[prime[j] * i] = faccnt[i] << 1; d[prime[j] * i] = 1;
     }
   }
 }
@@ -303,16 +298,23 @@ void calC() { // C(n,k),n个数里选k个
     for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD; }
   }
 }
-//中国剩余定理
+//中国剩余定理 求模线性方程组x=a[i](mod m[i]) m[i]可以不互质
+bool merge(ll a1, ll m1, ll a2, ll m2, ll &a3, ll &m3) {
+  ll d = __gcd(m1, m2), c = a2 - a1;
+  if (c % d != 0) { return false; }
+  c = (c % m2 + m2) % m2 / d; m1 /= d; m2 /= d;
+  c = c * inv(m1, m2) % m2 * m1 * d + a1;
+  m3 = m1 * m2 * d; a3 = (c % m3 + m3) % m3;
+  return true;
+}
 ll CRT(ll a[], ll m[], int k) {
-  ll mm = 1, ans = 0;
-  for (int i = 0; i < k; i++) { mm *= m[i]; }
-  for (int i = 0; i < k; i++) {
-    ll t = mm / m[i];
-    ans = (ans + t * inv(t, m[i]) * a[i]) % mm;
+  ll a1 = a[0], m1 = m[0];
+  for (int i = 1; i < k; i++) {
+    ll a2 = a[i], m2 = m[i], m3, a3;
+    if (!merge(a1, m1, a2, m2, a3, m3)) { return -1; }
+    a1 = a3; m1 = m3;
   }
-  if (ans < 0) { ans += mm; }
-  return ans;
+  return (a1 % m1 + m1) % m1;
 }
 //求原根
 ll n, factor[100];

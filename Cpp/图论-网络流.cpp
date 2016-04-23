@@ -1,17 +1,17 @@
 //最大流
 //SAP + 邻接矩阵 O(V^2*E) 点的编号默认从0开始
 typedef long long ftype;
-int n, dep[N], pre[N], cur[N], gap[N];
+int n, dis[N], pre[N], cur[N], gap[N];
 ftype cap[N][N];
 ftype SAP(int src, int sink, int n = n) {
-  memset(dep, 0, sizeof(dep));
+  memset(dis, 0, sizeof(dis));
   memset(cur, 0, sizeof(cur));
   memset(gap, 0, sizeof(gap));
   int u = src; ftype mxflow = 0, aug = -1; pre[src] = src; gap[0] = n;
-  while (dep[src] < n) {
+  while (dis[src] < n) {
 loop:
     for (int v = cur[u]; v < n; ++v) {
-      if (cap[u][v] > 0 && dep[u] == dep[v] + 1) {
+      if (cap[u][v] > 0 && dis[u] == dis[v] + 1) {
         if (aug == -1 || aug > cap[u][v]) { aug = cap[u][v]; }
         pre[v] = u; u = cur[u] = v;
         if (v == sink) {
@@ -25,17 +25,17 @@ loop:
     }
     int mndis = n - 1;
     for (int v = 0; v < n; v++) {
-      if (cap[u][v] > 0 && mndis > dep[v]) { cur[u] = v; mndis = dep[v]; }
+      if (cap[u][v] > 0 && mndis > dis[v]) { cur[u] = v; mndis = dis[v]; }
     }
-    if (--gap[dep[u]] == 0) { break; }
-    dep[u] = mndis + 1; gap[dep[u]]++; u = pre[u];
+    if (--gap[dis[u]] == 0) { break; }
+    dis[u] = mndis + 1; gap[dis[u]]++; u = pre[u];
   }
   return mxflow;
 }
 //ISAP + 邻接表 O(V^2*E)
 typedef long long ftype;
-const ftype INF = 0x3f3f3f3f; //!!!
-int n, head[N], to[M], nxt[M], tot, dep[N], pre[N], cur[N], gap[N];
+const ftype INF = 0x3f3f3f3f;
+int n, head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
 ftype cap[M];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype rw = 0) {
@@ -43,11 +43,11 @@ inline void addedge(int x, int y, ftype w, ftype rw = 0) {
   to[tot] = x; cap[tot] = rw; nxt[tot] = head[y]; head[y] = tot++;
 }
 ftype ISAP(int src, int sink, int n = n) {
-  memset(dep, 0, sizeof(dep));
+  memset(dis, 0, sizeof(dis));
   memset(gap, 0, sizeof(gap));
   memcpy(cur, head, sizeof(head));
   int u = src, v; ftype mxflow = 0; pre[u] = -1; gap[0] = n;
-  while (dep[src] < n) {
+  while (dis[src] < n) {
     if (u == sink) {
       ftype mndis = INF;
       for (int i = pre[u]; ~i; i = pre[to[i ^ 1]]) {
@@ -62,25 +62,25 @@ ftype ISAP(int src, int sink, int n = n) {
     bool flag = false;
     for (int i = cur[u]; ~i; i = nxt[i]) {
       v = to[i];
-      if (cap[i] > 0 && dep[v] + 1 == dep[u]) {
+      if (cap[i] > 0 && dis[v] + 1 == dis[u]) {
         flag = true; cur[u] = pre[v] = i; break;
       }
     }
     if (flag) { u = v; continue; }
     int mndis = n;
     for (int i = head[u]; ~i; i = nxt[i]) {
-      if (cap[i] > 0 && dep[to[i]] < mndis) { mndis = dep[to[i]]; cur[u] = i; }
+      if (cap[i] > 0 && dis[to[i]] < mndis) { mndis = dis[to[i]]; cur[u] = i; }
     }
-    if (--gap[dep[u]] == 0) { return mxflow; }
-    dep[u] = mndis + 1; gap[dep[u]]++;
+    if (--gap[dis[u]] == 0) { return mxflow; }
+    dis[u] = mndis + 1; gap[dis[u]]++;
     if (u != src) { u = to[pre[u] ^ 1]; }
   }
   return mxflow;
 }
 //ISAP + bfs标号 + queue + 邻接表 O(V^2*E)
 typedef long long ftype;
-const ftype INF = 0x3f3f3f3f; //!!!
-int n, head[N], to[M], nxt[M], tot, dep[N], pre[N], cur[N], gap[N];
+const ftype INF = 0x3f3f3f3f;
+int n, head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
 ftype cap[M];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype rw = 0) {
@@ -88,16 +88,16 @@ inline void addedge(int x, int y, ftype w, ftype rw = 0) {
   to[tot] = x; cap[tot] = rw; nxt[tot] = head[y]; head[y] = tot++;
 }
 void bfs(int sink) {
-  memset(dep, -1, sizeof(dep));
+  memset(dis, -1, sizeof(dis));
   memset(gap, 0, sizeof(gap));
-  dep[sink] = 0; gap[0] = 1;
+  dis[sink] = 0; gap[0] = 1;
   queue<int> que; que.push(sink);
   while (!que.empty()) {
     int u = que.front(); que.pop();
     for (int i = head[u], v; ~i; i = nxt[i]) {
       v = to[i];
-      if (~dep[v]) { continue; }
-      dep[v] = dep[u] + 1; gap[dep[v]]++; que.push(v);
+      if (~dis[v]) { continue; }
+      dis[v] = dis[u] + 1; gap[dis[v]]++; que.push(v);
     }
   }
 }
@@ -105,7 +105,7 @@ ftype ISAP(int src, int sink, int n = n) {
   bfs(sink);
   memcpy(cur, head, sizeof(head));
   int u = pre[src] = src, v, i; ftype mxflow = 0;
-  while (dep[sink] < n) {
+  while (dis[sink] < n) {
     if (u == sink) {
       ftype mndis = INF; int inser;
       for (i = src; i != sink; i = to[cur[i]]) {
@@ -118,24 +118,24 @@ ftype ISAP(int src, int sink, int n = n) {
     }
     for (i = cur[u]; ~i; i = nxt[i]) {
       v = to[i];
-      if (dep[v] + 1 == dep[u] && cap[i] > 0) { break; }
+      if (dis[v] + 1 == dis[u] && cap[i] > 0) { break; }
     }
     if (~i) { cur[u] = i; pre[to[i]] = u; u = to[i]; }
     else {
-      if (--gap[dep[u]] == 0) { break; }
+      if (--gap[dis[u]] == 0) { break; }
       int mndis = n;
       for (i = head[u]; ~i; i = nxt[i]) {
-        if (cap[i] > 0 && mndis > dep[to[i]]) { cur[u] = i; mndis = dep[to[i]]; }
+        if (cap[i] > 0 && mndis > dis[to[i]]) { cur[u] = i; mndis = dis[to[i]]; }
       }
-      dep[u] = mndis + 1; gap[dep[u]]++; u = pre[u];
+      dis[u] = mndis + 1; gap[dis[u]]++; u = pre[u];
     }
   }
   return mxflow;
 }
 //Dinic O(V^2*E)
 typedef long long ftype;
-const ftype INF = 0x3f3f3f3f; //!!!
-int head[N], to[M], nxt[M], tot, dep[N], cur[N], src, sink;
+const ftype INF = 0x3f3f3f3f;
+int head[N], to[M], nxt[M], tot, dis[N], cur[N], src, sink;
 ftype cap[M];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype rw = 0) {
@@ -143,23 +143,23 @@ inline void addedge(int x, int y, ftype w, ftype rw = 0) {
   to[tot] = x; cap[tot] = rw; nxt[tot] = head[y]; head[y] = tot++;
 }
 bool bfs() {
-  memset(dep, 0, sizeof(dep)); dep[src] = 1;
+  memset(dis, 0, sizeof(dis)); dis[src] = 1;
   queue<int> que; que.push(src);
   while (!que.empty()) {
     int u = que.front(); que.pop();
     for (int i = head[u], v; ~i; i = nxt[i]) {
       v = to[i];
-      if (cap[i] > 0 && !dep[v]) { dep[v] = dep[u] + 1; que.push(v); }
+      if (cap[i] > 0 && !dis[v]) { dis[v] = dis[u] + 1; que.push(v); }
     }
   }
-  return dep[sink];
+  return dis[sink];
 }
 ftype dfs(int u, ftype delta) {
   if (u == sink || delta == 0) { return delta; }
   ftype ret = 0;
   for (int &i = cur[u], v; delta && ~i; i = nxt[i]) {
     v = to[i];
-    if (cap[i] > 0 && dep[v] == dep[u] + 1) {
+    if (cap[i] > 0 && dis[v] == dis[u] + 1) {
       ftype aug = dfs(v, min(cap[i], delta));
       if (!aug) { continue; }
       cap[i] -= aug; cap[i ^ 1] += aug; delta -= aug; ret += aug;
@@ -250,57 +250,26 @@ int HLPP(int n = n) {
   }
   return w[sink];
 }
+//有上下界的网络流
+//无源汇上下界最大流
+//增加超级源汇点, 边的容量变为原弧的上界减去下界的差, 记录每个点的入流下界和-出流下界和
+//当下界和大于0时连一条超级源点到这个点的边, 上界为这个下界和, 下界为0
+//当下界和小于0时连一条这个点到超级汇点的边, 上界为下界和的绝对值, 下界为0
+//求一遍最大流, 如果源的出度满流的话, 即存在最大流, 否则则不存在最大流
+//有源汇上下界最大流
+//从汇连一条上界无限大, 下界为0的边到源, 使它变为无源无汇图, 构图和判断同无源汇上下界最大流
+//判断是否满流后, 去掉超级源汇及其边(head[]删除即可, 调用最大流算法时, 点的数量要包括超级源汇)
+//再跑一遍原源到原汇的最大流, 输出即可
+//有源汇上下界最小流
+//增加超级源汇点, 求一遍超级源到超级汇的最大流
+//从原汇点连一条上界无限大, 下界为0的边到原源点, 再求一遍超级源到超级汇的最大流
+//当且仅当超级源的出度满流时有可行解, 解为原汇点到原源点的反向弧
 //最小费用最大流 MCMF O(V*E*f)
-//ver.kuangbin
 //求最大费用只需取相反数, 结果取相反数即可
 typedef long long ftype;
-const ftype INF = 0x3f3f3f3f; //!!!
-int head[N], to[M], nxt[M], tot, pre[N];
-ftype cap[M], cost[M], dep[N], mxflow, mncost;
-bool vis[N];
-inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
-inline void addedge(int x, int y, ftype w, ftype c) {
-  to[tot] = y; cap[tot] = w; cost[tot] = c; nxt[tot] = head[x]; head[x] = tot++;
-  to[tot] = x; cap[tot] = 0; cost[tot] = -c; nxt[tot] = head[y]; head[y] = tot++;
-}
-bool SPFA(int src, int sink) {
-  memset(dep, 0x3f, sizeof(dep));
-  memset(pre, -1, sizeof(pre));
-  memset(vis, 0, sizeof(vis));
-  queue<int> que; que.push(src);
-  dep[src] = 0; vis[src] = true;
-  while (!que.empty()) {
-    int u = que.front(); que.pop();
-    vis[u] = false;
-    for (int i = head[u], v; ~i; i = nxt[i]) {
-      v = to[i];
-      if (cap[i] > 0 && dep[v] > dep[u] + cost[i]) {
-        dep[v] = dep[u] + cost[i]; pre[v] = i;
-        if (!vis[v]) { vis[v] = true; que.push(v); }
-      }
-    }
-  }
-  return pre[sink] != -1;
-}
-ftype MCMF(int src, int sink) {
-  mxflow = mncost = 0;
-  while (SPFA(src, sink)) {
-    ftype mn = INF;
-    for (int i = pre[sink]; ~i; i = pre[to[i ^ 1]]) {
-      if (mn > cap[i]) { mn = cap[i]; }
-    }
-    for (int i = pre[sink]; ~i; i = pre[to[i ^ 1]]) {
-      cap[i] -= mn; cap[i ^ 1] += mn; mncost += cost[i] * mn;
-    }
-    mxflow += mn;
-  }
-  return mncost;
-}
-//ver.poursoul
-typedef long long ftype;
-const ftype INF = 0x3f3f3f3f; //!!!
+const ftype INF = 0x3f3f3f3f;
 int head[N], to[M], nxt[M], tot, cur[N];
-ftype cap[M], cost[M], flow[N], dep[N], mncost, mxflow;
+ftype cap[M], cost[M], flow[N], dis[N], mncost, mxflow;
 bool vis[N];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype c) {
@@ -308,23 +277,23 @@ inline void addedge(int x, int y, ftype w, ftype c) {
   to[tot] = x; cap[tot] = 0; cost[tot] = -c; nxt[tot] = head[y]; head[y] = tot++;
 }
 bool SPFA(int src, int sink) {
-  memset(dep, 0x3f, sizeof(dep));
+  memset(dis, 0x3f, sizeof(dis));
   memset(vis, 0, sizeof(vis));
-  dep[src] = 0; cur[src] = -1; flow[src] = INF;
+  dis[src] = 0; cur[src] = -1; flow[src] = INF;
   queue<int> que; que.push(src);
   while (!que.empty()) {
     int u = que.front(); que.pop();
     vis[u] = false;
     for (int i = head[u], v; ~i; i = nxt[i]) {
       v = to[i];
-      if (cap[i] > 0 && dep[v] > dep[u] + cost[i]) {
-        dep[v] = dep[u] + cost[i]; flow[v] = min(flow[u], cap[i]); cur[v] = i;
+      if (cap[i] > 0 && dis[v] > dis[u] + cost[i]) {
+        dis[v] = dis[u] + cost[i]; flow[v] = min(flow[u], cap[i]); cur[v] = i;
         if (!vis[v]) { vis[v] = true; que.push(v); }
       }
     }
   }
-  if (dep[sink] == INF) { return false; }
-  mxflow += flow[sink]; mncost += flow[sink] * dep[sink];
+  if (dis[sink] == INF) { return false; }
+  mxflow += flow[sink]; mncost += flow[sink] * dis[sink];
   for (int i = cur[sink]; ~i; i = cur[to[i ^ 1]]) {
     cap[i] -= flow[sink]; cap[i ^ 1] += flow[sink];
   }

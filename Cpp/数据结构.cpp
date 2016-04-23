@@ -2097,21 +2097,6 @@ int main() {
   }
 }
 //哈夫曼树
-template<typename T> struct HfmTree {
-  int n, l[N << 1], r[N << 1]; T w[N << 1];
-  void build(int _n, T weight[]) {
-    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
-    pair<T, int> x, y; n = _n;
-    for (int i = 0; i < n; i++) {
-      w[i] = weight[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));
-    }
-    for (int i = n; i < (n << 1) - 1; i++) {
-      x = que.top(); que.pop(); y = que.top(); que.pop();
-      l[i] = x.second; r[i] = y.second; w[i] = x.first + y.first; que.push(make_pair(w[i], i));
-    }
-  }
-};
-//带编码解码
 template<typename T> struct Huffman {
   int l[N << 1], r[N << 1], p[N << 1], n, tot; T w[N << 1]; char key[N];
   void init() { n = tot = 0; }

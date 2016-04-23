@@ -34,9 +34,9 @@ int n, pre[N];
 wtype mp[N][N], dist[N]; //邻接矩阵初始化为INF
 bool vis[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  memset(dist, 0x3f, sizeof(dist));
   memset(vis, 0, sizeof(vis)); memset(pre, -1, sizeof(pre));
-  priority_queue<Node> que; que.push((Node) {src, dist[src]});
+  priority_queue<Node> que; que.push((Node) {src, dist[src] = 0});
   while (!que.empty()) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
@@ -57,9 +57,9 @@ vector<Node> e[N];
 wtype dist[N];
 bool vis[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
+  memset(dist, 0x3f, sizeof(dist));
   memset(vis, 0, sizeof(vis));
-  priority_queue<Node> que; que.push((Node) {src, dist[src]});
+  priority_queue<Node> que; que.push((Node) {src, dist[src] = 0});
   while (!que.empty()) {
     int u = que.top().v; que.pop();
     if (vis[u]) { continue; }
@@ -79,8 +79,8 @@ struct Node {
 };
 wtype dist[N];
 void Dijkstra(int src) {
-  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
-  priority_queue<Node> que; que.push((Node) {src, dist[src]});
+  memset(dist, 0x3f, sizeof(dist));
+  priority_queue<Node> que; que.push((Node) {src, dist[src] = 0});
   while (!que.empty()) {
     int u = que.top().v; wtype w = que.top().w; que.pop();
     if (w != dist[u]) { continue; }

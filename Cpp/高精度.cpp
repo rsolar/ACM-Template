@@ -151,67 +151,45 @@ struct bint {
     return ret;
   }
   operator bool()const { return s.size() && !(s.size() == 1 && !s[0]); }
+  //高精度开方
+  bint sqrt()const {
+    bint ret, t(*this); ret.s.resize((t.s.size() + 1) >> 1);
+    for (int i = (int)ret.s.size() - 1; i >= 0; i--) {
+      int l = 0, r = BASE - 1, mid = ret.s[i] = (l + r + 1) >> 1;
+      while (l < r) {
+        if (comp(ret, mid, i - 1, t)) { r = mid - 1; }
+        else { l = mid; }
+        mid = ret.s[i] = (l + r + 1) >> 1;
+      }
+      sub(t, ret, mid, i - 1); ret.s[i] += mid;
+    }
+    for (int i = 0; i < (int)ret.s.size(); i++) { ret.s[i] >>= 1; }
+    ret.trim(); return ret;
+  }
+  void sub(bint &a, const bint &b, const int &k, const int &d)const {
+    for (int i = d + 1, l = b.s.size() + d; i <= l; i++) {
+      ll tmp = a.s[i] - (ll)b.s[i - d - 1] * k;
+      if (tmp < 0) { a.s[i + 1] += (tmp - BASE + 1) / BASE; a.s[i] = tmp - (tmp - BASE + 1) / BASE * BASE; }
+      else { a.s[i] = tmp; }
+    }
+    for (int i = b.s.size() + d + 1; i < (int)a.s.size() && a.s[i] < 0; i++) {
+      a.s[i + 1] += (a.s[i] - BASE + 1) / BASE; a.s[i] -= (a.s[i] - BASE + 1) / BASE * BASE;
+    }
+    a.trim();
+  }
+  bool comp(const bint &a, const int &c, const int &d, const bint &b)const {
+    int l = -(BASE << 1); ll t = 0;
+    if (b.s.size() < a.s.size() + d && c) { return true; }
+    for (int i = (int)b.s.size() - 1; i > d; i--) {
+      t = t * BASE + (ll)(i - d - 1 < (int)a.s.size() ? a.s[i - d - 1] : 0) * c - b.s[i];
+      if (t > 0) { return true; }
+      if (t < l) { return false; }
+    }
+    for (int i = d - 1; i >= 0; i--) {
+      t = t * BASE - b.s[i];
+      if (t > 0) { return true; }
+      if (t < l) { return false; }
+    }
+    return t > 0;
+  }
 };
-//高精度开方
-const int MAXBIT = 10005;
-bool bigger(char *s1, char *s2) {
-  int beg = 0;
-  while (s1[beg] == '0') { beg++; } strcpy(s1, s1 + beg);
-  if (strlen(s1) == 0) { s1[0] = '0'; s1[1] = 0; }
-  beg = 0;
-  while (s2[beg] == '0') { beg++; } strcpy(s2, s2 + beg);
-  if (strlen(s2) == 0) { s2[0] = '0'; s2[1] = 0; }
-  int len1 = strlen(s1), len2 = strlen(s2);
-  if (len1 > len2) { return true; }
-  else if (len1 < len2) { return false; }
-  else {
-    for (int i = 0; i < len1; i++) {
-      if (s1[i] > s2[i]) { return true; }
-      else if (s1[i] < s2[i]) { return false; }
-    }
-  }
-  return false;
-}
-void mul(const char *s, const int t, char *ret) {
-  int left = 0, pos = 0;
-  for (int i = strlen(s) - 1, k; i >= 0; i--) {
-    k = t * (s[i] - '0') + left; ret[pos++] = k % 10 + '0'; left = k / 10;
-  }
-  while (left > 0) { ret[pos++] = left % 10 + '0'; left /= 10; }
-  ret[pos] = 0;
-  for (int i = 0, len = strlen(ret); i < len >> 1; i++) { swap(ret[i], ret[len - i - 1]); }
-}
-void sub(char *a, const char *b) {
-  int left = 0, len1 = strlen(a) - 1, len2 = strlen(b) - 1, beg = 0, tmp;
-  while (len2 >= 0) {
-    tmp = a[len1] - b[len2] + left;
-    if (tmp < 0) { tmp += 10; left = -1; }
-    else { left = 0; }
-    a[len1] = tmp + '0'; len1--; len2--;
-  }
-  while (len1 >= 0) {
-    tmp = a[len1] - '0' + left;
-    if (tmp < 0) { tmp += 10; left = -1; }
-    else { left = 0; }
-    a[len1] = tmp + '0'; len1--;
-  }
-  while (a[beg] == '0') { beg++; }
-  strcpy(a, a + beg);
-  if (strlen(a) == 0) { a[0] = '0'; a[1] = 0; }
-}
-void sqrt(const char *s, char *ret) {
-  char tmp[MAXBIT], left[MAXBIT], p[MAXBIT];
-  int i, j, len1 = strlen(s), len2, pos = 0; ret[0] = '0'; ret[1] = 0;
-  if (len1 % 2 == 0) { left[0] = s[0]; left[1] = s[1]; left[2] = 0; j = 2; }
-  else { left[0] = s[0]; left[1] = 0; j = 1; }
-  while (j <= len1) {
-    mul(ret, 20, tmp); len2 = strlen(tmp);
-    for (i = 9; i >= 0; i--) {
-      tmp[len2 - 1] = i + '0'; mul(tmp, i, p);
-      if (!bigger(p, left)) { break; }
-    }
-    ret[pos++] = i + '0'; ret[pos] = 0;
-    sub(left, p); len2 = strlen(left);
-    left[len2] = s[j]; left[len2 + 1] = s[j + 1]; left[len2 + 2] = 0; j += 2;
-  }
-}
