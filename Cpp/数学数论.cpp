@@ -190,10 +190,20 @@ ll sumPow(ll a, ll b, ll m) {
   return r;
 }
 //求逆元(ax = 1(mod m)的x值)
-//扩展欧几里得(求ax + by = gcd(a, b)的解),求出的x为a对b的模逆元
+//扩展欧几里得(求ax + by = gcd(a, b)的解), 求出的x为a对b的模逆元
 ll exgcd(ll a, ll b, ll &x, ll &y) {
   if (b == 0) { x = 1; y = 0; return a; }
   ll d = exgcd(b, a % b, y, x); return y -= a / b * x, d;
+}
+//解不定方程ax + by = c 求得的只是其中一组解
+//对于不定整数方程ax + by = c, 若c mod gcd(a, b) = 0, 则该方程存在整数解, 否则不存在整数解
+//在找到ax + by = gcd(a, b)的一组解x0, y0后，可得到ax + by = c的一组解x1 = x0 * (c / gcd(a, b)), y1 = y0 * (c / gcd(a,b))
+//ax + by = c的其他整数解满足：
+//x = x1 + b / gcd(a, b) * t, y = y1 - a / gcd(a, b) * t(其中t为任意整数)
+bool linear_equation(int a, int b, int c, int &x, int &y) {
+  int d = exgcd(a, b, x, y);
+  if (c % d != 0) { return false; }
+  int k = c / d; x *= k; y *= k; return true;
 }
 //扩展欧几里得求逆元
 ll modReverse(ll a, ll m) {
@@ -210,6 +220,31 @@ ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
 //线性求逆元
 void getInv(int m) {
   for (ll i = 2; i < m; i++) { inv[i] = (m - m / i) * inv[m % i] % m; }
+}
+//模线性方程组 需扩展欧几里得
+//求解方程ax ≡ b (mod m) 相当于求解方程ax + my = b (x, y为整数)
+int m[10], a[10]; //模数为m, 余数为a, X % m = a
+bool solve(int &m0, int &a0, int m, int a) {
+  ll y, x;
+  int g = exgcd(m0, m, x, y);
+  if (abs(a - a0) % g) { return false; }
+  x *= (a - a0) / g;
+  x %= m / g;
+  a0 = (x * m0 + a0);
+  m0 *= m / g;
+  a0 %= m0;
+  if (a0 < 0) { a0 += m0; }
+  return true;
+}
+//无解返回false, 有解返回true
+//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
+bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
+  bool flag = true;
+  m0 = 1; a0 = 0;
+  for (int i = 0; i < n; i++) {
+    if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
+  }
+  return flag;
 }
 //预处理卡特兰数
 int a[105][105], b[105]; //大数, 长度
@@ -431,30 +466,6 @@ ll BSGS(ll a, ll b, ll p) { //a^x=b(mod p), 已知a,b,p,求x
     b = fastMul(b, tmp, p);
   }
   return -1;
-}
-//模线性方程组 需扩展欧几里得
-int m[10], a[10]; //模数为m, 余数为a, X % m = a
-bool solve(int &m0, int &a0, int m, int a) {
-  ll y, x;
-  int g = exgcd(m0, m, x, y);
-  if (abs(a - a0) % g) { return false; }
-  x *= (a - a0) / g;
-  x %= m / g;
-  a0 = (x * m0 + a0);
-  m0 *= m / g;
-  a0 %= m0;
-  if (a0 < 0) { a0 += m0; }
-  return true;
-}
-//无解返回false, 有解返回true
-//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
-bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
-  bool flag = true;
-  m0 = 1; a0 = 0;
-  for (int i = 0; i < n; i++) {
-    if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
-  }
-  return flag;
 }
 //自适应simpson积分
 double simpson(double a, double b) {
