@@ -50,14 +50,14 @@ template<typename T> struct mat {
   bool operator!=(const mat &b)const { return !(*this == b); }
   T abs(const T &v)const { return v < 0 ? -v : v; }
   bool isZero(const T &v)const { return abs(v) < 1e-9; }
+  void input() { for (int i = 0, n = h * w; i < n; i++) { scanf("%I64d", &a[i]); } }
+  void print()const {
+    for (int i = 0, n = h * w; i < n; i++) { printf("%I64d%c", a[i], i % w == w - 1 ? '\n' : ' '); }
+  }
   mat trans()const {
     mat ret(w, h);
     for (int i = 0; i < w; i++) { for (int j = 0; j < h; j++) { ret[i][j] = a[j][i]; } }
     return ret;
-  }
-  void input() { for (int i = 0, n = h * w; i < n; i++) { scanf("%d", &a[i]); } }
-  void print()const {
-    for (int i = 0, n = h * w; i < n; i++) { printf("%d%c", a[i], i % w == w - 1 ? '\n' : ' '); }
   }
   //求逆矩阵 限double 可逆则返回true 结果在参数v中
   bool inv(mat &v)const {

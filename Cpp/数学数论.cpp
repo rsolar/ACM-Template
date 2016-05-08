@@ -130,7 +130,7 @@ ll eular(ll n) {
   for (ll i = 2; i * i <= n; i++) {
     if (n % i == 0) { ans -= ans / i; while (n % i == 0) { n /= i; } }
   }
-  return n > 1 ? ans - ans / n ? ans;
+  return n > 1 ? ans - ans / n : ans;
 }
 //欧拉函数筛 O(nloglogn)
 const int N = 10000000; //~320ms
