@@ -324,13 +324,64 @@ ll Lucas(ll n, ll m, ll p) {
   if (m == 0) { return 1; }
   return Com(n % p, m % p, p) * Lucas(n / p, m / p, p) % p;
 }
-//组合数打表 / 杨辉三角
+//组合数预处理 / 杨辉三角
+//C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
+//C[i][i] = C[i][0] = 1
 const int maxc = 105;
 ll C[maxc][maxc];
 void calC() { // C(n,k),n个数里选k个
   for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1; }
   for (int i = 2; i < maxc; i++) {
-    for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD; }
+    for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M; }
+  }
+}
+//第一类Stirling数 s(p, k)
+//将p个物体排成k个非空循环排列的方法数
+//s(p, k)的递推公式：s(p, k) = (p - 1) * s(p - 1, k) + s(p - 1, k - 1), 1 <= k <= p - 1
+//边界条件：s(p, 0) = 0, p >= 1, s(p, p) = 1, p >= 0
+const int maxs = 105;
+ll S[maxs][maxs];
+void calStir1() {
+  S[0][0] = S[1][1] = 1;
+  for (int i = 2; i < maxs; i++) {
+    for (int j = 1; j <= i; j++) { S[i][j] = ((i - 1) * S[i - 1][j] + S[i - 1][j - 1]) % M; }
+  }
+}
+//第二类Stirling数 S(p, k)
+//将p个物体划分成k个非空的不可辨别的(可以理解为盒子没有编号)集合的方法数
+//k! * S(p, k)是把p个人分进k间有差别(如被标有房号)的房间(无空房)的方法数
+//S(p, k)的递推公式是：S(p, k) = k * S(p - 1, k) + S(p - 1, k - 1), 1 <= k <= p - 1
+//边界条件：S(p, 0) = 0, p >= 1, S(p, p) = 1, p >= 0
+const int maxs = 105;
+ll S[maxs][maxs];
+void calStir2() {
+  S[0][0] = S[1][1] = 1;
+  for (int i = 2; i < maxs; i++) {
+    for (int j = 1; j <= i; j++) { S[i][j] = (j * S[i - 1][j] + S[i - 1][j - 1]) % M; }
+  }
+}
+//Bell数
+//B(n)表示基数为n的集合的划分方法的数目
+//B(0) = 1, B(n + 1) = sum(C(n, k) * B(k)), 0 <= k <= n
+//每个贝尔数都是第二类Stirling数的和, 即B(n) = sum(S(n, k)), 1 <= k <= n
+//Bell三角形
+//a[0][0] = 1
+//对于n >= 1, a[n][0] = a[n - 1][n - 1]
+//对于m, n >= 1, a[n][m] = a[n][m - 1] + a[n - 1][m - 1]
+//每行首项是贝尔数，每行之和是第二类Stirling数
+//两个重要的同余性质:
+//B(p + n) = B(n) + B(n + 1) (mod p)
+//B(p^m + n) = m * B(n) + B(n + 1) (mod p)
+//p是不大于100的素数, 这样, 我们可以通过上面的性质来计算Bell数模小于100的素数值
+//Bell数模素数p的周期为: N(p) = (p^p - 1) / (p - 1)
+const int maxb = 105;
+ll T[maxb], B[maxb];
+void calBell() {
+  B[0] = B[1] = T[0] = 1;
+  for (int i = 2; i < maxb; i++) {
+    T[i - 1] = B[i - 1];
+    for (int j = i - 2; j >= 0; j--) { T[j] = (T[j] + T[j + 1]) % M; }
+    B[i] = T[0];
   }
 }
 //中国剩余定理 求模线性方程组x=a[i](mod m[i]) m[i]可以不互质

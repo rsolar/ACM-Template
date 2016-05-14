@@ -10,7 +10,7 @@ int Joseph(int n, int m, int k) {
   for (k = k * m + m - 1; k >= n; k = k - n + (k - n) / (m - 1));
   return k;
 }
-//康托展开 fac[]为阶乘
+//康托展开 fac[]为阶乘 0 <= ans
 ll Cantor(char *s) {
   ll ans = 0;
   for (int i = 0, len = strlen(s); i < len; i++) {
@@ -20,7 +20,7 @@ ll Cantor(char *s) {
   }
   return ans;
 }
-//康托展开逆运算
+//康托展开逆运算 1 <= k <= n!
 vector<int> revCantor(ll n, ll k) {
   vector<int> v, ret; k--;
   for (int i = 1; i <= n; i++) { v.push_back(i); }
