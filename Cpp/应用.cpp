@@ -31,6 +31,83 @@ vector<int> revCantor(ll n, ll k) {
   }
   return ret;
 }
+//lydsy 1057: [ZJOI2007]棋盘制作
+//求最大子矩形及正方形
+//单调栈
+int n, m, h[N];
+bool a[N][N];
+int main() {
+  while (~scanf("%d%d", &n, &m)) {
+    for (int i = 1, t; i <= n; i++) {
+      for (int j = 1; j <= m; j++) {
+        scanf("%d", &t); a[i][j] = (t & 1) ^ ((i + j) & 1);
+      }
+    }
+    int rec = 0, sqr = 0;
+    memset(h, 0, sizeof(h));
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; j <= m; j++) { h[j] = a[i][j] ? h[j] + 1 : 0; }
+      stack<int> st; st.push(0);
+      for (int j = 1; j <= m + 1; j++) {
+        while (h[j] < h[st.top()]) {
+          int t = h[st.top()]; st.pop();
+          int w = j - st.top() - 1;
+          sqr = max(sqr, min(t, w) * min(t, w)); rec = max(rec, t * w);
+        }
+        st.push(j);
+      }
+    }
+    memset(h, 0, sizeof(h));
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; j <= m; j++) { h[j] = !a[i][j] ? h[j] + 1 : 0; }
+      stack<int> st; st.push(0);
+      for (int j = 1; j <= m + 1; j++) {
+        while (h[j] < h[st.top()]) {
+          int t = h[st.top()]; st.pop();
+          int w = j - st.top() - 1;
+          sqr = max(sqr, min(t, w) * min(t, w)); rec = max(rec, t * w);
+        }
+        st.push(j);
+      }
+    }
+    printf("%d\n%d\n", sqr, rec);
+  }
+}
+//dp 悬线法
+int n, m, l[N], r[N], h[N];
+bool a[N][N];
+int main() {
+  while (~scanf("%d%d", &n, &m)) {
+    memset(h, 0, sizeof(h));
+    for (int i = 1, t; i <= n; i++) {
+      for (int j = 1; j <= m; j++) {
+        scanf("%d", &t); a[i][j] = t;
+      }
+    }
+    int sqr = 1, rec = 1;
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; j <= m; j++) {
+        l[j] = r[j] = j; h[j] = a[i][j] != a[i - 1][j] ? h[j] + 1 : 1;
+      }
+      for (int j = 2; j <= m; j++) {
+        while (l[j] - 1 >= 1 && a[i][l[j] - 1] != a[i][l[j]] && h[l[j] - 1] >= h[j]) {
+          l[j] = l[l[j] - 1];
+        }
+      }
+      for (int j = m - 1; j >= 1; j--) {
+        while (r[j] + 1 <= m && a[i][r[j] + 1] != a[i][r[j]] && h[r[j] + 1] >= h[j]) {
+          r[j] = r[r[j] + 1];
+        }
+      }
+      for (int j = 1; j <= m; j++) {
+        int w = r[j] - l[j] + 1;
+        sqr = max(sqr, min(h[j], w) * min(h[j], w));
+        rec = max(rec, h[j] * w);
+      }
+    }
+    printf("%d\n%d\n", sqr, rec);
+  }
+}
 //二叉树前序 + 中序求后序遍历
 void getPost(char *pre, char *in, int len) {
   if (len == 0) { return; }

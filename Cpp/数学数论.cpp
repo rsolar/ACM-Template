@@ -466,7 +466,7 @@ void getMiu() {
     }
   }
 }
-//大步小步算法 Baby-Step Giant-Step
+//离散对数 大步小步算法 Baby-Step Giant-Step
 //a^x = b (mod n) n是素数和不是素数都可以 求解上式最小非负整数解或通解(p是质数)
 #define MOD 76543
 int hs[MOD], head[MOD], next[MOD], id[MOD], top;
