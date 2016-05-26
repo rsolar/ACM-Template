@@ -221,119 +221,55 @@ ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
 void getInv(int m) {
   for (ll i = 2; i < m; i++) { inv[i] = (m - m / i) * inv[m % i] % m; }
 }
-//模线性方程组 需扩展欧几里得
-//求解方程ax ≡ b (mod m) 相当于求解方程ax + my = b (x, y为整数)
-int m[10], a[10]; //模数为m, 余数为a, X % m = a
-bool solve(int &m0, int &a0, int m, int a) {
-  ll y, x;
-  int g = exgcd(m0, m, x, y);
-  if (abs(a - a0) % g) { return false; }
-  x *= (a - a0) / g;
-  x %= m / g;
-  a0 = (x * m0 + a0);
-  m0 *= m / g;
-  a0 %= m0;
-  if (a0 < 0) { a0 += m0; }
-  return true;
-}
-//无解返回false, 有解返回true
-//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
-bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
-  bool flag = true;
-  m0 = 1; a0 = 0;
-  for (int i = 0; i < n; i++) {
-    if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
-  }
-  return flag;
-}
-//预处理卡特兰数
-int a[105][105], b[105]; //大数, 长度
-void Catalan() {
-  int i, j, len, carry, temp;
-  a[1][0] = b[1] = len = 1;
-  for (i = 2; i <= 100; i++) {
-    for (j = 0; j < len; j++) { //乘法
-      a[i][j] = a[i - 1][j] * (4 * (i - 1) + 2);
-    }
-    carry = 0;
-    for (j = 0; j < len; j++) { //处理相乘结果
-      temp = a[i][j] + carry;
-      a[i][j] = temp % 10;
-      carry = temp / 10;
-    }
-    while (carry) { //进位处理
-      a[i][len++] = carry % 10;
-      carry /= 10;
-    }
-    carry = 0;
-    for (j = len - 1; j >= 0; j--) { //除法
-      temp = carry * 10 + a[i][j];
-      a[i][j] = temp / (i + 1);
-      carry = temp % (i + 1);
-    }
-    while (!a[i][len - 1]) { len--; } //高位零处理
-    b[i] = len;
+//组合数预处理 / 杨辉三角
+//C[i][i] = C[i][0] = 1
+//C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
+const int maxc = 105;
+ll C[maxc][maxc];
+void calC() {
+  for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1; }
+  for (int i = 2; i < maxc; i++) {
+    for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M; }
   }
 }
-//输出大数
-void printCatalan(int n) {
-  for (int i = b[n] - 1; i >= 0; i--) { printf("%d", a[n][i]); }
-}
-//组合数
+//求组合数C(n, m) 不取模
 ll Com(ll n, ll m) {
   if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }
-  if (m == 0) { return 1; }
   ll ret = 1;
   for (ll i = 0, j = 1; i < m; i++) {
     for (ret *= n - i; j <= m && ret % j == 0; j++) { ret /= j; }
   }
   return ret;
 }
-//组合数取模 Lucas定理 p <= 10^5 需要预处理阶乘 + 快速幂
-ll fac[N] = { 0 };
-void getFac(ll p) {
-  for (ll i = 1; i <= p; i++) { fac[i] = (fac[i - 1] * i) % p; }
-}
-ll Lucas(ll n, ll m, ll p) {
-  if (m > n) { return 0; }
-  if (m > n - m) { m = n - m; }
-  if (m == 0) { return 1; }
-  ll res = 1;
-  while (n && m) {
-    ll a = n % p, b = m % p;
-    if (a < b) { return 0; }
-    res = res * fac[a] * powMod(fac[b] * fac[a - b] % p, p - 2, p) % p;
-    n /= p; m /= p;
+//求组合数取模
+//p <= 10^5 预处理阶乘逆元
+ll fac[M] = {1, 1}, invfac[M] = {1, 1};
+void initFac(ll p) {
+  for (int i = 2; i < p; i++) {
+    fac[i] = fac[i - 1] * i % p; invfac[i] = (-invfac[p % i] * (p / i) % p + p) % p;
   }
-  return res;
+  for (int i = 2; i < p; i++) { invfac[i] = invfac[i] * invfac[i - 1] % p; }
 }
-//组合数取模 Lucas定理 p <= 10^9 需要快速幂
+ll Com(ll n, ll m, ll p) {
+  return n < m ? 0 : fac[n] * invfac[n - m] % p * invfac[m] % p;
+}
+//p <= 10^9 在线求逆元
 ll Com(ll n, ll m, ll p) {
   if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }
-  if (m == 0) { return 1; }
   ll ret = 1;
   for (ll i = 1; i <= m; i++) {
     ll a = (n + i - m) % p, b = i % p;
-    ret = ret * (a * powMod(b, p - 2, p) % p) % p;
+    ret = ret * a % p * powMod(b, p - 2, p) % p;
   }
   return ret;
 }
+//Lucas定理
 ll Lucas(ll n, ll m, ll p) {
-  if (m == 0) { return 1; }
+  if (n < m) { return 0; }
+  if (m == 0 && n == 0) { return 1; }
   return Com(n % p, m % p, p) * Lucas(n / p, m / p, p) % p;
-}
-//组合数预处理 / 杨辉三角
-//C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
-//C[i][i] = C[i][0] = 1
-const int maxc = 105;
-ll C[maxc][maxc];
-void calC() { // C(n,k),n个数里选k个
-  for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1; }
-  for (int i = 2; i < maxc; i++) {
-    for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M; }
-  }
 }
 //第一类Stirling数 s(p, k)
 //将p个物体排成k个非空循环排列的方法数
@@ -401,6 +337,64 @@ ll CRT(ll a[], ll m[], int k) {
     a1 = a3; m1 = m3;
   }
   return (a1 % m1 + m1) % m1;
+}
+//模线性方程组 需扩展欧几里得
+//求解方程ax ≡ b (mod m) 相当于求解方程ax + my = b (x, y为整数)
+int m[10], a[10]; //模数为m, 余数为a, X % m = a
+bool solve(int &m0, int &a0, int m, int a) {
+  ll y, x;
+  int g = exgcd(m0, m, x, y);
+  if (abs(a - a0) % g) { return false; }
+  x *= (a - a0) / g;
+  x %= m / g;
+  a0 = (x * m0 + a0);
+  m0 *= m / g;
+  a0 %= m0;
+  if (a0 < 0) { a0 += m0; }
+  return true;
+}
+//无解返回false, 有解返回true
+//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
+bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
+  bool flag = true;
+  m0 = 1; a0 = 0;
+  for (int i = 0; i < n; i++) {
+    if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
+  }
+  return flag;
+}
+//预处理卡特兰数
+int a[105][105], b[105]; //大数, 长度
+void Catalan() {
+  int i, j, len, carry, temp;
+  a[1][0] = b[1] = len = 1;
+  for (i = 2; i <= 100; i++) {
+    for (j = 0; j < len; j++) { //乘法
+      a[i][j] = a[i - 1][j] * (4 * (i - 1) + 2);
+    }
+    carry = 0;
+    for (j = 0; j < len; j++) { //处理相乘结果
+      temp = a[i][j] + carry;
+      a[i][j] = temp % 10;
+      carry = temp / 10;
+    }
+    while (carry) { //进位处理
+      a[i][len++] = carry % 10;
+      carry /= 10;
+    }
+    carry = 0;
+    for (j = len - 1; j >= 0; j--) { //除法
+      temp = carry * 10 + a[i][j];
+      a[i][j] = temp / (i + 1);
+      carry = temp % (i + 1);
+    }
+    while (!a[i][len - 1]) { len--; } //高位零处理
+    b[i] = len;
+  }
+}
+//输出大数
+void printCatalan(int n) {
+  for (int i = b[n] - 1; i >= 0; i--) { printf("%d", a[n][i]); }
 }
 //求原根
 ll n, factor[100];

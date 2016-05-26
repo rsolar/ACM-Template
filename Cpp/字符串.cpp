@@ -20,7 +20,7 @@ inline size_t BKDRHash(const char *str) {
 const int P = 13131;
 char key[N][M];
 typedef struct Node { int id, val; } etype;
-template<size_t(*Hash)(const char *)> struct hash_map {
+template<size_t(*Hash)(const char *)> struct hashmap {
   vector<etype> hs[P];
   void init() { for (int i = 0; i < P; i++) { hs[i].clear(); } }
   void insert(int id, int val) {
@@ -37,7 +37,7 @@ template<size_t(*Hash)(const char *)> struct hash_map {
     return false;
   }
 };
-hash_map<BKDRHash> mp;
+hashmap<BKDRHash> mp;
 //Manacher 最长回文子串
 //最长回文子串对应原串T中的位置: l = (i - R[i]) / 2; r = (i + R[i]) / 2 - 2;
 char s[N], tmp[N << 1];
