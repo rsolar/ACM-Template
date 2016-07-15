@@ -46,6 +46,7 @@ wtype Prim(int src) {
   return ret;
 }
 //Kruskal + 邻接表 O(ElogE)
+typedef int wtype;
 struct Edge {
   int u, v; wtype w;
   bool operator<(const Edge &r)const { return w < r.w; }
@@ -53,7 +54,7 @@ struct Edge {
 int n, fa[N], tot; //加边前赋值为0
 void addedge(int u, int v, wtype w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
-int Kruskal() {
+wtype Kruskal() {
   memset(fa, -1, sizeof(fa));
   sort(edge, edge + tot);
   int cnt = 0; wtype ret = 0;

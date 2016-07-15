@@ -29,6 +29,18 @@ bool topoSort() {
   }
   return k == n;
 }
+//染色判断二分图
+bool col[N];
+bool Color(int u) {
+  for (int i = head[u]; ~i; i = nxt[i]) {
+    int v = to[i];
+    if (!col[v]) {
+      col[v] = !col[u];
+      if (!Color(v)) { return false; }
+    } else if (col[v] == col[u]) { return false; }
+  }
+  return true;
+}
 //欧拉回路: 每条边只经过一次, 要求回到起点
 //欧拉路径: 每条边只经过一次, 不要求回到起点
 //欧拉路径的判断:

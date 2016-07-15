@@ -28,7 +28,7 @@ typedef long long ll;
 const int N = 100005;
 const int M = 1000000007;
 
-int n;
+int n, m;
 int a[N];
 
 int main() {

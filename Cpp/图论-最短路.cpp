@@ -5,6 +5,7 @@ int head[N], to[M], nxt[M], tot; wtype len[M];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y, wtype z) { to[tot] = y; len[tot] = z; nxt[tot] = head[x]; head[x] = tot++; }
 //Dijkstra + 邻接矩阵 O(V^2)
+typedef int wtype;
 int n, pre[N];
 wtype mp[N][N], dist[N]; //邻接矩阵初始化为INF
 bool vis[N];
@@ -26,6 +27,7 @@ void Dijkstra(int src) {
   }
 }
 //Dijkstra + priority_queue + 邻接矩阵 O(V^2)
+typedef int wtype;
 struct Node {
   int v; wtype w;
   bool operator<(const Node &r)const { return w > r.w; }
@@ -49,6 +51,7 @@ void Dijkstra(int src) {
   }
 }
 //Dijkstra + priority_queue + vector存边 O((V+E)logV)
+typedef int wtype;
 struct Node {
   int v; wtype w;
   bool operator<(const Node &r)const { return w > r.w; }
@@ -73,6 +76,7 @@ void Dijkstra(int src) {
   }
 }
 //Dijkstra + priority_queue + 邻接表 O((V+E)logV)
+typedef int wtype;
 struct Node {
   int v; wtype w;
   bool operator<(const Node &r)const { return w > r.w; }
@@ -93,6 +97,7 @@ void Dijkstra(int src) {
   }
 }
 //SPFA + queue/stack + vector存边 O(kE)
+typedef int wtype;
 struct Edge { int v; wtype w; };
 vector<Edge> e[N];
 wtype dist[N];
@@ -122,6 +127,7 @@ bool SPFA(int src) {
   return true; //没有负环回路
 }
 //SPFA + SLF + LLL + 邻接表 O(kE)
+typedef int wtype;
 wtype dist[N];
 bool vis[M];
 void SPFA(int src) {
@@ -149,11 +155,12 @@ void SPFA(int src) {
 }
 //Bellman-Ford + vector O(VE)
 //可以处理负边权图, 可以判断是否存在负环回路, 当且仅当图中不包含从源点可达的负权回路时返回true
+typedef int wtype;
 struct Edge { int u, v; wtype w; };
 vector<Edge> e;
 wtype dist[N];
 bool BellmanFord(int src) {
-  memset(dist, 0x1f, sizeof(dist)); dist[src] = 0;
+  memset(dist, 0x3f, sizeof(dist)); dist[src] = 0;
   for (int i = 1; i < n; i++) {
     bool flag = false;
     for (int j = 0; j < (int)e.size(); j++) {
@@ -169,6 +176,7 @@ bool BellmanFord(int src) {
   return true; //没有负环回路
 }
 //Floyd 带路径记录 O(V^3)
+typedef int wtype;
 int n; pre[N][N]; wtype mp[N][N];
 void Floyd() {
   for (int i = 0; i < n; i++) {
