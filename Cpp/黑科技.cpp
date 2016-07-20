@@ -1,6 +1,5 @@
 //º”’ª
 //G++
-void Main() { }
 int main() {
   int sz = 100 << 20; //100MB
   char *p = (char *)malloc(sz) + sz;
@@ -11,7 +10,7 @@ int main() {
     "movl %0, %%esp\n pushl $_exit\n"
 #endif
     :: "r"(p));
-  Main();
+  //......
   exit(0);
 }
 //VC++ 100MB

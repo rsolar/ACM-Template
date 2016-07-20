@@ -117,18 +117,51 @@ void getPost(char *pre, char *in, int len) {
   getPost(pre + root + 1, in + root + 1, len - root - 1);
   putchar(*pre);
 }
-//统计0到n之间1的个数
-int countOne(int n) {
-  int i = 1, ret = 0, before, current, after;
-  while (n / i) {
-    before = n / (i * 10); current = n / i % 10; after = n - n / i * i;
-    if (current > 1) { ret += (before + 1) * i; }
-    else if (current == 0) { ret += before * i; }
-    else { ret += before * i + after + 1; }
-    i *= 10;
+//求1到n之间1的个数
+ll countOne(ll n) {
+  ll ret = 0;
+  for (ll m = 1; m <= n; m *= 10) {
+    ll a = n / m, b = n % m;
+    ret += (a + 8) / 10 * m + (a % 10 == 1) * (b + 1);
   }
   return ret;
 }
+//求1到n所有数字的数位和的和 数位DP
+char t[N];
+ll dp[N][N][N];
+ll countDigit(char *s) {
+  ll ret = 0;
+  for (int i = 1, n = strlen(s); i <= n; i++) { t[i] = s[i - 1] - '0'; }
+  for (int i = 0; i <= t[1]; i++) { dp[1][i][i == t[1]] = 1; }
+  for (int i = 1; i < n; i++) {
+    for (int j = 1; j <= 900; j++) {
+      if (dp[i][j][0]) {
+        for (int k = 0; k <= 9; k++) { dp[i + 1][j + k][0] += dp[i][j][0]; dp[i + 1][j + k][0] %= M; }
+      }
+      if (dp[i][j][1]) {
+        for (int k = 0; k <= t[i + 1]; k++) { dp[i + 1][j + k][k == t[i + 1]] += dp[i][j][1]; dp[i + 1][j + k][k == t[i + 1]] %= M; }
+      }
+    }
+  }
+  for (int j = 1; j <= 900; j++) { ret += dp[n][j][0] * dp[n][j][1] % M; ret %= M; }
+  return ret;
+}
+//树hash
+int hs[N], P[N]; //一些质数
+void dfs(int u, int p) {
+  vector<int> t; t.push_back(1);
+  for (int i = 0; i < (int)e[u].size(); i++) {
+    int v = e[u][i];
+    if (v == p) { continue; }
+    dfs(v, u); t.push_back(hs[v]);
+  }
+  sort(t.begin(), t.end()); hs[u] = 0;
+  for (int i = 0; i < (int)t.size(); i++) { hs[u] += t[i] * P[i]; }
+}
+for (int j = 1; j <= n; j++) {
+  dfs(j, 0); //cout << j << ' ' << hs[j] << endl;
+}
+sort(hs[i] + 1, hs[i] + n + 1);
 //小数转化为分数
 //把小数转化为分数, 循环部分用()表示
 void work(char str[]) {

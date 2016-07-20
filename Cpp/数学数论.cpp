@@ -6,23 +6,23 @@ ll powMod(ll a, ll b, ll m) {
 }
 //素数筛
 //Eratosthenes O(nloglogn)
-const int N = 10000000; //~80ms
-bitset < N + 5 > isprime;
+const int N = 10000000; //~110ms
+bitset<N> isprime;
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i <= N; i++) {
+  for (int i = 2; i < N; i++) {
     if (isprime[i]) {
-      for (ll j = (ll)i * i; j <= N; j += i) { isprime[j] = false; }
+      for (ll j = (ll)i * i; j < N; j += i) { isprime[j] = false; }
     }
   }
 }
 //Euler O(n) prime[0]为个数
-const int N = 10000000; //~65ms
-int prime[N + 5]; //3711111 for [2, 10^9)
+const int N = 10000000; //~110ms
+int prime[N]; //3711111 for [2, 10^9)
 void getPrime() {
-  for (int i = 2; i <= N; i++) {
+  for (int i = 2; i < N; i++) {
     if (!prime[i]) { prime[++prime[0]] = i; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+    for (int j = 1; j <= prime[0] && prime[j] * i < N; j++) {
       prime[prime[j] * i] = 1;
       if (i % prime[j] == 0) { break; }
     }
@@ -30,13 +30,13 @@ void getPrime() {
 }
 //Euler O(n)
 const int N = 10000000; //~95ms
-bitset < N + 5 > isprime;
+bitset<N> isprime;
 int prime[N >> 3];
 void getPrime() {
   isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i <= N; i++) {
+  for (int i = 2; i < N; i++) {
     if (isprime[i]) { prime[++prime[0]] = i; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
+    for (int j = 1; j <= prime[0] && prime[j] * i < N; j++) {
       isprime[prime[j] * i] = false;
       if (i % prime[j] == 0) { break; }
     }
@@ -133,47 +133,74 @@ ll eular(ll n) {
   return n > 1 ? ans - ans / n : ans;
 }
 //欧拉函数筛 O(nloglogn)
-const int N = 10000000; //~320ms
-int phi[N + 5] = { 0, 1 };
+const int N = 10000000; //~400ms
+int phi[N] = {0, 1};
 void getPhi() {
-  for (int i = 2; i <= N; i++) {
+  for (int i = 2; i < N; i++) {
     if (!phi[i]) {
-      for (int j = i; j <= N; j += i) {
+      for (int j = i; j < N; j += i) {
         if (!phi[j]) { phi[j] = j; } phi[j] -= phi[j] / i;
       }
     }
   }
 }
 //素数 + 欧拉函数筛 O(n)
-const int N = 10000000; //~95ms
-bitset < N + 5 > isprime;
-int prime[N], phi[N + 5] = { 0, 1 };
+const int N = 10000000; //~150ms
+bitset<N> isprime;
+int prime[N >> 3], phi[N] = {0, 1};
 void getPrimePhi() {
   isprime.set(); isprime[0] = isprime[1] = false;
   for (int i = 2; i < N; i++) {
     if (isprime[i]) { prime[++prime[0]] = i; phi[i] = i - 1; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
-      isprime[prime[j] * i] = false;
-      if (i % prime[j] == 0) { phi[prime[j] * i] = phi[i] * prime[j]; break; }
-      else { phi[prime[j] * i] = phi[i] * (prime[j] - 1); }
+    for (int j = 1, k; j <= prime[0] && prime[j] * i < N; j++) {
+      isprime[k = prime[j] * i] = false;
+      if (i % prime[j] == 0) { phi[k] = phi[i] * prime[j]; break; }
+      phi[k] = phi[i] * (prime[j] - 1);
     }
   }
 }
-//约数个数筛 O(n)
-const int N = 10000000; //~125ms
-bitset < N + 5 > isprime;
-int prime[N], faccnt[N + 5] = { 0, 1 }, d[N + 5]; //d[i]表示i的最小质因子的幂次
-void getFaccnt() {
+//素数 + 莫比乌斯函数筛 O(n)
+const int N = 10000000; //150ms
+bitset<N> isprime;
+int prime[N >> 3], miu[N] = {0, 1};
+void getPrimeMiu() {
   isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i <= N; i++) {
+  for (int i = 2; i < N; i++) {
+    if (isprime[i]) { prime[++prime[0]] = i; miu[i] = -1; }
+    for (int j = 1, k; j <= prime[0] && prime[j] * i < N; j++) {
+      isprime[k = prime[j] * i] = false;
+      if (i % prime[j] == 0) { miu[k] = 0; break; }
+      miu[k] = -miu[i];
+    }
+  }
+}
+//素数 + 欧拉函数 + 莫比乌斯函数筛 O(n)
+const int N = 10000000; //~230ms
+int prime[N >> 3], phi[N] = {0, 1}, miu[N] = {0, 1}, d[N];
+void getPrimePhiMiu() {
+  for (int i = 2; i < N; i++) {
+    if (!d[i]) { prime[++prime[0]] = i; phi[i] = i - 1; miu[i] = -1; d[i] = i; }
+    for (int j = 1, k; j <= prime[0] && prime[j] * i < N; j++) {
+      d[k = prime[j] * i] = prime[j];
+      if (i % prime[j] == 0) { phi[k] = phi[i] * prime[j]; miu[k] = 0; break; }
+      phi[k] = phi[i] * (prime[j] - 1); miu[k] = -miu[i];
+    }
+  }
+}
+//素数 + 约数个数筛 O(n)
+const int N = 10000000; //~200ms
+bitset<N> isprime;
+int prime[N >> 3], faccnt[N] = {0, 1}, d[N]; //d[i]表示i的最小质因子的幂次
+void getPrimeFaccnt() {
+  isprime.set(); isprime[0] = isprime[1] = false;
+  for (int i = 2; i < N; i++) {
     if (isprime[i]) { prime[++prime[0]] = i; faccnt[i] = 2; d[i] = 1; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
-      isprime[prime[j] * i] = false;
+    for (int j = 1, k; j <= prime[0] && prime[j] * i < N; j++) {
+      isprime[k = prime[j] * i] = false;
       if (i % prime[j] == 0) {
-        faccnt[prime[j] * i] = faccnt[i] / (d[i] + 1) * (d[i] + 2);
-        d[prime[j] * i] = d[i] + 1; break;
+        faccnt[k] = faccnt[i] / (d[i] + 1) * (d[i] + 2); d[k] = d[i] + 1; break;
       }
-      faccnt[prime[j] * i] = faccnt[i] << 1; d[prime[j] * i] = 1;
+      faccnt[k] = faccnt[i] << 1; d[k] = 1;
     }
   }
 }
@@ -445,21 +472,6 @@ int main() {
     }
   }
 }
-//莫比乌斯函数筛 O(n)
-const int N = 10000000; //95ms
-bitset < N + 5 > isprime;
-int prime[N], miu[N + 5] = { 0, 1 };
-void getMiu() {
-  isprime.set(); isprime[0] = isprime[1] = false;
-  for (int i = 2; i <= N; i++) {
-    if (isprime[i]) { prime[++prime[0]] = i; miu[i] = -1; }
-    for (int j = 1; j <= prime[0] && prime[j] * i <= N; j++) {
-      isprime[prime[j] * i] = false;
-      if (i % prime[j] == 0) { miu[prime[j] * i] = 0; break; }
-      miu[prime[j] * i] = -miu[i];
-    }
-  }
-}
 //离散对数 大步小步算法 Baby-Step Giant-Step
 //a^x = b (mod n) n是素数和不是素数都可以 求解上式最小非负整数解或通解(p是质数)
 #define MOD 76543
@@ -490,7 +502,7 @@ int BSGS(int a, int b, int n) {
   return -1;
 }
 //ver.STL map
-//BSGS(a, b, p): 求ax≡b(modp)的最小非负整数解, 若无解则返回 -1
+//BSGS(a, b, p): 求ax≡b(mod p)的最小非负整数解, 若无解则返回 -1
 //rev(a, p): 扩展欧几里得求逆元
 //fastPow(base, pow, mod): 快速幂
 //fastMul(a, b, mod): 快速乘(这里用快速乘是为了避免爆long long int, 实际有时可以不用)
@@ -512,19 +524,45 @@ ll BSGS(ll a, ll b, ll p) { //a^x=b(mod p), 已知a,b,p,求x
   }
   return -1;
 }
-//自适应simpson积分
-double simpson(double a, double b) {
-  double c = a + (b - a) / 2;
-  return (F(a) + 4 * F(c) + F(b)) * (b - a) / 6;
-}
-double asr(double a, double b, double eps, double A) {
-  double c = a + (b - a) / 2;
-  double L = simpson(a, c), R = simpson(c, b);
-  if (fabs(L + R - A) <= 15 * eps) { return L + R + (L + R - A) / 15.0; }
-  return asr(a, c, eps / 2, L) + asr(c, b, eps / 2, R);
-}
-double asr(double a, double b, double eps) {
-  return asr(a, b, eps, simpson(a, b));
+//高斯消元 求线性方程组的解 O(n^3)
+//有equ个方程, var个变元, 增广矩阵行数为equ, 列数为var + 1, 下标从0开始
+int a[N][N], x[N]; //增广矩阵, 解集
+int freex[N], freenum;//自由变元 (多解枚举自由变元可以使用)
+//返回值为-1表示无解, 为0是唯一解, 否则返回自由变元个数
+int Gauss(int equ, int var) {
+  int mxrow, col, k; freenum = 0;
+  for (k = 0, col = 0; k < equ && col < var; k++, col++) {
+    mxrow = k;
+    for (int i = k + 1; i < equ; i++) {
+      if (abs(a[i][col]) > abs(a[mxrow][col])) { mxrow = i; }
+    }
+    if (a[mxrow][col] == 0) { k--; freex[freenum++] = col; continue; } //自由变元
+    if (mxrow != k) {
+      for (int j = col; j <= var; j++) { swap(a[k][j], a[mxrow][j]); }
+    }
+    for (int i = k + 1; i < equ; i++) {
+      if (a[i][col]) {
+        int x = abs(a[i][col]), y = abs(a[k][col]);
+        int lcm = x / __gcd(x, y) * y, tx = lcm / x, ty = lcm / y;
+        if (a[i][col] * a[k][col] < 0) { ty = -ty; }
+        for (int j = col; j <= var; j++) {
+          a[i][j] = a[i][j] * tx - a[k][j] * ty; //a[i][j] = (a[i][j] % M + M) % M;
+        }
+      }
+    }
+  }
+  for (int i = k; i < equ; i++) { if (a[i][col]) { return -1; } } //无解
+  if (k < var) { return var - k; } //自由变元个数
+  for (int i = var - 1; i >= 0; i--) { //唯一解，回代
+    int t = a[i][var];
+    for (int j = i + 1; j < var; j++) {
+      if (a[i][j]) {
+        t -= a[i][j] * x[j]; //t = (t % M + M) % M;
+      }
+    }
+    x[i] = t / a[i][i]; //x[i] = (t * inv(a[i][i], M)) % M;
+  }
+  return 0;
 }
 //高斯消元 (浮点数)
 const double eps = 1e-9;
@@ -533,16 +571,16 @@ double a[N][N], x[N]; //方程的左边的矩阵和等式右边的值, 求解之
 int equ, var; //方程数和未知数个数
 //返回0表示无解, 1表示有解
 int Gauss() {
-  int i, j, k, col, max_r;
+  int i, j, k, col, mxrow;
   for (k = 0, col = 0; k < equ && col < var; k++, col++) {
-    max_r = k;
+    mxrow = k;
     for (i = k + 1; i < equ; i++) {
-      if (fabs(a[i][col]) > fabs(a[max_r][col])) { max_r = i; }
+      if (fabs(a[i][col]) > fabs(a[mxrow][col])) { mxrow = i; }
     }
-    if (fabs(a[max_r][col]) < eps) { return 0; }
-    if (k != max_r) {
-      for (j = col; j < var; j++) { swap(a[k][j], a[max_r][j]); }
-      swap(x[k], x[max_r]);
+    if (fabs(a[mxrow][col]) < eps) { return 0; }
+    if (k != mxrow) {
+      for (j = col; j < var; j++) { swap(a[k][j], a[mxrow][j]); }
+      swap(x[k], x[mxrow]);
     }
     x[k] /= a[k][col];
     for (j = col + 1; j < var; j++) { a[k][j] /= a[k][col]; }
@@ -557,6 +595,61 @@ int Gauss() {
   }
   return 1;
 }
-//FFT
-
-
+//自适应simpson积分
+double simpson(double a, double b) {
+  double c = a + (b - a) / 2;
+  return (F(a) + 4 * F(c) + F(b)) * (b - a) / 6;
+}
+double asr(double a, double b, double eps, double A) {
+  double c = a + (b - a) / 2;
+  double L = simpson(a, c), R = simpson(c, b);
+  if (fabs(L + R - A) <= 15 * eps) { return L + R + (L + R - A) / 15.0; }
+  return asr(a, c, eps / 2, L) + asr(c, b, eps / 2, R);
+}
+double asr(double a, double b, double eps) {
+  return asr(a, b, eps, simpson(a, b));
+}
+//FFT O(nlogn)
+typedef complex<double> comp;
+const double PI = acos(-1.0);
+//n必须为2的幂, op为1时是求DFT, op为-1时为求IDFT
+void FFT(comp a[], int n, int op) {
+  for (int i = 1, j = 0; i < n - 1; i++) {
+    for (int s = n; j ^= s >>= 1, ~j & s;);
+    if (i < j) { swap(a[i], a[j]); }
+  }
+  for (int d = 0; (1 << d) < n; d++) {
+    int m = 1 << d, m2 = m << 1; double p0 = PI / m * op;
+    comp wn(cos(p0), sin(p0));
+    for (int i = 0; i < n; i += m2) {
+      comp w(1, 0);
+      for (int j = 0; j < m; j++) {
+        comp &x = a[i + j + m], &y = a[i + j], t = w * x;
+        x = y - t; y = y + t; w = w * wn;
+      }
+    }
+  }
+  if (op == -1) { for (int i = 0; i < n; i++) { a[i] = comp(a[i].real() / n, a[i].imag()); } }
+}
+//求高精度乘法 HDU 1402
+comp a[N], b[N];
+char str1[N / 2], str2[N / 2];
+int sum[N];
+int main() {
+  while (~scanf("%s%s", str1, str2)) {
+    memset(a, 0, sizeof(a)); memset(b, 0, sizeof(b));
+    int len1 = strlen(str1), len2 = strlen(str2), len = 1;
+    while (len < len1 * 2 || len < len2 * 2) { len <<= 1; }
+    for (int i = 0; i < len1; i++) { a[i] = comp(str1[len1 - 1 - i] - '0', 0); }
+    for (int i = 0; i < len2; i++) { b[i] = comp(str2[len2 - 1 - i] - '0', 0); }
+    fft(a, len, 1);
+    fft(b, len, 1);
+    for (int i = 0; i < len; i++) { a[i] *= b[i]; }
+    fft(a, len, -1);
+    for (int i = 0; i < len; i++) { sum[i] = (int)(a[i].real() + 0.5); }
+    for (int i = 0; i < len; i++) { sum[i + 1] += sum[i] / 10; sum[i] %= 10; }
+    len = len1 + len2 - 1;
+    while (sum[len] <= 0 && len > 0) { len--; }
+    for (int i = len; i >= 0; i--)  { putchar(sum[i] + '0'); } puts("");
+  }
+}

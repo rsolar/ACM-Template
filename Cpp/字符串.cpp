@@ -106,7 +106,7 @@ int KMPCount(char *x, int m, char *y, int n, int nxt[]/*, int &longest, int &lp*
   while (i < n) {
     while (j != -1 && y[i] != x[j]) { j = nxt[j]; }
     i++; j++;
-    //if (j > longest) { longest = j; lp = i − j; }
+    //if (j > longest) { longest = j; lp = i - j; }
     if (j >= m) { j = nxt[j]; ans++; }
   }
   return ans;
@@ -267,180 +267,95 @@ struct AC {
   }
 } ac;
 //后缀数组
-/*
-* 倍增算法 O(nlogn)
-* 待排序数组长度为n, 放在0 ~ n - 1中,在最后面补一个0
-* da(str, sa, rnk, height, n + 1, m); //注意是n + 1
-* 例如: n = 8; num[] = { 1, 1, 2, 1, 1, 1, 1, 2, $ }; 注意num最后一位为0, 其他大于0
-* rnk[] = { 4, 6, 8, 1, 2, 3, 5, 7, 0 }; rnk[0 ~ n - 1]为有效值, rnk[n]必定为0无效值
-* sa[] = { 8, 3, 4, 5, 0, 6, 1, 7, 2 }; sa[1 ~ n]为有效值, sa[0]必定为n是无效值
-* height[] = { 0, 0, 3, 2, 3, 1, 2, 0, 1 }; height[2 ~ n]为有效值
-*/
-const int N = 20010;
-char str[N];
-int rnk[N], height[N], sa[N], t1[N], t2[N], c[N]; //求SA数组需要的中间变量, 不需要赋值
-//待排序的字符串放在str数组中, 从str[0]到str[n-1],长度为n,且最大值小于m,
-//除s[n-1]外的所有s[i]都大于0, r[n-1]=0
-//函数结束以后结果放在sa数组中
-bool cmp(int *r, int a, int b, int l) {
-  return r[a] == r[b] && r[a + l] == r[b + l];
-}
-void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
-  int i, j, p, *x = t1, *y = t2; n++;
-  //第一轮基数排序, 如果s的最大值很大, 可改为快速排序
-  for (i = 0; i < m; i++) { c[i] = 0; }
-  for (i = 0; i < n; i++) { c[x[i] = str[i]]++; }
-  for (i = 1; i < m; i++) { c[i] += c[i - 1]; }
-  for (i = n - 1; i >= 0; i--) { sa[--c[x[i]]] = i; }
-  for (j = 1; j <= n; j <<= 1) {
-    p = 0;
-    //利用sa数组排序第二关键字
-    for (i = n - j; i < n; i++) { y[p++] = i; } //后面的j个数第二关键字为空的最小
-    for (i = 0; i < n; i++)if (sa[i] >= j) { y[p++] = sa[i] - j; }
-    //这样数组y保存的就是按照第二关键字排序的结果
-    //基数排序第一关键字
-    for (i = 0; i < m; i++) { c[i] = 0; }
-    for (i = 0; i < n; i++) { c[x[y[i]]]++; }
-    for (i = 1; i < m; i++) { c[i] += c[i - 1]; }
-    for (i = n - 1; i >= 0; i--) { sa[--c[x[y[i]]]] = y[i]; }
-    swap(x, y); p = 1; x[sa[0]] = 0;
-    for (i = 1; i < n; i++) { //根据sa和x数组计算新的x数组
-      x[sa[i]] = cmp(y, sa[i - 1], sa[i], j) ? p - 1 : p++;
+//n：串长
+//m：字符集大小
+//s[0..n - 1]：字符串
+//sa[1..n]：字典序第 i 小的是哪个后缀
+//rnk[0..n - 1]：后缀 i 的排名
+//height[i]：lcp(sa[i], sa[i - 1])
+int n, rnk[N], sa[N], height[N], tmp[N], cnt[N];
+char s[N];
+void SA(char *s, int n, int m) {
+  int i, j, k; n++;
+  memset(rnk, 0, sizeof(rnk)); memset(sa, 0, sizeof(sa)); memset(height, 0, sizeof(height));
+  memset(tmp, 0, sizeof(tmp)); memset(cnt, 0, sizeof(cnt));
+  for (i = 0; i < n; i++) { cnt[rnk[i] = s[i]]++; }
+  for (i = 1; i < m; i++) { cnt[i] += cnt[i - 1]; }
+  for (i = 0; i < n; i++) { sa[--cnt[rnk[i]]] = i; }
+  for (k = 1; k <= n; k <<= 1) {
+    for (i = 0; i < n; i++) {
+      j = sa[i] - k;
+      if (j < 0) { j += n; }
+      tmp[cnt[rnk[j]]++] = j;
     }
-    if (p >= n) { break; }
-    m = p; //下次基数排序的最大值
+    sa[tmp[cnt[0] = 0]] = j = 0;
+    for (i = 1; i < n; i++) {
+      if (rnk[tmp[i]] != rnk[tmp[i - 1]] || rnk[tmp[i] + k] != rnk[tmp[i - 1] + k]) { cnt[++j] = i; }
+      sa[tmp[i]] = j;
+    }
+    memcpy(rnk, sa, n * sizeof(int));
+    memcpy(sa, tmp, n * sizeof(int));
+    if (j >= n - 1) { break; }
   }
-  int k = 0; n--;
-  for (i = 0; i <= n; i++) { rnk[sa[i]] = i; }
-  for (i = 0; i < n; i++) {
-    if (k) { k--; }
-    j = sa[rnk[i] - 1];
-    while (str[i + k] == str[j + k]) { k++; }
-    height[rnk[i]] = k;
-  }
-}
-/*
-* DC3算法, O(n)
-* 所有的相关数组都要开三倍
-* da(str, sa, rnk, height, n, m);
-*/
-const int N = 2005;
-#define F(x) ((x)/3+((x)%3==1?0:tb))
-#define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
-int wa[N * 3], wb[N * 3], wv[N * 3], wss[N * 3];
-int c0(int *r, int a, int b) {
-  return r[a] == r[b] && r[a + 1] == r[b + 1] && r[a + 2] == r[b + 2];
-}
-int c12(int k, int *r, int a, int b) {
-  if (k == 2) { return r[a] < r[b] || (r[a] == r[b] && c12(1, r, a + 1, b + 1)); }
-  else { return r[a] < r[b] || (r[a] == r[b] && wv[a + 1] < wv[b + 1]); }
-}
-void Sort(int *r, int *a, int *b, int n, int m) {
-  for (int i = 0; i < n; i++) { wv[i] = r[a[i]]; }
-  for (int i = 0; i < m; i++) { wss[i] = 0; }
-  for (int i = 0; i < n; i++) { wss[wv[i]]++; }
-  for (int i = 1; i < m; i++) { wss[i] += wss[i - 1]; }
-  for (int i = n - 1; i >= 0; i--) { b[--wss[wv[i]]] = a[i]; }
-}
-void dc3(int *r, int *sa, int n, int m) {
-  int i, j, *rn = r + n;
-  int *san = sa + n, ta = 0, tb = (n + 1) / 3, tbc = 0, p;
-  r[n] = r[n + 1] = 0;
-  for (i = 0; i < n; i++) { if (i % 3 != 0) { wa[tbc++] = i; } }
-  Sort(r + 2, wa, wb, tbc, m);
-  Sort(r + 1, wb, wa, tbc, m);
-  Sort(r, wa, wb, tbc, m);
-  for (p = 1, rn[F(wb[0])] = 0, i = 1; i < tbc; i++) {
-    rn[F(wb[i])] = c0(r, wb[i - 1], wb[i]) ? p - 1 : p++;
-  }
-  if (p < tbc) { dc3(rn, san, tbc, p); }
-  else { for (i = 0; i < tbc; i++) { san[rn[i]] = i; } }
-  for (i = 0; i < tbc; i++) { if (san[i] < tb) { wb[ta++] = san[i] * 3; } }
-  if (n % 3 == 1) { wb[ta++] = n - 1; }
-  Sort(r, wb, wa, ta, m);
-  for (i = 0; i < tbc; i++) { wv[wb[i] = G(san[i])] = i; }
-  for (i = 0, j = 0, p = 0; i < ta && j < tbc; p++) {
-    sa[p] = c12(wb[j] % 3, r, wa[i], wb[j]) ? wa[i++] : wb[j++];
-  }
-  for (; i < ta; p++) { sa[p] = wa[i++]; }
-  for (; j < tbc; p++) { sa[p] = wb[j++]; }
-}
-void da(int str[], int sa[], int rnk[], int height[], int n, int m) {
-  for (int i = n; i < n * 3; i++) { str[i] = 0; }
-  dc3(str, sa, n + 1, m);
-  int i, j, k = 0;
-  for (i = 0; i <= n; i++) { rnk[sa[i]] = i; }
-  for (i = 0; i < n; i++) {
-    if (k) { k--; }
-    j = sa[rnk[i] - 1];
-    while (str[i + k] == str[j + k]) { k++; }
-    height[rnk[i]] = k;
+  for (j = rnk[height[i = k = 0] = 0]; i < n - 1; i++, k++) {
+    while (~k && s[i] != s[sa[j - 1] + k]) { height[j] = k--, j = rnk[sa[j] + 1]; }
   }
 }
 //后缀自动机
-const int N = 250005;
-struct SAM_Node {
-  SAM_Node *fa, *nxt[26];
-  int len, id, pos;
-  SAM_Node() {}
-  SAM_Node(int _len) : len(_len), fa(NULL) { memset(nxt, 0, sizeof(nxt)); }
-};
-SAM_Node SAM_node[N * 2], *SAM_root, *SAM_last;
-int SAM_size;
-SAM_Node *newSAM_Node(int len) {
-  SAM_node[SAM_size] = SAM_Node(len);
-  SAM_node[SAM_size].id = SAM_size;
-  return &SAM_node[SAM_size++];
-}
-SAM_Node *newSAM_Node(SAM_Node *p) {
-  SAM_node[SAM_size] = *p;
-  SAM_node[SAM_size].id = SAM_size;
-  return &SAM_node[SAM_size++];
-}
-void SAM_init() {
-  SAM_size = 0; SAM_node[0].pos = 0;
-  SAM_root = SAM_last = newSAM_Node(0);
-}
-void SAM_add(int x, int len) {
-  SAM_Node *p = SAM_last, *np = newSAM_Node(p->len + 1);
-  np->pos = len;
-  SAM_last = np;
-  for (; p && !p->nxt[x]; p = p->fa) { p->nxt[x] = np; }
-  if (!p) { np->fa = SAM_root; return; }
-  SAM_Node *q = p->nxt[x];
-  if (q->len == p->len + 1) { np->fa = q; return; }
-  SAM_Node *nq = newSAM_Node(q);
-  nq->len = p->len + 1;
-  q->fa = nq;
-  np->fa = nq;
-  for (; p && p->nxt[x] == q; p = p->fa) { p->nxt[x] = nq; }
-}
-void SAM_build(char *s) {
-  SAM_init();
-  for (int i = 0; i < s[i]; i++) { SAM_add(s[i] - 'a', i + 1); }
-}
-//加入串后进行拓扑排序
-char str[N];
-int topocnt[N];
-SAM_Node *topsam[N * 2];
-int n = strlen(str);
-SAM_build(str);
-memset(topocnt, 0, sizeof(topocnt));
-for (int i = 0; i < SAM_size; i++) { topocnt[SAM_node[i].len]++; }
-for (int i = 1; i <= n; i++) { topocnt[i] += topocnt[i - 1]; }
-for (int i = 0; i < SAM_size; i++) { topsam[--topocnt[SAM_node[i].len]] = &SAM_node[i]; }
-//多串的建立,注意SAM_init()的调用
-void SAM_build(char *s) {
-  int len = strlen(s);
-  SAM_last = SAM_root;
-  for (int i = 0; i < len; i++) {
-    if (!SAM_last->nxt[s[i] - '0'] || !(SAM_last->nxt[s[i] - '0']->len == i + 1)) {
-      SAM_add(s[i] - '0', i + 1);
-    } else {
-      SAM_last = SAM_last->nxt[s[i] - '0'];
-    }
+const int N = 1000005;
+const int N_CHAR = 26;
+struct SuffixAutomaton {
+  struct Node { Node *fail, *next[N_CHAR]; int val, right; };
+  Node mempool[N << 1]; int n_node;
+  Node *new_node(int v) {
+    Node *p = &mempool[n_node++]; memset(p->next, 0, sizeof(p->next));
+    p->fail = 0; p->right = 0; p->val = v; return p;
   }
-}
+  Node *root, *last;
+  SuffixAutomaton() { clear(); }
+  void clear() { root = last = new_node(n_node = 0); }
+  void add(int c) {
+    Node *p = last, *np = new_node(p->val + 1);
+    while (p && !p->next[c]) { p->next[c] = np; p = p->fail; }
+    if (!p) { np->fail = root; }
+    else {
+      Node *q = p->next[c];
+      if (p->val + 1 == q->val) { np->fail = q; }
+      else {
+        Node *nq = new_node(p->val + 1);
+        for (int i = 0; i < N_CHAR; i++) { nq->next[i] = q->next[i]; }
+        nq->fail = q->fail; q->fail = np->fail = nq;
+        while (p && p->next[c] == q) { p->next[c] = nq; p = p->fail; }
+      }
+    }
+    last = np; np->right = 1;
+  }
+  Node *go(const char *s) {
+    Node *p = root; int cL = 0; //与s匹配的长度
+    for (int i = 0; s[i]; i++) {
+      int c = s[i] - 'a';
+      if (p->next[c]) { p = p->next[c], ++cL; }
+      else {
+        while (p && !p->next[c]) { p = p->fail; }
+        if (!p) { cL = 0; p = root; }
+        else { cL = p->val + 1; p = p->next[c]; }
+      }
+    }
+    return p;
+  }
+  int d[N << 1]; Node *b[N << 1];
+  void toposort() {
+    for (int i = 0; i <= n_node; i++) { d[i] = 0; }
+    int mx_val = 0;
+    for (int i = 0; i < n_node; i++) { mx_val = max(mx_val, mempool[i].val); d[mempool[i].val]++; }
+    for (int i = 1; i <= mx_val; i++) { d[i] += d[i - 1]; }
+    for (int i = 0; i < n_node; i++) { b[--d[mempool[i].val]] = &mempool[i]; }
+  }
+  void updateright() {
+    toposort();
+    for (int i = n_node - 1; i; i--) { b[i]->fail->right += b[i]->right; }
+  }
+} sa;
 //回文树
 struct PalindromicTree {
   int nxt[N][26]; //指向的串为当前串两端加上同一个字符构成

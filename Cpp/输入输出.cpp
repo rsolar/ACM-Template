@@ -54,6 +54,6 @@ inline void nextc(char &x) { x = *pt; ++pt; }
 inline void nexts(char *s) { for (; *pt; s++, pt++) { *s = *pt; } *s = 0; }
 //输出一个正整数
 template<typename T> inline void printn(T x) {
-  if (x > 9) { printInt(x / 10); }
+  if (x > 9) { printn(x / 10); }
   putchar(x % 10 + '0');
 }

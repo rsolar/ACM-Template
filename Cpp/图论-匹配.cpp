@@ -204,7 +204,7 @@ bool dfs(int u) {
 int KM() {
   memset(match, -1, sizeof(match));
   memset(ly, 0, sizeof(ly));
-  for (int i = 0; i < uN; i++) { lx[i] = *min_element(g[i], g[i] + vN); }
+  for (int i = 0; i < uN; i++) { lx[i] = *max_element(g[i], g[i] + vN); }
   for (int u = 0; u < uN; u++) {
     memset(slack, 0x3f, sizeof(slack));
     for (;;) {
@@ -214,11 +214,11 @@ int KM() {
       int d = INF;
       for (int i = 0; i < vN; i++) { if (!visy[i] && d > slack[i]) { d = slack[i]; } }
       for (int i = 0; i < uN; i++) { if (visx[i]) { lx[i] -= d; } }
-      for (int i = 0; i < vN; i++) { visy[i] ? ly[i] += d : slack[i] -= d; }
+      for (int i = 0; i < vN; i++) { if (visy[i]) { ly[i] += d } else { slack[i] -= d; } }
     }
   }
   int res = 0;
-  for (int i = 0; i < vN; i++) { if (~match[i]) { res += g[match[i]][i]; } }
+  for (int i = 0; i < vN; i++) { if (match[i] != -1) { res += g[match[i]][i]; } }
   return res;
 }
 //二分图多重匹配

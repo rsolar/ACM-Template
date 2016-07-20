@@ -59,7 +59,7 @@ int b[N];
 int LIS(int a[], int n) {
   int len = 1; b[0] = a[0];
   for (int i = 1; i < n; i++) {
-    b[a[i] > b[len - 1] ? len++ : upper_bound(b, b + len, a[i]) - b] = a[i]; //非降换为lower_bound
+    b[a[i] > b[len - 1] ? len++ : lower_bound(b, b + len, a[i]) - b] = a[i]; //非降换为>=和upper_bound
   }
   return len;
 }
