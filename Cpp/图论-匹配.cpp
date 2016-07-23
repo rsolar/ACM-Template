@@ -296,7 +296,7 @@ int graphMatch() {
   for (int i = 0; i < n; i++) { ret += (match[i] != -1); }
   return ret >> 1;
 }
-//一般图匹配带花树 + 邻接矩阵 O(N^3) 点的编号从1到n
+//带花树 + 邻接矩阵 O(V^3) 点的编号从1到n
 int n, match[N], fa[N], base[N], newbase, st, ed;
 bool g[N][N], inqueue[N], inpath[N], inblossom[N];
 queue<int> que;

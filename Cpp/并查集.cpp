@@ -1,4 +1,4 @@
-//并查集 + 路径压缩 O(nlogn)
+//并查集 + 路径压缩 O(logn)
 int fa[N];
 void init(int n) { for (int i = 0; i <= n; i++) { fa[i] = i; } }
 int findfa(int n) { return n == fa[n] ? n : fa[n] = findfa(fa[n]); }
@@ -17,3 +17,5 @@ inline void unite(int x, int y) {
     else { fa[x] = y; if (rnk[x] == rnk[y]) { rnk[y]++; } }
   }
 }
+//迭代路径压缩
+int findfa(int n) { while (fa[n] != n) { fa[n] = fa[fa[n]]; n = fa[n]; } return n; }

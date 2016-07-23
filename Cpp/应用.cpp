@@ -31,82 +31,42 @@ vector<int> revCantor(ll n, ll k) {
   }
   return ret;
 }
-//lydsy 1057: [ZJOI2007]棋盘制作
-//求最大子矩形及正方形
-//单调栈
-int n, m, h[N];
-bool a[N][N];
-int main() {
-  while (~scanf("%d%d", &n, &m)) {
-    for (int i = 1, t; i <= n; i++) {
-      for (int j = 1; j <= m; j++) {
-        scanf("%d", &t); a[i][j] = (t & 1) ^ ((i + j) & 1);
+//求最大的全为id的子矩形面积
+//单调栈 O(nm)
+int n, m, a[N][N], h[N];
+int solve(int id) {
+  int ans = 0;
+  memset(h, 0, sizeof(h));
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) { h[j] = a[i][j] == id ? h[j] + 1 : 0; }
+    stack<int> st; st.push(0);
+    for (int j = 1; j <= m + 1; j++) {
+      while (h[j] < h[st.top()]) {
+        int t = h[st.top()]; st.pop();
+        int w = j - st.top() - 1;
+        ans = max(ans, t * w);
       }
+      st.push(j);
     }
-    int rec = 0, sqr = 0;
-    memset(h, 0, sizeof(h));
-    for (int i = 1; i <= n; i++) {
-      for (int j = 1; j <= m; j++) { h[j] = a[i][j] ? h[j] + 1 : 0; }
-      stack<int> st; st.push(0);
-      for (int j = 1; j <= m + 1; j++) {
-        while (h[j] < h[st.top()]) {
-          int t = h[st.top()]; st.pop();
-          int w = j - st.top() - 1;
-          sqr = max(sqr, min(t, w) * min(t, w)); rec = max(rec, t * w);
-        }
-        st.push(j);
-      }
-    }
-    memset(h, 0, sizeof(h));
-    for (int i = 1; i <= n; i++) {
-      for (int j = 1; j <= m; j++) { h[j] = !a[i][j] ? h[j] + 1 : 0; }
-      stack<int> st; st.push(0);
-      for (int j = 1; j <= m + 1; j++) {
-        while (h[j] < h[st.top()]) {
-          int t = h[st.top()]; st.pop();
-          int w = j - st.top() - 1;
-          sqr = max(sqr, min(t, w) * min(t, w)); rec = max(rec, t * w);
-        }
-        st.push(j);
-      }
-    }
-    printf("%d\n%d\n", sqr, rec);
   }
+  return ans;
 }
-//dp 悬线法
-int n, m, l[N], r[N], h[N];
-bool a[N][N];
-int main() {
-  while (~scanf("%d%d", &n, &m)) {
-    memset(h, 0, sizeof(h));
-    for (int i = 1, t; i <= n; i++) {
-      for (int j = 1; j <= m; j++) {
-        scanf("%d", &t); a[i][j] = t;
-      }
+//dp 悬线法 O(nm)
+int n, m, a[N][N], l[N], r[N], h[N];
+int solve(int id) {
+  int ans = 0;
+  for (int i = 1; i <= m; i++) { l[i] = 1; r[i] = m; h[i] = 0; }
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1, mxl = 1; j <= m; j++) {
+      if (a[i][j] == id) { h[j]++; l[j] = max(l[j], mxl); }
+      else { h[j] = 0; l[j] = 1; r[j] = m; mxl = j + 1; }
     }
-    int sqr = 1, rec = 1;
-    for (int i = 1; i <= n; i++) {
-      for (int j = 1; j <= m; j++) {
-        l[j] = r[j] = j; h[j] = a[i][j] != a[i - 1][j] ? h[j] + 1 : 1;
-      }
-      for (int j = 2; j <= m; j++) {
-        while (l[j] - 1 >= 1 && a[i][l[j] - 1] != a[i][l[j]] && h[l[j] - 1] >= h[j]) {
-          l[j] = l[l[j] - 1];
-        }
-      }
-      for (int j = m - 1; j >= 1; j--) {
-        while (r[j] + 1 <= m && a[i][r[j] + 1] != a[i][r[j]] && h[r[j] + 1] >= h[j]) {
-          r[j] = r[r[j] + 1];
-        }
-      }
-      for (int j = 1; j <= m; j++) {
-        int w = r[j] - l[j] + 1;
-        sqr = max(sqr, min(h[j], w) * min(h[j], w));
-        rec = max(rec, h[j] * w);
-      }
+    for (int j = m, mxr = m; j >= 1; j--) {
+      if (a[i][j] == id) { r[j] = min(r[j], mxr); ans = max(ans, (r[j] - l[j] + 1) * h[j]); }
+      else { mxr = j - 1; }
     }
-    printf("%d\n%d\n", sqr, rec);
   }
+  return ans;
 }
 //二叉树前序 + 中序求后序遍历
 void getPost(char *pre, char *in, int len) {
@@ -161,7 +121,21 @@ void dfs(int u, int p) {
 for (int j = 1; j <= n; j++) {
   dfs(j, 0); //cout << j << ' ' << hs[j] << endl;
 }
-sort(hs[i] + 1, hs[i] + n + 1);
+sort(hs[i] + 1, hs[i] + n + 1); //结果序列
+//整数划分方案数 O(n^1.5)
+int n, f[777] = {0, 1, 2, 5, 7}, g[N] = {1};
+int main() {
+  for (int i = 5; i < 777; i++) { f[i] = 3 + 2 * f[i - 2] - f[i - 4]; }
+  while (~scanf("%d", &n)) {
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; f[j] <= i; j++) {
+        if ((j + 1) >> 1 & 1) { g[i] = (g[i] + g[i - f[j]]) % M; }
+        else { g[i] = ((g[i] - g[i - f[j]]) % M + M) % M; }
+      }
+    }
+    printf("%d\n", g[n]);
+  }
+}
 //小数转化为分数
 //把小数转化为分数, 循环部分用()表示
 void work(char str[]) {

@@ -1857,14 +1857,10 @@ struct point {
     }
   }
 } vec[N], origin[N], pt, ans[10];
-inline int sqr(int x) {
-  return x * x;
-}
+inline int sqr(int x) { return x * x; }
 int dist(const point &a, const point &b) {
   int ret = 0;
-  for (int i = 0; i < K; ++i) {
-    ret += sqr(a.x[i] - b.x[i]);
-  }
+  for (int i = 0; i < K; ++i) { ret += sqr(a.x[i] - b.x[i]); }
   return ret;
 }
 void build(int l, int r, int dep = 0) {
@@ -1883,19 +1879,14 @@ void query(const point &x, int k, int l, int r, int dep = 0) {
   if (pq.size() < k) {
     pq.push(tmp);
   } else if (pq.top().first > tmp.first) {
-    pq.pop();
-    pq.push(tmp);
+    pq.pop(); pq.push(tmp);
   }
   if (x.x[cur] < vec[m].x[cur]) {
     query(x, k, lson);
-    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) {
-      query(x, k, rson);
-    }
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, rson); }
   } else {
     query(x, k, rson);
-    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) {
-      query(x, k, lson);
-    }
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, lson); }
   }
 }
 int main() {
@@ -1916,13 +1907,10 @@ int main() {
       scanf("%d", &m);
       query(pt, m, 1, n);
       for (int i = 0; i < m; ++i) {
-        ans[i] = pq.top().second;
-        pq.pop();
+        ans[i] = pq.top().second; pq.pop();
       }
       printf("the closest %d points are:\n", m);
-      for (int i = m - 1; i >= 0; --i) {
-        ans[i].output();
-      }
+      for (int i = m - 1; i >= 0; --i) { ans[i].output(); }
     }
   }
 }
@@ -1930,45 +1918,30 @@ int main() {
 #define lson kdt[rt].ls,dep+1
 #define rson kdt[rt].rs,dep+1
 struct kdnode {
-  int ls, rs, x[DIM];
-  bool flag; //删点标记
+  int ls, rs, x[DIM]; bool flag; //删点标记
 } kdt[N];
-inline ll sqr(int x) {
-  return (ll)x * x;
-}
+inline ll sqr(int x) { return (ll)x * x; }
 ll dist(const kdnode &a, const kdnode &b) {
   ll ret = 0;
-  for (int i = 0; i < DIM; ++i) {
-    ret += sqr(a.x[i] - b.x[i]);
-  }
+  for (int i = 0; i < DIM; ++i) { ret += sqr(a.x[i] - b.x[i]); }
   return ret;
 }
 int root, tot;
-void init() {
-  tot = 0; root = -1;
-}
+void init() { tot = 0; root = -1; }
 int add(int pt[]) {
   kdt[tot].flag = false;
   kdt[tot].ls = kdt[tot].rs = -1;
-  for (int i = 0; i < DIM; ++i) {
-    kdt[tot].x[i] = pt[i];
-  }
+  for (int i = 0; i < DIM; ++i) { kdt[tot].x[i] = pt[i]; }
   return tot++;
 }
 void insert(int pt[], int rt, int dep = 0) {
   dep %= DIM;
   if (pt[dep] < kdt[rt].x[dep]) {
-    if (!~kdt[rt].ls) {
-      kdt[rt].ls = add(pt);
-    } else {
-      insert(pt, lson);
-    }
+    if (!~kdt[rt].ls) { kdt[rt].ls = add(pt); }
+    else { insert(pt, lson); }
   } else {
-    if (!~kdt[rt].rs) {
-      kdt[rt].rs = add(pt);
-    } else {
-      insert(pt, rson);
-    }
+    if (!~kdt[rt].rs) { kdt[rt].rs = add(pt); }
+    else { insert(pt, rson); }
   }
 }
 //求最近点距离
@@ -2048,27 +2021,19 @@ int query(int L, int R, int k, int l, int r, int dep) {
 int val[N], ls[N], rs[N], dep[N], fa[N];
 void init(int n) {
   for (int i = 1; i <= n; ++i) {
-    scanf("%d", &val[i]);
-    ls[i] = rs[i] = dep[i] = 0;
-    fa[i] = i;
+    scanf("%d", &val[i]); ls[i] = rs[i] = dep[i] = 0; fa[i] = i;
   }
 }
-int find(int x) {
-  if (fa[x] != x) { fa[x] = find(fa[x]); }
-  return fa[x];
-}
+int find(int x) { return x == fa[x] ? x : fa[x] = findfa(fa[x]); }
 int merge(int x, int y) {
   if (!x || !y) { return x | y; }
   if (val[x] < val[y]) { swap(x, y); }
-  rs[x] = merge(rs[x], y);
-  fa[rs[x]] = x;
+  rs[x] = merge(rs[x], y); fa[rs[x]] = x;
   if (dep[ls[x]] < dep[rs[x]]) { swap(ls[x], rs[x]); }
   dep[x] = dep[rs[x]] + 1;
   return x;
 }
-int push(int x, int y) {
-  return merge(x, y);
-}
+int push(int x, int y) { return merge(x, y); }
 int pop(int x) {
   int a = ls[x], b = rs[x];
   ls[x] = rs[x] = dep[x] = 0;
@@ -2087,57 +2052,13 @@ int main() {
       if (a == b) {
         puts("-1");
       } else {
-        val[a] >>= 1;
-        val[b] >>= 1;
-        a = push(pop(a), a);
-        b = push(pop(b), b);
+        val[a] >>= 1; val[b] >>= 1;
+        a = push(pop(a), a); b = push(pop(b), b);
         printf("%d\n", val[merge(a, b)]);
       }
     }
   }
 }
-//哈夫曼树
-template<typename T> struct Huffman {
-  int l[N << 1], r[N << 1], p[N << 1], n, tot; T w[N << 1]; char key[N];
-  void init() { n = tot = 0; }
-  void build(char s[], T weight[]) {
-    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
-    pair<T, int> x, y; n = strlen(s); tot = (n << 1) - 1;
-    for (int i = 0; i < n; i++) {
-      w[i] = weight[i]; key[i] = s[i]; l[i] = r[i] = 0; que.push(make_pair(w[i], i));
-    }
-    for (int i = n; i < m; i++) {
-      x = que.top(); que.pop(); y = que.top(); que.pop();
-      l[i] = x.second; r[i] = y.second; w[i] = x.first + y.first;
-      p[x.second] = p[y.second] = i; p[i] = 0; que.push(make_pair(w[i], i));
-    }
-  }
-  void getCode(vector<string> &code) {
-    code.resize(n);
-    for (int i = 0, pos; i < n; i++) {
-      for (pos = i; pos != tot - 1;) {
-        if (pos == l[p[pos]]) { code[i] = '0' + code[i]; }
-        else { code[i] = '1' + code[i]; }
-      }
-    }
-  }
-  string encode(char s[], const vector<string> &code) {
-    string ret;
-    for (int i = 0, j; s[i]; i++) {
-      for (j = 0; j < n && s[i] != key[j]; j++);
-      ret += code[j];
-    }
-    return ret;
-  }
-  string decode(char s[], const vector<string> &code) {
-    string ret;
-    for (int i = 0, pos = tot - 1; s[i]; i++) {
-      if (pos >= n) { pos = s[i] == '0' ? l[pos] : r[pos]; }
-      else { ret += key[pos]; pos = tot - 1; }
-    }
-    return ret;
-  }
-};
 //笛卡尔树
 //考虑一个键值对的序列, 当键与键, 值与值之间互不相同时, 它们可以唯一地构成这样一棵二叉树：
 //key在中序遍历时呈升序, 满足二叉查找树性质; 父节点的value大于子节点的value, 满足堆的性质.

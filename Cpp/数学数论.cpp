@@ -42,6 +42,19 @@ void getPrime() {
     }
   }
 }
+//[a, b]区间内素数个数
+bitset<N> isprime, isprimesmall;
+ll segPrime(ll a, ll b) {
+  ll ret = 0; isprime.set(); isprimesmall.set();
+  for (int i = 2; (ll)i * i <= b; i++) {
+    if (isprimesmall[i]) {
+      for (ll j = (ll)i * i; (ll)j * j <= b; j += i) { isprimesmall[j] = false; }
+      for (ll j = max(2ll, (a + i - 1) / i)) * i; j <= b; j += i) { isprime[j - a] = false; }
+    }
+  }
+  for (ll i = 0; i <= r - l; i++) { ret += isprime[i]; }
+  return ret;
+}
 //分解质因数
 ll factor[100], facCnt;
 void getFactors(ll x) {
@@ -220,7 +233,7 @@ ll sumPow(ll a, ll b, ll m) {
 //扩展欧几里得(求ax + by = gcd(a, b)的解), 求出的x为a对b的模逆元
 ll exgcd(ll a, ll b, ll &x, ll &y) {
   if (b == 0) { x = 1; y = 0; return a; }
-  ll d = exgcd(b, a % b, y, x); return y -= a / b * x, d;
+  ll d = exgcd(b, a % b, y, x); y -= a / b * x; return d;
 }
 //解不定方程ax + by = c 求得的只是其中一组解
 //对于不定整数方程ax + by = c, 若c mod gcd(a, b) = 0, 则该方程存在整数解, 否则不存在整数解

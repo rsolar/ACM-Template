@@ -16,6 +16,15 @@ inline size_t BKDRHash(const char *str) {
   while (*str) { h = h * seed + (*str++); }
   return h & 0x7FFFFFFF;
 }
+//字符串hash
+const int N = 20005, P = 31, D = 1000173169;
+int n, pp[N] = {1}, hs[N]; char s[N];
+int get(int l, int r) { return ((hs[r] - (ll)hs[l - 1] * pp[r - l + 1]) % D + D) % D; }
+int main() {
+  scanf("%d%s", &n, s + 1);
+  for (int i = 1; i <= n; i++) { pp[i] = pp[i - 1] * P % D; }
+  for (int i = 1; i <= n; i++) { hs[i] = ((ll)hs[i - 1] * P + s[i]) % D; }
+}
 //手写hash_map
 const int P = 13131;
 char key[N][M];

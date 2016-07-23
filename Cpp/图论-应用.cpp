@@ -1,4 +1,4 @@
-//拓扑排序 O(N^2)
+//拓扑排序 O(V^2)
 //queue->普通判断用, priority_queue->字典序
 //邻接矩阵
 int n, mp[N][N], in[N], ret[N];
@@ -53,16 +53,12 @@ bool Color(int u) {
 //无向图: 连通(不考虑度为0的点), 每个顶点度数都为偶数
 //有向图: 基图连通(同样不考虑度为0的点), 每个顶点出度等于入度
 //混合图: 基图连通(不考虑度为0的点), 然后借助网络流判定
-//首先给原图中的每条无向边随便指定一个方向(称为初始定向), 将原图改为有向图G'
-//然后的任务就是改变G'中某些边(无向边转化来的)的方向使其满足每个点的入度等于出度
-//设D[i]为G'中(点i的出度 - 点i的入度), 可以发现, 在改变G'中边的方向的过程中, 任何点的D值的奇偶性都不会发生改变
-//而最终要求的是每个点的入度等于出度, 即每个点的D值都为0, 是偶数, 故可得:
-//若初始定向得到的G'中任意一个点的D值是奇数, 那么原图中一定不存在欧拉环
-//若初始D值都是偶数, 则将G'改装成网络: 设立源点S和汇点T,
+//首先给原图中的每条无向边随便指定一个方向, 将原图改为有向图G'
+//设D[i]为G'中(点i的出度 - 点i的入度), 若存在D[i]为奇数, 或者图不连通, 则无解
+//若初始D值都是偶数, 则将G'改装成网络: 设立源点S和汇点T
 //对于每个D[i] > 0的点i, 连边<S, i>, 容量为D[i] / 2; 对于每个D[j] < 0的点j, 连边<j, T>, 容量为-D[j] / 2
-//G'中的每条边在网络中仍保留, 容量为1(表示该边最多只能被改变方向一次)
-//求这个网络的最大流, 若S引出的所有边均满流, 则原混合图是欧拉图, 将网络中所有流量为1的中间边(就是不与S或T关联的边)
-//在G'中改变方向,形成的新图G''一定是有向欧拉图; 若S引出的边中有的没有满流, 则原混合图不是欧拉图
+//G'中的每条边在网络中仍保留, 容量为1, 求这个网络的最大流, 若S引出的所有边均满流, 则原混合图是欧拉图
+//将网络中所有流量为1的不与S或T关联的边在G'中改变方向,形成的新图G''一定是有向欧拉图
 //欧拉回路 + 邻接矩阵 O(N^2)
 //求欧拉路径/回路经过的点 支持自环和重边
 int n, mp[N][N], path[N], cnt;
@@ -362,3 +358,75 @@ int main() {
     } else { printf("bad luck\n"); }
   }
 }
+//最大团
+//搜索 O(n*2^n)
+int mp[N][N], stk[N][N], dp[N], ans;
+bool dfs(int crt, int tot) {
+  if (!crt) {
+    if (tot > ans) { ans = tot; return true; }
+    return false;
+  }
+  for (int i = 0, u, nxt; i < crt; i++) {
+    u = stk[tot][i]; nxt = 0;
+    if (cur - i + tot <= ans) { return false; }
+    if (dp[u] + tot <= ans) { return false; }
+    for (int j = i + 1, v; j < cur; j++) {
+      int v = stk[tot][j];
+      if (mp[u][v]) { stk[tot + 1][nxt++] = v; }
+    }
+    if (dfs(nxt, tot + 1)) { return true; }
+  }
+  return false;
+}
+int maxClique(int n) {
+  ans = 0;
+  for (int i = n - 1; i >= 0; i--) {
+    for (int j = i + 1, k = 0; j < n; j++) {
+      if (mp[i][j]) { stk[1][k++] = j; }
+    }
+    dfs(k, 1); dp[i] = ans;
+  }
+  return ans;
+}
+//随机贪心 O(T*n^2)
+const int T = 100;
+int mp[N][N], id[N], ansn, ans[N]; bool del[N];
+void solve(int n) {
+  memset(del, 0, sizeof(del)); int k = 0;
+  for (int i = 0, j; i < n; i++) {
+    if (del[i]) { continue; }
+    for (j = i + 1, k++; j < n; j++) { if (!mp[id[i]][id[j]]) { del[j] = true; } }
+  }
+  if (k > ansn) {
+    ansn = k;
+    for (int i = k = 0; i < n; i++) { if (!del[i]) { ans[k++] = id[i]; } }
+  }
+}
+void maxClique(int n) {
+  for (int i = 0; i < n; i++) { id[i] = i; }
+  for (int t = 0; t < T; t++) {
+    for (int i = 0; i < n; i++) { swap(id[i], id[rand() % n]); } solve();
+  }
+}
+//最大独立集
+//随机算法 O(T*(V+E))
+const int T = 1000;
+int q[N], pos[N]; bool del[N];
+int solve(int n) {
+  int ans = 0;
+  for (int t = 0; t < T; t++) {
+    int ret = 0, top = n; memset(del, 0, sizeof(del));
+    for (int i = 1; i <= n; i++) { q[i] = pos[i] = i; }
+    while (top) {
+      int x = rand() % top, u = q[x]; q[x] = q[top--]; pos[q[x]] = x; ret++;
+      for (int i = head[u]; ~i; i = nxt[i]) {
+        int v = to[i];
+        if (!del[v]) { del[v] = true; x = pos[v]; q[x] = q[top--]; pos[q[x]] = x; }
+      }
+    }
+    ans = max(ans, ret);
+  }
+  return ans;
+}
+
+
