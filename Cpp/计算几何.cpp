@@ -1,3 +1,33 @@
+//随机化求最小圆覆盖
+//圆心为O, 半径为R
+double R, EPS = 1e-9;
+struct Point { double x, y; } a[N], O;
+inline double dis(Point x, Point y) { return sqrt((x.x - y.x) * (x.x - y.x) + (x.y - y.y) * (x.y - y.y)); }
+Point center(Point x, Point y, Point z) {
+  double a1 = y.x - x.x, a2 = z.x - x.x, b1 = y.y - x.y, b2 = z.y - x.y,
+         c1 = (a1 * a1 + b1 * b1) / 2, c2 = (a2 * a2 + b2 * b2) / 2,
+         d = a1 * b2 - a2 * b1;
+  return (Point) {x.x + (c1 * b2 - c2 * b1) / d, x.y + (a1 * c2 - a2 * c1) / d};
+}
+void cal(int n, Point b[]) {
+  O = a[0]; R = 0;
+  for (int i = 0; i < n; i++) { a[i] = b[i]; }
+  for (int i = 0; i < n; i++) { swap(a[rand() % n], a[i]); }
+  for (int i = 1; i < n; i++) {
+    if (dis(a[i], O) > R + EPS) {
+      O = a[i]; R = 0;
+      for (int j = 0; j < i; j++) {
+        if (dis(a[j], O) > R + EPS) {
+          O = (Point) {(a[i].x + a[j].x) / 2, (a[i].y + a[j].y) / 2}, R = dis(O, a[i]);
+          for (int k = 0; k < j; k++) {
+            if (dis(a[k], O) > R + EPS) { O = center(a[k], a[j], a[i]), R = dis(O, a[i]); }
+          }
+        }
+      }
+    }
+  }
+}
+
 //kuangbin
 //1、基本函数
 //1.1 Point 定义

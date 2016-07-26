@@ -296,78 +296,62 @@ int graphMatch() {
   for (int i = 0; i < n; i++) { ret += (match[i] != -1); }
   return ret >> 1;
 }
-//带花树 + 邻接矩阵 O(V^3) 点的编号从1到n
-int n, match[N], fa[N], base[N], newbase, st, ed;
-bool g[N][N], inqueue[N], inpath[N], inblossom[N];
-queue<int> que;
-int findCommonAncestor(int u, int v) {
-  memset(inpath, 0, sizeof(inpath));
-  for (;;) { u = base[u]; inpath[u] = true; if (u == st) { break; } u = fa[match[u]]; }
-  for (;;) { v = base[v]; if (inpath[v]) { break; } v = fa[match[v]]; }
-  return v;
-}
-void resetTrace(int u) {
-  while (base[u] != newbase) {
-    int v = match[u]; inblossom[base[u]] = inblossom[base[v]] = true; u = fa[v];
-    if (base[u] != newbase) { fa[u] = v; }
+//带花树 + vector O(V^3) 点的编号从0开始
+int n, match[N], fa[N], nxt[N], mark[N], vis[N], t;
+vector<int> e[N]; queue<int> que;
+int findfa(int n) { return n == fa[n] ? n : fa[n] = findfa(fa[n]); }
+void unite(int x, int y) { fa[findfa(x)] = findfa(y); }
+int lca(int x, int y) {
+  for (t++;; swap(x, y)) {
+    if (x == -1) { continue; }
+    if (vis[x = findfa(x)] == t) { return x; }
+    vis[x] = t; x = match[x] == -1 ? -1 : nxt[match[x]];
   }
 }
-void bloosomContract(int u, int v) {
-  newbase = findCommonAncestor(u, v);
-  memset(inblossom, 0, sizeof(inblossom));
-  resetTrace(u); resetTrace(v);
-  if (base[u] != newbase) { fa[u] = v; }
-  if (base[v] != newbase) { fa[v] = u; }
-  for (int tu = 1; tu <= n; tu++) {
-    if (inblossom[base[tu]]) {
-      base[tu] = newbase;
-      if (!inqueue[tu]) { inqueue[tu] = true; que.push(tu); }
-    }
+void group(int a, int p) {
+  for (int b, c; a != p; unite(a, b), unite(b, c), a = c) {
+    b = match[a]; c = nxt[b];
+    if (findfa(c) != p) { nxt[c] = b; }
+    if (mark[b] == 2) { mark[b] = 1; que.push(b); }
+    if (mark[c] == 2) { mark[c] = 1; que.push(c); }
   }
 }
-void findAugmentingPath() {
-  memset(inqueue, 0, sizeof(inqueue));
-  memset(fa, 0, sizeof(fa)); ed = 0;
-  for (int i = 1; i <= n; i++) { base[i] = i; }
-  while (!que.empty()) { que.pop(); }
-  inqueue[st] = true; que.push(st);
-  while (!que.empty()) {
+void aug(int st) {
+  for (int i = 0; i < n; i++) { fa[i] = i; }
+  memset(nxt, -1, sizeof(nxt)); memset(vis, -1, sizeof(vis)); memset(mark, 0, sizeof(mark));
+  while (!que.empty()) { que.pop(); } que.push(st); mark[st] = 1;
+  while (match[st] == -1 && !que.empty()) {
     int u = que.front(); que.pop();
-    for (int v = 1; v <= n; v++) {
-      if (g[u][v] && base[u] != base[v] && match[u] != v) {
-        if (v == st || (match[v] > 0 && fa[match[v]] > 0)) {
-          bloosomContract(u, v);
-        } else if (fa[v] == 0) {
-          fa[v] = u;
-          if (match[v] > 0) { inqueue[match[v]] = true; que.push(match[v]); }
-          else { ed = v; return; }
-        }
-      }
+    for (int i = 0; i < (int)e[u].size(); i++) {
+      int v = e[u][i];
+      if (v == match[u] || findfa(u) == findfa(v) || mark[v] == 2) { continue; }
+      if (mark[v] == 1) {
+        int p = lca(u, v);
+        if (findfa(u) != p) { nxt[u] = v; }
+        if (findfa(v) != p) { nxt[v] = u; }
+        group(u, p); group(v, p);
+      } else if (match[v] == -1) {
+        nxt[v] = u;
+        for (int j = v, k, l; ~j; j = l) { k = nxt[j]; l = match[k]; match[j] = k; match[k] = j; }
+        break;
+      } else { nxt[v] = u; que.push(match[v]); mark[match[v]] = 1; mark[v] = 2; }
     }
   }
 }
-void augmentPath() {
-  for (int u = ed, v, w; u > 0;) { v = fa[u]; w = match[v]; match[v] = u; match[u] = v; u = w; }
+int solve(int n) {
+  memset(match, -1, sizeof(match)); t = 0; int ret = 0;
+  for (int i = 0; i < n; i++) { if (match[i] == -1) { aug(i); } }
+  for (int i = 0; i < n; i++) { ret += (match[i] > i); }
+  return ret;
 }
-void Edmonds() {
-  memset(match, 0, sizeof(match));
-  for (int u = 1; u <= n; u++) {
-    if (match[u] == 0) {
-      st = u; findAugmentingPath();
-      if (ed > 0) { augmentPath(); }
-    }
-  }
-}
-//ural1099
+//ural 1099
 int main() {
   int u, v;
   scanf("%d", &n);
-  while (~scanf("%d%d", &u, &v)) { g[u][v] = g[v][u] = true; }
-  Edmonds();
-  int cnt = 0;
-  for (int u = 1; u <= n; u++) { cnt += (match[u] > 0); }
-  printf("%d\n", cnt);
-  for (int u = 1; u <= n; u++) {
-    if (u < match[u]) { printf("%d %d\n", u, match[u]); }
+  while (~scanf("%d%d", &u, &v)) { e[--u].push_back(--v); e[v].push_back(u); }
+  int ans = solve(n);
+  printf("%d\n", ans * 2);
+  for (int u = 0; u < n; u++) {
+    if (u < match[u]) { printf("%d %d\n", u + 1, match[u] + 1); }
   }
 }

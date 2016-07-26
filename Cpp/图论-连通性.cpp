@@ -119,22 +119,52 @@ void Tarjan(int u, int p) {
 }
 void CUT(int n) {
   memset(dfn, 0, sizeof(dfn)); memset(addblock, 0, sizeof(addblock));
-  memset(instack, 0, sizeof(instack)); memset(cut, 0, sizeof(addblock));
+  memset(instack, 0, sizeof(instack)); memset(cut, 0, sizeof(cut));
   while (!stk.empty()) { stk.pop(); } index = bridge = 0;
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, i); } }
 }
 //无向图的边双连通分量
 //求出所有的桥以后, 把桥边删除, 原图变成了多个连通块, 则每个连通块就是一个边双连通分量
 //桥不属于任何一个边双连通分量, 其余的边和每个顶点都属于且只属于一个边双连通分量
-//无向图的点双连通分量
 //Tarjan算法 O(V + E)
+int low[N], dfn[N], index, belong[N], bridge, block;
+bool instack[N], ecut[M];
+stack<int> stk;
+void Tarjan(int u, int p) {
+  low[u] = dfn[u] = ++index; stk.push(u); instack[u] = true;
+  for (int i = head[u]; ~i; i = nxt[i]) {
+    int v = to[i];
+    if (v == p) { continue; }
+    if (!dfn[v]) {
+      Tarjan(v, u);
+      low[u] = min(low[u], low[v]);
+      if (low[v] > dfn[u]) { //割边
+        bridge++; ecut[i] = ecut[i ^ 1] = true;
+      }
+    } else if (low[u] > dfn[v]) { low[u] = dfn[v]; }
+  }
+  if (low[u] == dfn[u]) {
+    int v; block++;
+    do {
+      v = stk.top(); stk.pop(); instack[v] = false; belong[v] = block;
+    } while (u != v);
+  }
+}
+void EBCC(int n) {
+  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); memset(cut, 0, sizeof(cut));
+  while (!stk.empty()) { stk.pop(); } index = bridge = block = 0;
+  for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, -1); } }
+}
+//无向图的点双连通分量
 //对于点双连通分量, 实际上在求割点的过程中就能顺便把每个点双连通分量求出
 //建立一个栈, 存储当前双连通分量, 在搜索图时, 每找到一条树枝边或后向边(非横叉边), 就把这条边加入栈中
 //如果遇到某时满足DFS(u)<=Low(v), 说明u是一个割点, 同时把边从栈顶一个个取出,
 //直到遇到了边(u,v), 取出的这些边与其关联的点, 组成一个点双连通分量
 //割点可以属于多个点双连通分量, 其余点和每条边只属于且属于一个点双连通分量
+//Tarjan算法 O(V + E)
 int low[N], dfn[N], index, belong[N], block; //所属分量, 分量点数, 分量个数
 stack<int> stk;
+bool instack[N];
 void Tarjan(int u, int p) {
   low[u] = dfn[u] = ++index;
   stk.push(u); instack[u] = true;
@@ -145,7 +175,7 @@ void Tarjan(int u, int p) {
       Tarjan(v, u);
       low[u] = min(low[u], low[v]);
       if (low[v] >= dfn[u]) { //u为割点
-        int vv; block++; cc = 0;
+        int vv; block++;
         do {
           vv = stk.top(); stk.pop(); instack[vv] = false;
           belong[vv] = block;

@@ -282,8 +282,7 @@ struct AC {
 //sa[1..n]：字典序第 i 小的是哪个后缀
 //rnk[0..n - 1]：后缀 i 的排名
 //height[i]：lcp(sa[i], sa[i - 1])
-int n, rnk[N], sa[N], height[N], tmp[N], cnt[N];
-char s[N];
+int rnk[N], sa[N], height[N], tmp[N], cnt[N];
 void SA(char *s, int n, int m) {
   int i, j, k; n++;
   memset(rnk, 0, sizeof(rnk)); memset(sa, 0, sizeof(sa)); memset(height, 0, sizeof(height));
@@ -307,7 +306,7 @@ void SA(char *s, int n, int m) {
     if (j >= n - 1) { break; }
   }
   for (j = rnk[height[i = k = 0] = 0]; i < n - 1; i++, k++) {
-    while (~k && s[i] != s[sa[j - 1] + k]) { height[j] = k--, j = rnk[sa[j] + 1]; }
+    while (k >= 0 && s[i] != s[sa[j - 1] + k]) { height[j] = k--, j = rnk[sa[j] + 1]; }
   }
 }
 //后缀自动机

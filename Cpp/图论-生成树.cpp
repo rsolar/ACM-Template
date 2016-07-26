@@ -287,12 +287,3 @@ int main() {
 //我们定义G的Kirchhoff矩阵(也称为拉普拉斯算子)C[G]为C[G] = D[G] - A[G], 则Matrix-Tree定理可以
 //描述为: G的所有不同的生成树的个数等于其Kirchhoff矩阵C[G]任何一个n - 1阶主子式的行列式的绝对值
 //所谓n - 1阶主子式, 就是对于r(1 ≤ r ≤ n), 将C[G]的第r行、第r列同时去掉后得到的新矩阵, 用Cr[G]表示。
-ret.init();
-for (int i = 0; i < n; i++) {
-  for (int j = 0; j < n; j++) {
-    if (i != j && g[i][j]) {
-      ret.mat[i][j] = -1; ret.mat[i][i]++;
-    }
-  }
-}
-ret.det(n - 1);

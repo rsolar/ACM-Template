@@ -136,6 +136,17 @@ int main() {
     printf("%d\n", g[n]);
   }
 }
+//所有区间gcd的预处理
+int l[N], v[N];
+void calGCD {
+  for (int i = 1, j; i <= n; i++) {
+    for (v[i] = a[i], j = l[i] = i; j; j = l[j] - 1) {
+      v[j] = __gcd(v[j], a[i]);
+      while (l[j] > 1 && __gcd(a[i], v[l[j] - 1]) == __gcd(a[i], v[j])) { l[j] = l[l[j] - 1]; }
+      //[l[j]...j, i]区间内的值求gcd均为v[j]
+    }
+  }
+}
 //小数转化为分数
 //把小数转化为分数, 循环部分用()表示
 void work(char str[]) {
