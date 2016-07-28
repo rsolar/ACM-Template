@@ -1,4 +1,4 @@
-//组合数预处理 / 杨辉三角
+//组合数预处理 / 杨辉三角 O(n^2)
 //C[i][i] = C[i][0] = 1
 //C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
 const int maxc = 105;
@@ -9,7 +9,7 @@ void calC() {
     for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M; }
   }
 }
-//求组合数C(n, m) 不取模
+//求组合数不取模 O(n)
 ll Com(ll n, ll m) {
   if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }
@@ -20,7 +20,7 @@ ll Com(ll n, ll m) {
   return ret;
 }
 //求组合数取模
-//p <= 10^5 预处理阶乘逆元
+//p <= 1e6 预处理阶乘逆元 O(min(n, p)) + O(1)
 ll fac[M] = {1, 1}, invfac[M] = {1, 1};
 void initFac(ll p) {
   for (int i = 2; i < p; i++) {
@@ -31,7 +31,7 @@ void initFac(ll p) {
 ll Com(ll n, ll m, ll p) {
   return n < m ? 0 : fac[n] * invfac[n - m] % p * invfac[m] % p;
 }
-//p <= 10^9 在线求逆元
+//p <= 1e9 在线求逆元 O(nlogp)
 ll Com(ll n, ll m, ll p) {
   if (m > n) { return 0; }
   if (m > n - m) { m = n - m; }

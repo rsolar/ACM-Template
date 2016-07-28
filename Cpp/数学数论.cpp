@@ -247,24 +247,25 @@ bool linear_equation(ll a, ll b, ll p) {
   for (int i = 1; i < d; i++) { ans[++cnt] = (ans[1] + i * p / d) % n; }
   return true;
 }
+//线性预处理逆元
+ll Inv[N] = {1, 1};
+void getInv(int m) {
+  for (ll i = 2; i < m; i++) { Inv[i] = (m - m / i) * Inv[m % i] % m; }
+}
 //扩展欧几里得求逆元
 ll modReverse(ll a, ll m) {
   ll x, y, d = exgcd(a, m, x, y);
   if (d == 1) { return (x % m + m) % m; } else { return -1; }
 }
+//费马小定理, m为素数, a与m互质
+ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
 //只能求0 < a < m的情况,a和m互质
 ll inv(ll a, ll m) {
   if (a == 1) { return 1; }
   return inv(m % a, m) * (m - m / a) % m;
 }
-//费马小定理, m为素数, a与m互质
-ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
-//线性求逆元
-ll Inv[N] = {1, 1};
-void getInv(int m) {
-  for (ll i = 2; i < m; i++) { Inv[i] = (m - m / i) * Inv[m % i] % m; }
-}
-//中国剩余定理 求模线性方程组x=a[i](mod m[i]) m[i]可以不互质
+//中国剩余定理 求模线性方程组x = a[i] (mod m[i]) m[i]可以不互质
+//[1, n]内解的个数为(n - x) / m1 + (x != 0)
 bool merge(ll a1, ll m1, ll a2, ll m2, ll &a3, ll &m3) {
   ll d = __gcd(m1, m2), c = a2 - a1;
   if (c % d != 0) { return false; }
@@ -455,7 +456,7 @@ double rsimpson(double l, double r) {
   return rsimpson(l, mid) + rsimpson(mid, r);
 }
 //FFT O(nlogn)
-//n必须为2的幂, op为1时是求DFT, op为-1时为求IDFT
+//以下n必须为2的幂, op为1时是求DFT, op为-1时为求IDFT
 typedef complex<double> comp;
 const double PI = acos(-1.0);
 void fft(comp a[], int n, int op) {
@@ -494,5 +495,140 @@ int main() {
     len = n + m - 1;
     while (sum[len] <= 0 && len > 0) { len--; }
     for (int i = len; i >= 0; i--)  { putchar(sum[i] + '0'); } puts("");
+  }
+}
+//NTT O(nlogn)
+//998244353 = 119 * 2^23 + 1, 原根为3; 1004535809 = 479 * 2^21 + 1, 原根为3
+//786433 = 3 * 2^18 + 1, 原根为10; 880803841 = 105 * 2^23 + 1, 原根为26
+//P是素数且N必须是P - 1的因子
+//op为1时是求FNT, op为-1时为求IFNT
+const int P = 998244353, G = 3, N = 262144, K = 17;
+ll g[N + 5], ng[N + 5], Inv[N + 5] = {1, 1};
+void initG() {
+  g[K] = powMod(G, (P - 1) / N, P); ng[K] = powMod(g[K], P - 2, P);
+  for (int i = K - 1; i >= 0; i--) { g[i] = g[i + 1] * g[i + 1] % P; ng[i] = ng[i + 1] * ng[i + 1] % P; }
+  for (ll i = 2; i <= N; i++) { Inv[i] = (P - P / i) * Inv[P % i] % P; }
+}
+void ntt(ll a[], int n, int op) {
+  for (int i = 1, j = 0; i < n - 1; i++) {
+    for (int s = n; j ^= s >>= 1, ~j & s;);
+    if (i < j) { swap(a[i], a[j]); }
+  }
+  for (int d = 0; (1 << d) < n; d++) {
+    int m = 1 << d; ll w0 = op == 1 ? g[d] : ng[d];
+    for (int i = 0; i < n; i += m << 1) {
+      for (int j = 0, w = 1; j < m; j++, w = w * w0 % P) {
+        ll &x = a[i + j + m], &y = a[i + j], t = w * x % P;
+        x = y - t; y = y + t;
+        if (x < 0) { x += P; } if (y >= P) { y -= P; }
+      }
+    }
+  }
+  if (op == -1) { for (int i = 0; i < n; i++) { a[i] = a[i] * Inv[n] % P; } }
+}
+//多项式求逆元 O(nlogn) 即求B(x)满足A(X) * B(x) = 1 (mod x^n), deg(B) <= deg(A)
+void polyInv(ll a[], ll b[], int n) {
+  if (n == 1) { b[0] = powMod(a[0], P - 2, P); return; }
+  polyInv(a, b, n >> 1);
+  int k = 1;
+  while (k < n << 1) { k <<= 1; }
+  for (int i = 0; i < n; i++) { tmp[i] = a[i]; }
+  for (int i = n; i < k; i++) { tmp[i] = b[i] = 0; }
+  ntt(tmp, k, 1); ntt(b, k, 1);
+  for (int i = 0; i < k; i++) {
+    b[i] = b[i] * (2 - tmp[i] * b[i] % P) % P;
+    if (b[i] < 0) { b[i] += P; }
+  }
+  ntt(b, k, -1);
+  for (int i = n; i < k; i++) { b[i] = 0; }
+}
+//多项式除法 O(nlogn) 即求D(x)和R(x)满足A(x) = D(x) * B(x) + R(x), deg(D) <= deg(A) - deg(B), deg(R) < deg(B)
+ll a0[N], b0[N];
+void polyDiv(ll a[], int n, ll b[], int m, ll d[], ll r[]) {
+  int k = 1, t = n - m + 1;
+  while (k < t << 1) { k <<= 1; }
+  for (int i = 0; i < k; i++) { a0[i] = b0[i] = 0; }
+  for (int i = 0; i < m; i++) { a0[i] = b[m - i - 1]; }
+  polyInv(a0, b0, t);
+  for (int i = t; i < k; i++) { b0[i] = 0; }
+  for (int i = 0; i < t; i++) { a0[i] = a[n - i - 1]; }
+  for (int i = t; i < k; i++) { a0[i] = 0; }
+  ntt(b0, k, 1); ntt(a0, k, 1);
+  for (int i = 0; i < k; i++) { a0[i] = a0[i] * b0[i] % P; }
+  ntt(a0, k, -1);
+  reverse(a0, a0 + t);
+  for (int i = 0; i < t; i++) { d[i] = a0[i]; }
+  for (k = 1; k < n << 1; k <<= 1);
+  for (int i = t; i < k; i++) { a0[i] = 0; }
+  for (int i = 0; i < m; i++) { b0[i] = b[i]; }
+  for (int i = m; i < k; i++) { b0[i] = 0; }
+  ntt(a0, k, 1); ntt(b0, k, 1);
+  for (int i = 0; i < k; i++) { a0[i] = a0[i] * b0[i] % P; }
+  ntt(a0, k, -1);
+  for (int i = 0; i < m; i++) { r[i] = (a[i] - a0[i]) % P; }
+  for (int i = m; i < k; i++) { r[i] = 0; }
+}
+//多项式求对数函数 O(nlogn) a[0] = 1
+void polyLn(ll a[], ll b[], int n) {
+  polyInv(a, tmp2, n);
+  int k = 1;
+  while (k < n << 1) { k <<= 1; }
+  for (int i = 0; i < n - 1; i++) { b[i] = a[i + 1] * (i + 1) % P; }
+  for (int i = n - 1; i < k; i++) { b[i] = 0; }
+  ntt(b, k, 1); ntt(tmp2, k, 1);
+  for (int i = 0; i < k; i++) { b[i] = b[i] * tmp2[i] % P; }
+  ntt(b, k, -1);
+  for (int i = n - 1; i >= 0; i--) { b[i] = b[i - 1] * Inv[i] % P; } b[0] = 0;
+}
+//多项式求指数函数 O(nlogn) a[0] = 0
+void polyExp(ll a[], ll b[], int n) {
+  if (n == 1) { b[0] = 1; return; }
+  polyExp(a, b, n >> 1); polyLn(b, tmp, n);
+  int k = 1;
+  while (k < n << 1) { k <<= 1; }
+  for (int i = 0; i < n; i++) { tmp[i] -= a[i]; if (tmp[i] < 0) { tmp[i] += P; } }
+  if (++tmp[0] == P) { tmp[0] = 0; }
+  for (int i = n; i < k; i++) { tmp[i] = b[i] = 0; }
+  ntt(tmp, k, 1); ntt(b, k, 1);
+  for (int i = 0; i < k; i++) { b[i] = b[i] * tmp[i] % P; }
+  ntt(b, k, -1);
+  for (int i = n; i < k; i++) { b[i] = 0; }
+}
+//多项式求平方根 O(nlogn) a[0] = 1
+void polySqrt(ll a[], ll b[], int n) {
+  if (n == 1) { b[0] = 1; return; }
+  polySqrt(a, b, n >> 1); polyInv(b, tmp2, n);
+  int k = 1;
+  while (k < n << 1) { k <<= 1; }
+  for (int i = 0; i < n; i++) { tmp[i] = a[i]; }
+  for (int i = n; i < k; i++) { tmp[i] = b[i] = 0; }
+  ntt(tmp, k, 1); ntt(b, k, 1); ntt(tmp2, k, 1);
+  for (int i = 0; i < k; i++) { b[i] = (b[i] * b[i] + tmp[i]) % P * Inv[2] % P * tmp2[i] % P; }
+  ntt(b, k, -1);
+  for (int i = n; i < k; i++) { b[i] = 0; }
+}
+//快速沃尔什变换 即求C[i] = sum{j ? k = i}(A[j] * B[k]) ?为任一二元逻辑位运算
+void fwt(ll a[], int n) {
+  for (int d = 1; d < n; d <<= 1) {
+    for (int i = 0, m = d << 1; i < n; i += m) {
+      for (int j = 0; j < d; j++) {
+        ll x = a[i + j], y = a[i + j + d];
+        //xor: a[i + j] = x + y; a[i + j + d] = x - y;
+        //and: a[i + j] = x + y;
+        //or: a[i + j + d] = x + y;
+      }
+    }
+  }
+}
+void ufwt(ll a[], int n) {
+  for (int d = 1; d < n; d <<= 1) {
+    for (int i = 0, m = d << 1; i < n; i += m) {
+      for (int j = 0; j < d; j++) {
+        ll x = a[i + j], y = a[i + j + d];
+        //xor: a[i + j] = (x + y) >> 1; a[i + j + d] = (x - y) >> 1;
+        //and: a[i + j] = x - y;
+        //or: a[i + j + d] = y - x;
+      }
+    }
   }
 }
