@@ -246,7 +246,7 @@ int TSP() {
 }
 //mTSP问题 O(V^2*2^V)
 int n, mp[N][N], dp[1 << N][N], best[1 << N];
-bool ok[N]; //该集合状态是否可行
+bool ok[1 << N]; //该集合状态是否可行
 int mTSP() {
   memset(dp, 0x1f, sizeof(dp));
   memset(best, 0x1f, sizeof(best));
