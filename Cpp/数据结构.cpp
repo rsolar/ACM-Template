@@ -33,7 +33,7 @@ template<typename T> struct BIT {
   }
   T query(int l, int r) {
     T ret = B[r];
-    for (;;) {
+    while (true) {
       ret = max(ret, B[r]);
       if (l == r) { break; }
       for (r -= 1; r - l >= lowbit(r); r -= lowbit(r)) { ret = max(ret, A[r]); }
@@ -229,7 +229,108 @@ template<typename T> struct zkwSegmentTree {
   }
 };
 zkwSegmentTree<int> st;
-//实时开节点的线段树 (无需离散化)
+//可持久化线段树
+const int N = 100005;
+const int M = 2500005;
+const int INF = 0x3f3f3f3f;
+int n, m, nn; //离散化后大小
+#define lson l,m,ls[rt]
+#define rson m+1,r,rs[rt]
+template<typename T> struct SegmentTree {
+  int ls[M], rs[M], root[N], tot; T data[M];
+  int new_node() { return ++tot; }
+  void build(int l, int r, int &rt) {
+    rt = new_node(); data[rt] = 0;
+    if (l == r) { return; }
+    int m = (l + r) >> 1;
+    build(lson);
+    build(rson);
+  }
+  void update(int p, T val, int lst, int l, int r, int &rt) {
+    rt = new_node(); ls[rt] = ls[lst]; rs[rt] = rs[lst]; data[rt] = data[lst] + val;
+    if (l == r) { return; }
+    int m = (l + r) >> 1;
+    if (p <= m) { update(p, val, ls[lst], lson); }
+    else { update(p, val, rs[lst], rson); }
+  }
+  //带修改区间第k小
+  int tree[N], use[N];
+  int lowbit(int x) { return x & -x; }
+  void modify(int x, int p, T val) { //x为原数列中的下标, p为值
+    for (int i = x; i <= n; i += lowbit(i)) { update(p, val, tree[i], 1, nn, tree[i]); }
+  }
+  T query(int x) {
+    T ret = 0;
+    for (int i = x; i; i -= lowbit(i)) { ret += data[ls[use[i]]]; }
+    return ret;
+  }
+  int query(int L, int R, int k, int l, int r) {
+    for (int i = L; i; i -= lowbit(i)) { use[i] = tree[i]; }
+    for (int i = R; i; i -= lowbit(i)) { use[i] = tree[i]; }
+    int lr = root[L], rr = root[R];
+    while (l < r) {
+      int m = (l + r) >> 1; T tmp = query(R) - query(L) + data[ls[rr]] - data[ls[lr]];
+      if (k <= tmp) {
+        r = m;
+        for (int i = L; i; i -= lowbit(i)) { use[i] = ls[use[i]]; }
+        for (int i = R; i; i -= lowbit(i)) { use[i] = ls[use[i]]; }
+        lr = ls[lr]; rr = ls[rr];
+      } else {
+        l = m + 1; k -= tmp;
+        for (int i = L; i; i -= lowbit(i)) { use[i] = rs[use[i]]; }
+        for (int i = R; i; i -= lowbit(i)) { use[i] = rs[use[i]]; }
+        lr = rs[lr]; rr = rs[rr];
+      }
+    }
+    return l;
+  }
+};
+SegmentTree<int> st;
+//ZOJ 2112
+int a[N], hs[N], l[N], r[N], k[N];
+char op[N];
+int main() {
+  int C = 0, T;
+  scanf("%d", &T);
+  while (++C <= T) {
+    nn = 0;
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++) {
+      scanf("%d", &a[i]); hs[++nn] = a[i];
+    }
+    for (int i = 0; i < m; i++) {
+      scanf(" %c%d%d", &op[i], &l[i], &r[i]);
+      switch (op[i]) {
+        case 'Q': scanf("%d", &k[i]); break;
+        case 'C': hs[++nn] = r[i]; break;
+      }
+    }
+    sort(hs + 1, hs + nn + 1);
+    nn = unique(hs + 1, hs + nn + 1) - hs - 1;
+    for (int i = 1; i <= n; ++i) {
+      a[i] = lower_bound(hs + 1, hs + nn + 1, a[i]) - hs;
+    }
+    st.tot = 0;
+    st.build(1, nn, st.root[0]);
+    for (int i = 1; i <= n; i++) {
+      st.update(a[i], 1, st.root[i - 1], 1, nn, st.root[i]);
+    }
+    for (int i = 1; i <= n; i++) { st.tree[i] = st.root[0]; }
+    for (int i = 0; i < m; i++) {
+      switch (op[i]) {
+        case 'Q':
+          printf("%d\n", hs[st.query(l[i] - 1, r[i], k[i], 1, nn)]);
+          break;
+        case 'C':
+          st.modify(l[i], a[l[i]], -1);
+          a[l[i]] = lower_bound(hs + 1, hs + nn + 1, r[i]) - hs;
+          st.modify(l[i], a[l[i]], 1);
+          break;
+      }
+    }
+  }
+}
+//实时开节点的权值线段树 (无需离散化) O(logV)
 const int N = 60005;
 const int M = 2500005;
 const int INF = 0x3f3f3f3f;
@@ -237,13 +338,10 @@ int n, a[N];
 #define lson l,m,ls[rt]
 #define rson m+1,r,rs[rt]
 struct SegmentTree {
-  int ls[M], rs[M], cnt[M], root[N], use[N], tot;
+  int ls[M], rs[M], cnt[M], root[N], tot;
   void init() {
-    tot = 0;
-    memset(root, 0, sizeof(root));
-    memset(ls, 0, sizeof(ls));
-    memset(rs, 0, sizeof(rs));
-    memset(cnt, 0, sizeof(cnt));
+    tot = 0; memset(cnt, 0, sizeof(cnt)); memset(root, 0, sizeof(root));
+    memset(ls, 0, sizeof(ls)); memset(rs, 0, sizeof(rs));
   }
   int new_node() { return ++tot; }
   void update(int p, int val, int l, int r, int &rt) {
@@ -254,36 +352,37 @@ struct SegmentTree {
     else { update(p, val, rson); }
     cnt[rt] = cnt[ls[rt]] + cnt[rs[rt]];
   }
+  int use[N];
   int lowbit(int x) { return x & -x; }
   //单点修改
   void modify(int x, int p, int val) {
     for (int i = x; i <= n; i += lowbit(i)) { update(p, val, 0, INF, root[i]); }
   }
-  int sum(int x) {
+  int query(int x) {
     int ret = 0;
-    for (int i = x; i > 0; i -= lowbit(i)) { ret += cnt[ls[use[i]]]; }
+    for (int i = x; i; i -= lowbit(i)) { ret += cnt[ls[use[i]]]; }
     return ret;
   }
-  //查询区间第K大
-  int query(int ss, int tt, int l, int r, int k) {
-    for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
-    for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = root[i]; }
+  //查询区间第k小
+  int query(int L, int R, int k, int l, int r) {
+    for (int i = L; i; i -= lowbit(i)) { use[i] = root[i]; }
+    for (int i = R; i; i -= lowbit(i)) { use[i] = root[i]; }
     while (l < r) {
-      int m = (l + r) >> 1, tmp = sum(tt) - sum(ss);
+      int m = (l + r) >> 1, tmp = query(R) - query(L);
       if (k <= tmp) {
         r = m;
-        for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = ls[use[i]]; }
-        for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = ls[use[i]]; }
+        for (int i = L; i; i -= lowbit(i)) { use[i] = ls[use[i]]; }
+        for (int i = R; i; i -= lowbit(i)) { use[i] = ls[use[i]]; }
       } else {
         l = m + 1; k -= tmp;
-        for (int i = ss; i > 0; i -= lowbit(i)) { use[i] = rs[use[i]]; }
-        for (int i = tt; i > 0; i -= lowbit(i)) { use[i] = rs[use[i]]; }
+        for (int i = L; i; i -= lowbit(i)) { use[i] = rs[use[i]]; }
+        for (int i = R; i; i -= lowbit(i)) { use[i] = rs[use[i]]; }
       }
     }
     return l;
   }
 } st;
-//BZOJ1901 区间第k大
+//BZOJ1901 区间第k小
 int main() {
   int m, l, r, k; char op[5];
   while (~scanf("%d%d", &n, &m)) {
@@ -297,7 +396,7 @@ int main() {
       switch (op[0]) {
         case 'Q':
           scanf("%d", &k);
-          printf("%d\n", st.query(l - 1, r, 0, INF, k));
+          printf("%d\n", st.query(l - 1, r, k, 0, INF));
           break;
         case 'C':
           st.modify(l, a[l], -1);
@@ -1146,9 +1245,6 @@ int main() {
     }
   }
 }
-//主席树
-
-
 //Link-Cut Tree 动态树
 //维护多棵树(森林)的形态, 并在O(logn)的时间复杂度内维护链上信息; 但LCT处理子树信息将会非常麻烦.
 //它的核心操作是access函数, 可以把某个节点到根的路径上所有点按照深度用Splay维护起来,
