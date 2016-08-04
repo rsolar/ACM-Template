@@ -368,11 +368,11 @@ bool dfs(int crt, int tot) {
   }
   for (int i = 0, u, nxt; i < crt; i++) {
     u = stk[tot][i]; nxt = 0;
-    if (cur - i + tot <= ans) { return false; }
+    if (crt - i + tot <= ans) { return false; }
     if (dp[u] + tot <= ans) { return false; }
-    for (int j = i + 1, v; j < cur; j++) {
+    for (int j = i + 1; j < crt; j++) {
       int v = stk[tot][j];
-      if (mp[u][v]) { stk[tot + 1][nxt++] = v; }
+      if (g[u][v]) { stk[tot + 1][nxt++] = v; }
     }
     if (dfs(nxt, tot + 1)) { return true; }
   }
@@ -380,16 +380,16 @@ bool dfs(int crt, int tot) {
 }
 int maxClique(int n) {
   ans = 0;
-  for (int i = n - 1; i >= 0; i--) {
-    for (int j = i + 1, k = 0; j < n; j++) {
-      if (mp[i][j]) { stk[1][k++] = j; }
+  for (int i = n - 1, j, k; i >= 0; i--) {
+    for (j = i + 1, k = 0; j < n; j++) {
+      if (g[i][j]) { stk[1][k++] = j; }
     }
     dfs(k, 1); dp[i] = ans;
   }
   return ans;
 }
 //随机贪心 O(T*n^2)
-const int T = 100;
+const int T = 1000;
 int mp[N][N], id[N], ansn, ans[N]; bool del[N];
 void solve(int n) {
   memset(del, 0, sizeof(del)); int k = 0;
@@ -418,7 +418,7 @@ int solve(int n) {
     int ret = 0, top = n; memset(del, 0, sizeof(del));
     for (int i = 1; i <= n; i++) { q[i] = pos[i] = i; }
     while (top) {
-      int x = rand() % top, u = q[x]; q[x] = q[top--]; pos[q[x]] = x; ret++;
+      int x = rand() % top + 1, u = q[x]; q[x] = q[top--]; pos[q[x]] = x; ret++;
       for (int i = head[u]; ~i; i = nxt[i]) {
         int v = to[i];
         if (!del[v]) { del[v] = true; x = pos[v]; q[x] = q[top--]; pos[q[x]] = x; }
@@ -428,5 +428,3 @@ int solve(int n) {
   }
   return ans;
 }
-
-

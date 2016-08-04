@@ -3,7 +3,7 @@
 typedef long long ftype;
 int n, dis[N], pre[N], cur[N], gap[N];
 ftype cap[N][N];
-ftype SAP(int src, int sink, int n = n) {
+ftype SAP(int src, int sink, int n) {
   memset(dis, 0, sizeof(dis));
   memset(cur, 0, sizeof(cur));
   memset(gap, 0, sizeof(gap));
@@ -35,14 +35,14 @@ loop:
 //ISAP + 邻接表 O(V^2*E)
 typedef long long ftype;
 const ftype INF = 0x3f3f3f3f;
-int n, head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
+int head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
 ftype cap[M];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype rw = 0) {
   to[tot] = y; cap[tot] = w; nxt[tot] = head[x]; head[x] = tot++;
   to[tot] = x; cap[tot] = rw; nxt[tot] = head[y]; head[y] = tot++;
 }
-ftype ISAP(int src, int sink, int n = n) {
+ftype ISAP(int src, int sink, int n) {
   memset(dis, 0, sizeof(dis));
   memset(gap, 0, sizeof(gap));
   memcpy(cur, head, sizeof(head));
@@ -101,7 +101,7 @@ void bfs(int sink) {
     }
   }
 }
-ftype ISAP(int src, int sink, int n = n) {
+ftype ISAP(int src, int sink, int n) {
   bfs(sink);
   memcpy(cur, head, sizeof(head));
   int u = pre[src] = src, v, i; ftype mxflow = 0;
@@ -205,7 +205,7 @@ void bfs() {
     }
   }
 }
-int HLPP(int n = n) {
+int HLPP(int n) {
   memset(w, 0, sizeof(w));
   memset(done, 0, sizeof(done));
   memset(vis, 0, sizeof(vis));

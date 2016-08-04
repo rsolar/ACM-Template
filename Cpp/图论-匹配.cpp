@@ -186,7 +186,7 @@ int HK() {
 //若求最小权匹配,可将权值取相反数,结果取相反数 点的编号从0开始
 const int INF = 0x3f3f3f3f;
 int uN, vN, g[N][N];
-int match[N], lx[N], ly[N]; //y中各点匹配状态, 可行顶标
+int matchy[N], lx[N], ly[N]; //y中各点匹配状态, 可行顶标
 int slack[N]; //松弛数组
 bool visx[N], visy[N];
 bool dfs(int u) {
@@ -196,13 +196,13 @@ bool dfs(int u) {
     int tmp = lx[u] + ly[v] - g[u][v];
     if (tmp == 0) {
       visy[v] = true;
-      if (match[v] == -1 || dfs(match[v])) { match[v] = u; return true; }
+      if (matchy[v] == -1 || dfs(matchy[v])) { matchy[v] = u; return true; }
     } else if (slack[v] > tmp) { slack[v] = tmp; }
   }
   return false;
 }
 int KM() {
-  memset(match, -1, sizeof(match));
+  memset(matchy, -1, sizeof(matchy));
   memset(ly, 0, sizeof(ly));
   for (int i = 0; i < uN; i++) { lx[i] = *max_element(g[i], g[i] + vN); }
   for (int u = 0; u < uN; u++) {
@@ -214,11 +214,11 @@ int KM() {
       int d = INF;
       for (int i = 0; i < vN; i++) { if (!visy[i] && d > slack[i]) { d = slack[i]; } }
       for (int i = 0; i < uN; i++) { if (visx[i]) { lx[i] -= d; } }
-      for (int i = 0; i < vN; i++) { if (visy[i]) { ly[i] += d } else { slack[i] -= d; } }
+      for (int i = 0; i < vN; i++) { if (visy[i]) { ly[i] += d; } else { slack[i] -= d; } }
     }
   }
   int res = 0;
-  for (int i = 0; i < vN; i++) { if (match[i] != -1) { res += g[match[i]][i]; } }
+  for (int i = 0; i < vN; i++) { if (matchy[i] != -1) { res += g[matchy[i]][i]; } }
   return res;
 }
 //二分图多重匹配
