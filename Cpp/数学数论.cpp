@@ -381,31 +381,32 @@ ll BSGS(ll a, ll b, ll p) {
   }
   return -1;
 }
-//高斯消元 求线性方程组的解 O(n^3)
+//高斯消元 (整数/模意义) 求线性方程组的解 O(n^3)
 //有equ个方程, var个变元, 增广矩阵行数为equ, 列数为var + 1, 下标从0开始
-int a[N][N], x[N]; //增广矩阵, 解集
-int freex[N], freenum;//自由变元 (多解枚举自由变元可以使用)
 //返回值为-1表示无解, 为0是唯一解, 否则返回自由变元个数
+int a[N][N], x[N]; //增广矩阵, 解集
+int freex[N], freenum; //自由变元 (多解枚举自由变元可以使用)
 int Gauss(int equ, int var) {
-  int mxrow, col, k; freenum = 0;
-  for (k = 0, col = 0; k < equ && col < var; k++, col++) {
-    mxrow = k;
-    for (int i = k + 1; i < equ; i++) { if (abs(a[i][col]) > abs(a[mxrow][col])) { mxrow = i; } }
-    if (a[mxrow][col] == 0) { k--; freex[freenum++] = col; continue; } //自由变元
-    if (mxrow != k) { for (int j = col; j <= var; j++) { swap(a[k][j], a[mxrow][j]); } }
-    for (int i = k + 1; i < equ; i++) {
+  int mxrow, row, col; freenum = 0;
+  for (row = 0, col = 0; row < equ && col < var; row++, col++) {
+    mxrow = row;
+    for (int i = row + 1; i < equ; i++) { if (abs(a[i][col]) > abs(a[mxrow][col])) { mxrow = i; } }
+    swap(a[row], a[mxrow]);
+    if (!a[row][col]) { row--; freex[freenum++] = col; continue; } //自由变元
+    for (int i = row + 1; i < equ; i++) {
       if (a[i][col]) {
-        int x = abs(a[i][col]), y = abs(a[k][col]), lcm = x / __gcd(x, y) * y, tx = lcm / x, ty = lcm / y;
-        if (a[i][col] * a[k][col] < 0) { ty = -ty; }
+        int x = abs(a[i][col]), y = abs(a[row][col]), lcm = x / __gcd(x, y) * y, tx = lcm / x, ty = lcm / y;
+        if (a[i][col] * a[row][col] < 0) { ty = -ty; }
         for (int j = col; j <= var; j++) {
-          a[i][j] = a[i][j] * tx - a[k][j] * ty; //a[i][j] = (a[i][j] % M + M) % M;
+          a[i][j] = a[i][j] * tx - a[row][j] * ty; //a[i][j] = (a[i][j] % M + M) % M;
         }
       }
     }
   }
-  for (int i = k; i < equ; i++) { if (a[i][col]) { return -1; } } //无解
-  if (k < var) { return var - k; } //自由变元个数
-  for (int i = var - 1; i >= 0; i--) { //唯一解，回代
+  for (int i = row; i < equ; i++) { if (a[i][col]) { return -1; } } //无解
+  if (row < var) { return var - row; } //返回自由变元个数
+  //for (int i = 0; i < var - row; i++) { x[freex[i]] = 0; }
+  for (int i = row - 1; i >= 0; i--) { //唯一解，回代
     for (int j = i + 1; j < var; j++) {
       if (a[i][j]) { a[i][var] -= a[i][j] * x[j]; /*a[i][var] = (a[i][var] % M + M) % M;*/ }
     }
@@ -415,35 +416,58 @@ int Gauss(int equ, int var) {
   return 0;
 }
 //高斯消元 (浮点数)
-const double eps = 1e-9;
-const int N = 205;
-double a[N][N], x[N]; //方程的左边的矩阵和等式右边的值, 求解之后x存的就是结果
-int equ, var; //方程数和未知数个数
-//返回0表示无解, 1表示有解
-int Gauss() {
-  int i, j, k, col, mxrow;
-  for (k = 0, col = 0; k < equ && col < var; k++, col++) {
-    mxrow = k;
-    for (i = k + 1; i < equ; i++) {
-      if (fabs(a[i][col]) > fabs(a[mxrow][col])) { mxrow = i; }
-    }
-    if (fabs(a[mxrow][col]) < eps) { return 0; }
-    if (k != mxrow) {
-      for (j = col; j < var; j++) { swap(a[k][j], a[mxrow][j]); }
-      swap(x[k], x[mxrow]);
-    }
-    x[k] /= a[k][col];
-    for (j = col + 1; j < var; j++) { a[k][j] /= a[k][col]; }
-    a[k][col] = 1;
-    for (i = 0; i < equ; i++) {
-      if (i != k) {
-        x[i] -= x[k] * a[i][k];
-        for (j = col + 1; j < var; j++) { a[i][j] -= a[k][j] * a[i][col]; }
-        a[i][col] = 0;
+const double EPS = 1e-8;
+double a[N][N], x[N];
+int freex[N], freenum;
+inline int sgn(double x) { return (fabs(x) < EPS ? 0 : (x < 0 ? -1 : 1)); }
+int Gauss(int equ, int var) {
+  int mxrow, row, col; freenum = 0;
+  for (row = 0, col = 0; row < equ && col < var; row++, col++) {
+    mxrow = row;
+    for (int i = row + 1; i < equ; i++) { if (fabs(a[i][col]) > fabs(a[mxrow][col])) { mxrow = i; } }
+    if (fabs(a[mxrow][col]) < EPS) { return 0; }
+    swap(a[row], a[mxrow]);
+    if (!sgn(a[row][col])) { row--; freex[freenum++] = col; continue; } //自由变元
+    for (int i = row + 1; i < equ; i++) {
+      if (sgn(a[i][col])) {
+        double t = a[i][col] / a[row][col];
+        for (int j = col; j <= var; j++) { a[i][j] -= a[row][j] * t; }
       }
     }
   }
-  return 1;
+  for (int i = row; i < equ; i++) { if (sgn(a[i][col])) { return -1; } } //无解
+  if (row < var) { return var - row; } //返回自由变元个数
+  //for (int i = 0; i < var - row; i++) { x[freex[i]] = 0; }
+  for (int i = row - 1; i >= 0; i--) { //唯一解，回代
+    for (int j = i + 1; j < var; j++) {
+      if (sgn(a[i][j])) { a[i][var] -= a[i][j] * x[j]; }
+    }
+    x[i] = a[i][var] / a[i][i];
+  }
+  return 0;
+}
+//高斯消元 (XOR)
+bool a[N][N], x[N];
+int freex[N], freenum;
+int Gauss(int equ, int var) {
+  int mxrow, row, col; freenum = 0;
+  for (row = 0, col = 0; row < equ && col < var; row++, col++) {
+    for (mxrow = row; mxrow < equ && !a[mxrow][col]; mxrow++);
+    if (mxrow == equ) { row--; freex[freenum++] = col; continue; } //自由变元
+    swap(a[row], a[mxrow]);
+    for (int i = row + 1; i < equ; i++) {
+      if (a[i][col]) { for (int j = col; j <= var; j++) { a[i][j] ^= a[row][j]; } }
+    }
+  }
+  for (int i = row; i < equ; i++) { if (a[i][col]) { return -1; } } //无解
+  if (row < var) { return var - row; } //返回自由变元个数
+  //for (int i = 0; i < var - row; i++) { x[freex[i]] = false; }
+  for (int i = row - 1; i >= 0; i--) { //唯一解，回代
+    for (int j = i + 1; j < var; j++) {
+      if (a[i][j]) { x[i] = a[i][var]; break; }
+    }
+  }
+  return 0;
 }
 //自适应simpson积分
 //给定一个函数f(x), 求[a, b]区间内f(x)到x轴所形成区域的面积
@@ -496,6 +520,23 @@ int main() {
     while (sum[len] <= 0 && len > 0) { len--; }
     for (int i = len; i >= 0; i--)  { putchar(sum[i] + '0'); } puts("");
   }
+}
+//分治FFT 可求解形如f(i) = ∑(f(i - j) * a(j)), j∈[1, i - 1]的递推式
+void cdq(int l, int r) {
+  if (l == r) { f[l] = (f[l] + a[l]) % M; return; }
+  int mid = (l + r) >> 1;
+  cdq(l, mid);
+  int len1 = mid - l + 1, len2 = r - mid, len = 1;
+  while (len < len1 + len2) { len <<= 1; }
+  for (int i = 0; i < len1; i++) { x[i] = comp(f[l + i], 0); }
+  for (int i = len1; i < len; i++) { x[i] = comp(0, 0); }
+  for (int i = 0; i < len1 + len2; i++) { y[i] = comp(a[i], 0); }
+  for (int i = len1 + len2; i < len; i++) { y[i] = comp(0, 0); }
+  fft(x, len, 1); fft(y, len, 1);
+  for (int i = 0; i < len; i++) { x[i] *= y[i]; }
+  fft(x, len, -1);
+  for (int i = mid + 1; i <= r; i++) { f[i] = (f[i] + (int)(x[i - l].real() + 0.5)) % M; }
+  cdq(mid + 1, r);
 }
 //NTT O(nlogn)
 //998244353 = 119 * 2^23 + 1, 原根为3; 1004535809 = 479 * 2^21 + 1, 原根为3

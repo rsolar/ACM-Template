@@ -236,7 +236,7 @@ const int INF = 0x3f3f3f3f;
 int n, m, nn; //离散化后大小
 #define lson l,m,ls[rt]
 #define rson m+1,r,rs[rt]
-template<typename T> struct SegmentTree {
+template<typename T> struct PersistentSegmentTree {
   int ls[M], rs[M], root[N], tot; T data[M];
   int new_node() { return ++tot; }
   void build(int l, int r, int &rt) {
@@ -285,7 +285,7 @@ template<typename T> struct SegmentTree {
     return l;
   }
 };
-SegmentTree<int> st;
+PersistentSegmentTree<int> st;
 //ZOJ 2112
 int a[N], hs[N], l[N], r[N], k[N];
 char op[N];
@@ -1931,149 +1931,51 @@ int main() {
     }
   }
 }
-//KD-Tree
-//用来维护多维第K近点对距离一类的信息.
-//在每一维上依次用一个超平面进行空间划分, 将点集比较均匀地分割在各个区域内,
-//结构上则是一棵二叉树, 且与线段树的形态和构造方法都有些类似.
-//经过改造的KD-Tree一般可以做到O(logn)的单点插入, 以及O(n^(1-1/D))的询问操作, 其中D是维数, 可见维数越大KD-Tree越慢
-//询问距离一个点的前K近点一般需要用一个优先队列进行询问时的维护
-//HDU4347 O(n) 不支持点的插入和删除
-const int N = 50005;
-const int INF = ~0U >> 1;
-const int DIM = 5;
-#define lson l,m-1,dep+1
-#define rson m+1,r,dep+1
-int cur, K;
-struct point {
-  int x[DIM];
-  bool operator<(const point &oth)const { return x[cur] < oth.x[cur]; }
-  void output() {
-    for (int i = 0; i < K; ++i) {
-      printf("%d%c", x[i], i < K - 1 ? ' ' : '\n');
-    }
+//左偏树 Leftist Tree
+//可并堆的一种实现, 可以在O(logn)的时间内实现堆的push、pop和两个堆的合并操作, 以及O(1)时间的取堆顶操作
+template<typename T> struct LeftistTree {
+  T data[N]; int ls[N], rs[N], dep[N], tot = 0, fa[N];
+  void clear() { tot = 0; }
+  int init(T val) { data[++tot] = val; ls[tot] = rs[tot] = dep[tot] = 0; fa[tot] = tot; return tot; }
+  int findfa(int x) { return x == fa[x] ? x : fa[x] = findfa(fa[x]); }
+  int merge(int x, int y) {
+    if (!x || !y) { return x | y; }
+    if (data[x] < data[y]) { swap(x, y); }
+    rs[x] = merge(rs[x], y); fa[rs[x]] = x;
+    if (dep[ls[x]] < dep[rs[x]]) { swap(ls[x], rs[x]); }
+    dep[x] = dep[rs[x]] + 1;
+    return x;
   }
-} vec[N], origin[N], pt, ans[10];
-inline int sqr(int x) { return x * x; }
-int dist(const point &a, const point &b) {
-  int ret = 0;
-  for (int i = 0; i < K; ++i) { ret += sqr(a.x[i] - b.x[i]); }
-  return ret;
-}
-void build(int l, int r, int dep = 0) {
-  if (l >= r) { return; }
-  int m = l + r >> 1;
-  cur = dep % K;
-  nth_element(vec + l, vec + m, vec + r + 1);
-  build(lson);
-  build(rson);
-}
-priority_queue<pair<int, point>> pq;
-void query(const point &x, int k, int l, int r, int dep = 0) {
-  if (l > r) { return; }
-  int m = l + r >> 1, cur = dep % K;
-  pair<int, point> tmp(dist(x, vec[m]), vec[m]);
-  if (pq.size() < k) {
-    pq.push(tmp);
-  } else if (pq.top().first > tmp.first) {
-    pq.pop(); pq.push(tmp);
+  int push(int x, T val) { return /*merge(x, init(val))*/merge(x, val); }
+  int pop(int x) {
+    int a = ls[x], b = rs[x];
+    ls[x] = rs[x] = dep[x] = 0;
+    fa[x] = x; fa[a] = a; fa[b] = b;
+    return merge(a, b);
   }
-  if (x.x[cur] < vec[m].x[cur]) {
-    query(x, k, lson);
-    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, rson); }
-  } else {
-    query(x, k, rson);
-    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, lson); }
-  }
-}
+};
+LeftistTree<int> lt;
+//POJ 2201 左偏树搭配并查集使用
 int main() {
-  int n, t, m;
-  while (~scanf("%d%d", &n, &K)) {
-    for (int i = 1; i <= n; ++i) {
-      for (int j = 0; j < K; ++j) {
-        scanf("%d", &origin[i].x[j]);
-      }
-      vec[i] = origin[i];
+  int n, m, x, y;
+  while (~scanf("%d", &n)) {
+    lt.clear();
+    for (int i = 1; i <= n; i++) {
+      scanf("%d", &x); lt.init(x);
     }
-    build(1, n);
-    scanf("%d", &t);
-    while (t--) {
-      for (int i = 0; i < K; ++i) {
-        scanf("%d", &pt.x[i]);
+    scanf("%d", &m);
+    while (m--) {
+      scanf("%d%d", &x, &y);
+      int a = lt.findfa(x), b = lt.findfa(y);
+      if (a == b) {
+        puts("-1");
+      } else {
+        lt.data[a] >>= 1; lt.data[b] >>= 1;
+        a = lt.push(lt.pop(a), a); b = lt.push(lt.pop(b), b);
+        printf("%d\n", lt.data[lt.merge(a, b)]);
       }
-      scanf("%d", &m);
-      query(pt, m, 1, n);
-      for (int i = 0; i < m; ++i) {
-        ans[i] = pq.top().second; pq.pop();
-      }
-      printf("the closest %d points are:\n", m);
-      for (int i = m - 1; i >= 0; --i) { ans[i].output(); }
     }
   }
-}
-//支持点的插入和删除
-#define lson kdt[rt].ls,dep+1
-#define rson kdt[rt].rs,dep+1
-struct kdnode {
-  int ls, rs, x[DIM]; bool flag; //删点标记
-} kdt[N];
-inline ll sqr(int x) { return (ll)x * x; }
-ll dist(const kdnode &a, const kdnode &b) {
-  ll ret = 0;
-  for (int i = 0; i < DIM; ++i) { ret += sqr(a.x[i] - b.x[i]); }
-  return ret;
-}
-int root, tot;
-void init() { tot = 0; root = -1; }
-int add(int pt[]) {
-  kdt[tot].flag = false;
-  kdt[tot].ls = kdt[tot].rs = -1;
-  for (int i = 0; i < DIM; ++i) { kdt[tot].x[i] = pt[i]; }
-  return tot++;
-}
-void insert(int pt[], int rt, int dep = 0) {
-  dep %= DIM;
-  if (pt[dep] < kdt[rt].x[dep]) {
-    if (!~kdt[rt].ls) { kdt[rt].ls = add(pt); }
-    else { insert(pt, lson); }
-  } else {
-    if (!~kdt[rt].rs) { kdt[rt].rs = add(pt); }
-    else { insert(pt, rson); }
-  }
-}
-//求最近点距离
-ll query(const kdnode &pt, int rt, int dep = 0) {
-  if (!~rt) { return INF; }
-  dep %= DIM;
-  ll ret = INF, tmp = sqr(kdt[rt].x[dep] - pt.x[dep]);
-  if (!kdt[rt].flag) { ret = dist(kdt[rt], pt); }
-  if (pt.x[dep] <= kdt[rt].x[dep]) {
-    ret = min(ret, query(pt, lson));
-    if (tmp < ret) { ret = min(ret, query(pt, rson)); }
-  }
-  if (pt.x[dep] >= kdt[rt].x[dep]) {
-    ret = min(ret, query(pt, rson));
-    if (tmp < ret) { ret = min(ret, query(pt, lson)); }
-  }
-  return ret;
-}
-//查询区间内有多少个点
-int query(int pt1[], int pt2[], int rt, int dep = 0) {
-  if (!~rt) { return 0; }
-  dep %= DIM;
-  int ret = 0, cur;
-  for (cur = 0; cur < DIM; ++cur) {
-    if (kdt[rt].x[cur] < pt1[cur] || kdt[rt].x[cur] > pt2[cur]) { break; }
-  }
-  if (cur == DIM) { ++ret; }
-  if (pt2[dep] < kdt[rt].x[dep]) {
-    ret += query(pt1, pt2, lson);
-  } else if (pt1[dep] >= kdt[rt].x[dep]) {
-    ret += query(pt1, pt2, rson);
-  } else {
-    ret += query(pt1, pt2, lson);
-    ret += query(pt1, pt2, rson);
-  }
-  return ret;
 }
 //划分树
 int part[20][N]; //表示每层每个位置的值
@@ -2112,49 +2014,237 @@ int query(int L, int R, int k, int l, int r, int dep) {
     return query(tl, tr, k - cnt, m + 1, r, dep + 1);
   }
 }
-//左偏树
-//可并堆的一种实现, 可以在O(logn)的时间内实现堆的push、pop和两个堆的合并操作, 以及O(1)时间的取堆顶操作
-int val[N], ls[N], rs[N], dep[N], fa[N];
-void init(int n) {
-  for (int i = 1; i <= n; ++i) {
-    scanf("%d", &val[i]); ls[i] = rs[i] = dep[i] = 0; fa[i] = i;
+//KD-Tree
+//用来维护多维第K近点对距离一类的信息.
+//在每一维上依次用一个超平面进行空间划分, 将点集比较均匀地分割在各个区域内
+//结构上则是一棵二叉树, 且与线段树的形态和构造方法都有些类似
+//经过改造的KD-Tree一般可以做到O(logn)的单点插入, 以及O(n^(1-1/D))的询问操作, 其中D是维数, 可见维数越大KD-Tree越慢
+//询问距离一个点的前K近点一般需要用一个优先队列进行询问时的维护
+//HDU 4347 O(n) 不支持点的插入和删除
+const int N = 50005;
+const int INF = 0x3f3f3f3f;
+const int DIM = 5;
+#define lson l,m-1,dep+1
+#define rson m+1,r,dep+1
+int cur, K;
+struct Node {
+  int x[DIM];
+  bool operator<(const Node &r)const { return x[cur] < r.x[cur]; }
+  void output() {
+    for (int i = 0; i < K; ++i) {
+      printf("%d%c", x[i], i < K - 1 ? ' ' : '\n');
+    }
+  }
+} vec[N], origin[N], pt, ans[10];
+inline int sqr(int x) { return x * x; }
+int dist(const Node &a, const Node &b) {
+  int ret = 0;
+  for (int i = 0; i < K; ++i) { ret += sqr(a.x[i] - b.x[i]); }
+  return ret;
+}
+void build(int l, int r, int dep = 0) {
+  if (l >= r) { return; }
+  int m = (l + r) >> 1;
+  cur = dep % K;
+  nth_element(vec + l, vec + m, vec + r + 1);
+  build(lson);
+  build(rson);
+}
+priority_queue<pair<int, Node>> pq;
+void query(const Node &x, int k, int l, int r, int dep = 0) {
+  if (l > r) { return; }
+  int m = (l + r) >> 1, cur = dep % K;
+  pair<int, Node> tmp(dist(x, vec[m]), vec[m]);
+  if ((int)pq.size() < k) { pq.push(tmp); }
+  else if (pq.top().first > tmp.first) { pq.pop(); pq.push(tmp); }
+  if (x.x[cur] < vec[m].x[cur]) {
+    query(x, k, lson);
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, rson); }
+  } else {
+    query(x, k, rson);
+    if (pq.top().first > sqr(x.x[cur] - vec[m].x[cur])) { query(x, k, lson); }
   }
 }
-int find(int x) { return x == fa[x] ? x : fa[x] = findfa(fa[x]); }
-int merge(int x, int y) {
-  if (!x || !y) { return x | y; }
-  if (val[x] < val[y]) { swap(x, y); }
-  rs[x] = merge(rs[x], y); fa[rs[x]] = x;
-  if (dep[ls[x]] < dep[rs[x]]) { swap(ls[x], rs[x]); }
-  dep[x] = dep[rs[x]] + 1;
-  return x;
-}
-int push(int x, int y) { return merge(x, y); }
-int pop(int x) {
-  int a = ls[x], b = rs[x];
-  ls[x] = rs[x] = dep[x] = 0;
-  fa[x] = x; fa[a] = a; fa[b] = b;
-  return merge(a, b);
-}
-//POJ 2201
 int main() {
-  int n, m, x, y;
-  while (~scanf("%d", &n)) {
-    init(n);
-    scanf("%d", &m);
-    while (m--) {
-      scanf("%d%d", &x, &y);
-      int a = find(x), b = find(y);
-      if (a == b) {
-        puts("-1");
-      } else {
-        val[a] >>= 1; val[b] >>= 1;
-        a = push(pop(a), a); b = push(pop(b), b);
-        printf("%d\n", val[merge(a, b)]);
+  int n, t, m;
+  while (~scanf("%d%d", &n, &K)) {
+    for (int i = 1; i <= n; ++i) {
+      for (int j = 0; j < K; ++j) {
+        scanf("%d", &origin[i].x[j]);
       }
+      vec[i] = origin[i];
+    }
+    build(1, n);
+    scanf("%d", &t);
+    while (t--) {
+      for (int i = 0; i < K; ++i) {
+        scanf("%d", &pt.x[i]);
+      }
+      scanf("%d", &m);
+      query(pt, m, 1, n);
+      for (int i = 0; i < m; ++i) {
+        ans[i] = pq.top().second; pq.pop();
+      }
+      printf("the closest %d points are:\n", m);
+      for (int i = m - 1; i >= 0; --i) { ans[i].output(); }
     }
   }
 }
+//支持点的插入和删除
+const int INF = 0x3f3f3f3f;
+const int DIM = 5;
+#define lson kdt[rt].ls,dep+1
+#define rson kdt[rt].rs,dep+1
+struct Node {
+  int ls, rs, x[DIM]; bool flag; //删点标记
+} kdt[N];
+inline ll sqr(int x) { return (ll)x * x; }
+ll dist(const Node &a, const Node &b) {
+  ll ret = 0;
+  for (int i = 0; i < DIM; ++i) { ret += sqr(a.x[i] - b.x[i]); }
+  return ret;
+}
+int root, tot;
+void init() { tot = 0; root = -1; }
+int add(int pt[]) {
+  kdt[tot].flag = false; kdt[tot].ls = kdt[tot].rs = -1;
+  for (int i = 0; i < DIM; ++i) { kdt[tot].x[i] = pt[i]; }
+  return tot++;
+}
+void insert(int pt[], int rt, int dep = 0) {
+  dep %= DIM;
+  if (pt[dep] < kdt[rt].x[dep]) {
+    if (!~kdt[rt].ls) { kdt[rt].ls = add(pt); }
+    else { insert(pt, lson); }
+  } else {
+    if (!~kdt[rt].rs) { kdt[rt].rs = add(pt); }
+    else { insert(pt, rson); }
+  }
+}
+//求最近点距离
+ll query(const Node &pt, int rt, int dep = 0) {
+  if (!~rt) { return INF; }
+  dep %= DIM;
+  ll ret = INF, tmp = sqr(kdt[rt].x[dep] - pt.x[dep]);
+  if (!kdt[rt].flag) { ret = dist(kdt[rt], pt); }
+  if (pt.x[dep] <= kdt[rt].x[dep]) {
+    ret = min(ret, query(pt, lson));
+    if (tmp < ret) { ret = min(ret, query(pt, rson)); }
+  }
+  if (pt.x[dep] >= kdt[rt].x[dep]) {
+    ret = min(ret, query(pt, rson));
+    if (tmp < ret) { ret = min(ret, query(pt, lson)); }
+  }
+  return ret;
+}
+//查询区间内有多少个点
+int query(int pt1[], int pt2[], int rt, int dep = 0) {
+  if (!~rt) { return 0; }
+  dep %= DIM;
+  int ret = 0, cur = 0;
+  for (; cur < DIM; cur++) {
+    if (kdt[rt].x[cur] < pt1[cur] || kdt[rt].x[cur] > pt2[cur]) { break; }
+  }
+  if (cur == DIM) { ++ret; }
+  if (pt2[dep] < kdt[rt].x[dep]) {
+    ret += query(pt1, pt2, lson);
+  } else if (pt1[dep] >= kdt[rt].x[dep]) {
+    ret += query(pt1, pt2, rson);
+  } else {
+    ret += query(pt1, pt2, lson);
+    ret += query(pt1, pt2, rson);
+  }
+  return ret;
+}
+//
+const int N = 100005;
+const ll INF = 0x3f3f3f3f3f3f3f3fll;
+const int DIM = 2;
+#define lson l,m-1,dep+1
+#define rson m+1,r,dep+1
+int n, K, id[N], root, cur;
+struct Node {
+  int x[DIM], ls, rs, mx[DIM], mn[DIM], val, sum, fa, id;
+  bool operator<(const Node &r)const {
+    for (int d = 0; d < K; d++) { if (x[d] != r.x[d]) { return x[d] < r.x[d]; } }
+    return false;
+  }
+} kdt[N];
+inline bool cmp(const Node &a, const Node &b) { return a.x[cur] < b.x[cur]; }
+inline void umax(int &a, int b) { if (a < b) { a = b; } }
+inline void umin(int &a, int b) { if (a > b) { a = b; } }
+void up(int rt) {
+  if (kdt[rt].ls) {
+    for (int d = 0; d < K; d++) {
+      umax(ktd[rt].mx[d], kdt[kdt[rt].ls].mx[d]);
+      umin(kdt[rt].mn[d], kdt[kdt[rt].ls].mn[d]);
+    }
+  }
+  if (kdt[rt].rs) {
+    for (int d = 0; d < K; d++) {
+      umax(ktd[rt].mx[d], kdt[kdt[rt].rs].mx[d]);
+      umin(kdt[rt].mn[d], kdt[kdt[rt].rs].mn[d]);
+    }
+  }
+}
+int build(int l, int r, int dep, int fa) {
+  int mid = (l + r) >> 1;
+  cur = dep % K;
+  nth_element(kdt + l + 1, kdt + mid + 1, kdt + r + 1, cmp);
+  for (int d = 0; d < K; d++) { kdt[mid].mx[d] = kdt[mid].mn[d] = kdt[mid].x[d]; }
+  kdt[mid].val = kdt[mid].sum = 0;
+  id[kdt[mid].fa] = mid; kdt[mid].fa = fa;
+  kdt[mid].ls = l == mid ? 0 : build(lson, mid);
+  kdt[mid].rs = r == mid ? 0 : build(rson, mid);
+  up(mid); return mid;
+}
+//输入的第x个点的权值增加val
+void change(int x, int val) {
+  for (kdt[x = id[x]].val += val; x; x = kdt[x].fa) { kdt[x].sum += val; }
+}
+//求最近点
+int px, py; ll ans; Node ansP;
+inline ll sqr(int x) {return (ll)x * x;}
+inline ll dist(int p1) {
+  ll ret = 0;
+  if (px < kdt[p1].mn[0]) { ret += sqr(kdt[p1].mn[0] - px); }
+  if (px > kdt[p1].mx[0]) { ret += sqr(px - kdt[p1].mx[0]); }
+  if (py < kdt[p1].mn[1]) { ret += sqr(kdt[p1].mn[1] - py); }
+  if (py > kdt[p1].mx[1]) { ret += sqr(py - kdt[p1].mx[1]); }
+  return ret;
+}
+void ask(int x) {
+  ll dl, dr, d0 = sqr(kdt[x].d[0] - px) + sqr(kdt[x].d[1] - py);
+  if (d0 < ans || (d0 == ans && kdt[x] < ansP)) { ans = d0; ansP = kdt[x]; }
+  dl = kdt[x].ls ? dist(kdt[x].ls) : INF;
+  dr = kdt[x].rs ? dist(kdt[x].rs) : INF;
+  if (dl < dr) {
+    if (dl <= ans) { ask(kdt[x].ls); }
+    if (dr <= ans) { ask(kdt[x].rs); }
+  } else {
+    if (dr <= ans) { ask(kdt[x].rs); }
+    if (dl <= ans) { ask(kdt[x].ls); }
+  }
+}
+int getP(int root) { ans = INF; ask(root); return ansP.id; }
+//估价函数:
+//欧几里得距离下界: sqr(max(max(X−x.mx[0],x.mn[0]−X),0))+sqr(max(max(Y−x.mx[1],x.mn[1]−Y),0))
+//欧几里得距离上界: max(sqr(X−x.mn[0]),sqr(X−x.mx[0]))+max(sqr(Y−x.mn[1]),sqr(Y−x.mx[1])
+//曼哈顿距离下界: max(x.mn[0]−X,0)+max(X−x.mx[0],0)+max(x.mn[1]−Y,0)+max(Y−x.mx[1],0)
+//曼哈顿距离上界: max(abs(X−x.mx[0]),abs(x.mn[0]−X))+max(abs(Y−x.mx[1]),abs(x.mn[1]−Y))
+//查询二维矩形范围内所有点的权值和
+int X1, Y1, X2, Y2, ret;
+void query(int rt) {
+  if (kdt[rt].mn[0] > X2 || kdt[rt].mx[0] < X1 || kdt[rt].mn[1] > Y2 || kdt[rt].mx[1] < Y1) { return; }
+  if (kdt[rt].mn[0] >= X1 && kdt[rt].mx[0] <= X2 && kdt[rt].mn[1] >= Y1 && kdt[rt].mx[1] <= Y2) {
+    ret += kdt[rt].sum;
+    return;
+  }
+  if (kdt[rt].x[0] >= X1 && kdt[rt].x[0] <= X2 && kdt[rt].x[1] >= Y1 && kdt[rt].x[1] <= Y2) { ret += kdt[rt].val; }
+  if (kdt[rt].ls) { ask(kdt[rt].ls); }
+  if (kdt[rt].rs) { ask(kdt[rt].rs); }
+}
+root = build(1, n, 0, 0);
 //笛卡尔树
 //考虑一个键值对的序列, 当键与键, 值与值之间互不相同时, 它们可以唯一地构成这样一棵二叉树：
 //key在中序遍历时呈升序, 满足二叉查找树性质; 父节点的value大于子节点的value, 满足堆的性质.
@@ -2162,7 +2252,7 @@ int main() {
 //POJ2201
 const int N = 50005;
 int idx[N], n;
-struct Cartesian_Tree {
+struct CartesianTree {
   int root, key[N], val[N], ch[N][2], pre[N];
   void init() {
     for (int i = 1; i <= n; ++i) {

@@ -21,7 +21,7 @@ ll Com(ll n, ll m) {
 }
 //求组合数取模
 //p <= 1e6 预处理阶乘逆元 O(min(n, p)) + O(1)
-ll fac[M] = {1, 1}, invfac[M] = {1, 1};
+ll fac[M + 5] = {1, 1}, invfac[M + 5] = {1, 1};
 void initFac(ll p) {
   for (int i = 2; i < p; i++) {
     fac[i] = fac[i - 1] * i % p; invfac[i] = (-invfac[p % i] * (p / i) % p + p) % p;

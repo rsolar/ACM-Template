@@ -10,11 +10,12 @@ struct str_hash {
     return __stl_hash_string(str.c_str());
   }
 };
-//BKDR Hash Function
-inline size_t BKDRHash(const char *str) {
-  size_t h = 0, seed = 131; //31 131 1313 13131 131313 etc..
-  while (*str) { h = h * seed + (*str++); }
-  return h & 0x7FFFFFFF;
+//BKDR Hash
+const int seed = 131; //31 131 1313 13131 131313 ...
+inline int BKDRHash(const char *str) {
+  int h = 0;
+  while (*str) { h = h * seed + *str++; }
+  return h;
 }
 //字符串hash
 const int N = 20005, P = 31, D = 1000173169;
@@ -47,15 +48,20 @@ template<size_t(*Hash)(const char *)> struct hashmap {
   }
 };
 hashmap<BKDRHash> mp;
-//Manacher 最长回文子串
+//Manacher 最长回文子串 O(n)
+//s[i]:       w   a   a   b   w   s   w   f   d
+//tmp[i]: $ # w # a # a # b # w # s # w # f # d #
+//dp[i]:  1 1 2 1 2 3 2 1 2 1 2 1 4 1 2 1 2 1 2 1
+//dp[i]: 新串以s[i]为中心向右延伸的回文距离 + 1(自己)
+//dp[i] - 1: 原串以s[i]为中心的回文长度
 //最长回文子串对应原串T中的位置: l = (i - R[i]) / 2; r = (i + R[i]) / 2 - 2;
-char s[N], tmp[N << 1];
+char tmp[N << 1];
 int dp[N << 1];
-void Manacher(char *s, int len) {
-  int l = 0, mx = 0, id = 0; tmp[l++] = '$'; tmp[l++] = '#';
-  for (int i = 0; i < len; i++) { tmp[l++] = s[i]; tmp[l++] = '#'; }
-  tmp[l] = 0;
-  for (int i = 0; i < l; i++) {
+void Manacher(char *s, int n) {
+  int len = 0, mx = 0, id = 0; tmp[len++] = '$'; tmp[len++] = '#';
+  for (int i = 0; i < n; i++) { tmp[len++] = s[i]; tmp[len++] = '#'; }
+  tmp[len] = 0;
+  for (int i = 0; i < len; i++) {
     dp[i] = mx > i ? min(dp[(id << 1) - i], mx - i) : 1;
     while (tmp[i + dp[i]] == tmp[i - dp[i]]) { dp[i]++; }
     if (i + dp[i] > mx) { mx = i + dp[i]; id = i; }
