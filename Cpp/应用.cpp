@@ -149,7 +149,7 @@ void calGCD {
 }
 //小数转化为分数
 //把小数转化为分数, 循环部分用()表示
-void work(char str[]) {
+pair<ll, ll> work(char *str) {
   int len = strlen(str), cnt1 = 0, cnt2 = 0;
   ll a = 0, b = 0; bool flag = false;
   for (int i = 2; i < len; i++) {
@@ -164,8 +164,8 @@ void work(char str[]) {
   if (!flag) { p = b; q = 1; cnt2 = 0; }
   for (int i = 0; i < cnt2; i++) { q = q * 10 + 9; }
   for (int i = 0; i < cnt1; i++) { q = q * 10; }
-  ll g = gcd(p, q);
-  printf("%I64d/%I64d\n", p / g, q / g);
+  ll d = __gcd(p, q);
+  return make_pair(p / d, q / d);
 }
 //分数转化为小数
 //定理: 有理数a / b(其中0 < a < b，(a, b) = 1)能表示成纯循环小数的充要条件是(b, 10) = 1

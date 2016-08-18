@@ -318,41 +318,47 @@ void SA(char *s, int n, int m) {
 //后缀自动机
 const int N = 1000005;
 const int N_CHAR = 26;
+struct Node { Node *fail, *nxt[N_CHAR]; int val, right; };
 struct SuffixAutomaton {
-  struct Node { Node *fail, *next[N_CHAR]; int val, right; };
   Node mempool[N << 1]; int n_node;
   Node *new_node(int v) {
-    Node *p = &mempool[n_node++]; memset(p->next, 0, sizeof(p->next));
+    Node *p = &mempool[n_node++]; memset(p->nxt, 0, sizeof(p->nxt));
     p->fail = 0; p->right = 0; p->val = v; return p;
   }
   Node *root, *last;
-  SuffixAutomaton() { clear(); }
   void clear() { root = last = new_node(n_node = 0); }
   void add(int c) {
     Node *p = last, *np = new_node(p->val + 1);
-    while (p && !p->next[c]) { p->next[c] = np; p = p->fail; }
+    while (p && !p->nxt[c]) { p->nxt[c] = np; p = p->fail; }
     if (!p) { np->fail = root; }
     else {
-      Node *q = p->next[c];
+      Node *q = p->nxt[c];
       if (p->val + 1 == q->val) { np->fail = q; }
       else {
         Node *nq = new_node(p->val + 1);
-        for (int i = 0; i < N_CHAR; i++) { nq->next[i] = q->next[i]; }
+        for (int i = 0; i < N_CHAR; i++) { nq->nxt[i] = q->nxt[i]; }
         nq->fail = q->fail; q->fail = np->fail = nq;
-        while (p && p->next[c] == q) { p->next[c] = nq; p = p->fail; }
+        while (p && p->nxt[c] == q) { p->nxt[c] = nq; p = p->fail; }
       }
     }
     last = np; np->right = 1;
+  }
+  void insert(const char *s) {
+    last = root;
+    for (int i = 0, c; s[i]; i++) {
+      if (!last->nxt[c = s[i] - 'a'] || last->nxt[c]->val != i + 1) { add(c); }
+      else { last = last->nxt[c]; }
+    }
   }
   Node *go(const char *s) {
     Node *p = root; int cL = 0; //与s匹配的长度
     for (int i = 0; s[i]; i++) {
       int c = s[i] - 'a';
-      if (p->next[c]) { p = p->next[c], ++cL; }
+      if (p->nxt[c]) { p = p->nxt[c], ++cL; }
       else {
-        while (p && !p->next[c]) { p = p->fail; }
+        while (p && !p->nxt[c]) { p = p->fail; }
         if (!p) { cL = 0; p = root; }
-        else { cL = p->val + 1; p = p->next[c]; }
+        else { cL = p->val + 1; p = p->nxt[c]; }
       }
     }
     return p;

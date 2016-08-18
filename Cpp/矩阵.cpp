@@ -101,7 +101,7 @@ template<typename T> struct mat {
           break;
         }
       }
-      if (c[i][i] == 0) { res = -1; break; }
+      if (c[i][i] == 0) { return -1; }
       for (int j = i + 1; j < h; j++) {
         //int mul = (c[j][i] * Inv[c[i][i]]) % M; //打表逆元
         ll mul = (c[j][i] * inv(c[i][i], M)) % M;

@@ -40,7 +40,10 @@ bool dfs(int u) {
 int head[N], to[M], nxt[M], tot, uN, match[N];
 bool check[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y) {
+  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
+}
 bool dfs(int u) {
   for (int i = head[u]; ~i; i = nxt[i]) {
     int v = to[i];
@@ -100,7 +103,10 @@ int Hungary() {
 //Hungary + bfs + 邻接表 O(V*E)
 int head[N], to[M], nxt[M], tot, uN, match[N], check[N], pre[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y) {
+  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
+}
 int Hungary() {
   memset(match, -1, sizeof(match));
   memset(check, -1, sizeof(check));
@@ -269,7 +275,10 @@ bool aug(int now) {
 int head[N], to[M], nxt[M], tot, match[N];
 bool check[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
+void addedge(int x, int y) {
+  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
+  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
+}
 bool aug(int now) {
   bool ret = false; check[now] = true;
   for (int i = head[now]; ~i; i = nxt[i]) {

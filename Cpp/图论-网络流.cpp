@@ -1,7 +1,7 @@
 //最大流
 //SAP + 邻接矩阵 O(V^2*E) 点的编号默认从0开始
-typedef long long ftype;
-int n, dis[N], pre[N], cur[N], gap[N];
+typedef int ftype;
+int dis[N], pre[N], cur[N], gap[N];
 ftype cap[N][N];
 ftype SAP(int src, int sink, int n) {
   memset(dis, 0, sizeof(dis));
@@ -33,7 +33,7 @@ loop:
   return mxflow;
 }
 //ISAP + 邻接表 O(V^2*E)
-typedef long long ftype;
+typedef int ftype;
 const ftype INF = 0x3f3f3f3f;
 int head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
 ftype cap[M];
@@ -78,9 +78,9 @@ ftype ISAP(int src, int sink, int n) {
   return mxflow;
 }
 //ISAP + bfs标号 + queue + 邻接表 O(V^2*E)
-typedef long long ftype;
+typedef int ftype;
 const ftype INF = 0x3f3f3f3f;
-int n, head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
+int head[N], to[M], nxt[M], tot, dis[N], pre[N], cur[N], gap[N];
 ftype cap[M];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
 inline void addedge(int x, int y, ftype w, ftype rw = 0) {
@@ -133,7 +133,7 @@ ftype ISAP(int src, int sink, int n) {
   return mxflow;
 }
 //Dinic O(V^2*E)
-typedef long long ftype;
+typedef int ftype;
 const ftype INF = 0x3f3f3f3f;
 int head[N], to[M], nxt[M], tot, dis[N], cur[N], src, sink;
 ftype cap[M];
@@ -177,21 +177,17 @@ ftype Dinic() {
   return ret;
 }
 //HLPP Highest Label Preflow Push O(V^3)
-typedef long long ftype;
+typedef int ftype;
 struct Edge { int v; ftype c; } edge[M];
 vector<int> e[N];
-int n, m, src, sink, c[N << 1], d[N], done[N];
-ftype w[N];
-bool vis[N];
-void init(int _n, int _src, int _sink) {
-  n = _n; m = 0; src = _src; sink = _sink;
-  for (int i = 0; i <= n; ++i) { e[i].clear(); }
+int tot, src, sink, c[N << 1], d[N], done[N];
+ftype w[N]; bool vis[N];
+void init(int n) { for (int i = 0; i <= n; ++i) { e[i].clear(); } tot = 0; }
+inline void addedge(int x, int y, ftype w, ftype rw = 0) {
+  edge[tot].v = y; edge[tot].c = w; e[x].push_back(tot++);
+  edge[tot].v = x; edge[tot].c = rw; e[y].push_back(tot++);
 }
-inline void addEdge(int x, int y, ftype w, ftype rw = 0) {
-  edge[m].v = y; edge[m].c = w; e[x].push_back(m++);
-  edge[m].v = x; edge[m].c = rw; e[y].push_back(m++);
-}
-void bfs() {
+void bfs(int n) {
   memset(c, 0, sizeof(c));
   fill(d, d + n, n + 1);
   queue<int> que; que.push(sink);
@@ -209,7 +205,7 @@ int HLPP(int n) {
   memset(w, 0, sizeof(w));
   memset(done, 0, sizeof(done));
   memset(vis, 0, sizeof(vis));
-  bfs();
+  bfs(n);
   int todo = -1;
   vector<queue<int>> que(n << 1);
   vis[src] = vis[sink] = true;
@@ -268,7 +264,7 @@ int HLPP(int n) {
 //最小费用流: 若dis[sink]为负则继续增广
 //最小费用最大流: 若dis[sink]不为INF则继续增广
 //求最大费用只需取相反数, 结果取相反数即可
-typedef long long ftype;
+typedef int ftype;
 const ftype INF = 0x3f3f3f3f;
 int head[N], to[M], nxt[M], tot, cur[N];
 ftype cap[M], cost[M], flow[N], dis[N], mncost, mxflow;
