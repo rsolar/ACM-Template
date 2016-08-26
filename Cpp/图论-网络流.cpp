@@ -260,7 +260,7 @@ int HLPP(int n) {
 //增加超级源汇点, 求一遍超级源到超级汇的最大流
 //从原汇点连一条容量INF的边到原源点, 再求一遍超级源到超级汇的最大流
 //当且仅当超级源的出度满流时有可行解, 解为原汇点到原源点的反向弧
-////最小费用最大流 MCMF O(V*E*f)
+//最小费用最大流 SPFA增广 O(V*E*f)
 //最小费用流: 若dis[sink]为负则继续增广
 //最小费用最大流: 若dis[sink]不为INF则继续增广
 //求最大费用只需取相反数, 结果取相反数即可
@@ -301,4 +301,31 @@ ftype MCMF(int src, int sink) {
   mxflow = mncost = 0;
   while (SPFA(src, sink));
   return mncost;
+}
+//无向图最小割 Stoer-Wagner算法 O(V^3)
+const int INF = 0x3f3f3f3f;
+int g[N][N], dis[N], v[N]; bool vis[N];
+int StoerWagner(int n) {
+  int ret = INF;
+  for (int i = 0; i < n; i++) { v[i] = i; }
+  while (n > 1) {
+    memset(dis, 0, sizeof(dis)); memset(vis, 0, sizeof(vis));
+    for (int i = 1, j, k, pre = 0; i < n; i++, pre = k) {
+      for (j = 1, k = -1; j < n; j++) {
+        if (!vis[v[j]]) {
+          dis[v[j]] += g[v[pre]][v[j]];
+          if (k == -1 || dis[v[k]] < dis[v[j]]) { k = j; }
+        }
+      }
+      vis[v[k]] = true;
+      if (i == n - 1) {
+        ret = min(ret, dis[v[k]]);
+        for (int j = 0; j < n; j++) {
+          g[v[pre]][v[j]] += g[v[j]][v[k]]; g[v[j]][v[pre]] = g[v[pre]][v[j]];
+        }
+        v[k] = v[--n];
+      }
+    }
+  }
+  return ret;
 }

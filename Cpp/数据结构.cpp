@@ -55,35 +55,47 @@ BIT<int> bit;
 //单点修改 + 单点查询 + 区域修改 + 区域查询
 int n, m;
 template<typename T> struct BIT {
-  T A[N][N]; //T B[N][N], C[N][N], D[N][N]; //区域求和
+  T A[N][N]; //T A[N][N][4]; //区域求和
   int lowbit(int x) { return x & -x; }
-  void init() { memset(A, 0, sizeof(A)); /*memset(B, 0, sizeof(B)); memset(C, 0, sizeof(C)); memset(D, 0, sizeof(D));*/ }
+  void init() { memset(A, 0, sizeof(A)); }
   T get(int x, int y) {
     T ret = 0;
     for (int i = x; i > 0; i -= lowbit(i)) { for (int j = y; j > 0; j -= lowbit(j)) { ret += A[i][j]; } }
     return ret;
   }
+  //单点查询
   T query(int x, int y) { return get(x, y) - get(x, y - 1) - get(x - 1, y) + get(x - 1, y - 1); }
   void update(int x, int y, T v) {
     for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { A[i][j] += v; } }
   }
-  //区域和[x1][y1]-[x2][y2]
+  //区域查询
   T query(int x1, int y1, int x2, int y2) {
     return get(x2, y2) - get(x1 - 1, y2) - get(x2, y1 - 1) + get(x1 - 1, y1 - 1);
   }
   //区域增减
-  void update(int x, int y, T v, T a[][N]) {
-    for (int i = x; i <= n; i += lowbit(i)) { for (int j = y; j <= m; j += lowbit(j)) { a[i][j] += v; } }
+  void add(int x, int y, T v) {
+    T c[4] = {v, v * y, v * x, v *x * y};
+    for (int i = x; i <= n; i += lowbit(i)) {
+      for (int j = y; j <= m; j += lowbit(j)) {
+        for (int k = 0; k < 4; k++) { A[i][j][k] += c[k]; }
+      }
+    }
   }
   void update(int x1, int y1, int x2, int y2, T v) {
-    update(x1, y1, v, A); update(x2 + 1, y1, -v, A);
-    update(x1, y2 + 1, -v, A); update(x2 + 1, y2 + 1, v, A);
-    update(x1, y1, v * x1, B); update(x2 + 1, y1, -v * (x2 + 1), B);
-    update(x1, y2 + 1, -v * x1, B); update(x2 + 1, y2 + 1, v * (x2 + 1), B);
-    update(x1, y1, v * y1, C); update(x2 + 1, y1, -v * y1, C);
-    update(x1, y2 + 1, -v * (y2 + 1), C); update(x2 + 1, y2 + 1, v * (y2 + 1), C);
-    update(x1, y1, v * x1 * y1, D); update(x2 + 1, y1, -v * (x2 + 1) * y1, D);
-    update(x1, y2 + 1, -v * x1 * (y2 + 1), D); update(x2 + 1, y2 + 1, v * (x2 + 1) * (y2 + 1), D);
+    add(x1, y1, v); add(x1, y2 + 1, -v); add(x2 + 1, y1, -v); add(x2 + 1, y2 + 1, v);
+  }
+  //区域查询
+  T sum(int x, int y) {
+    T c[4] = {0};
+    for (int i = x; i; i -= lowbit(i)) {
+      for (int j = y; j; j -= lowbit(j)) {
+        for (int k = 0; k < 4; k++) { c[k] += A[i][j][k]; }
+      }
+    }
+    return (x + 1ll) * (y + 1) * c[0] - (x + 1ll) * c[1] - (y + 1ll) * c[2] + c[3];
+  }
+  T query(int x1, int y1, int x2, int y2) {
+    return sum(x1 - 1, y1 - 1) - sum(x1 - 1, y2) - sum(x2, y1 - 1) + sum(x2, y2);
   }
 };
 BIT<int> bit;
@@ -161,6 +173,9 @@ template<typename T> struct SegmentTree {
   }
 };
 SegmentTree<int> st;
+//二维线段树
+
+
 //非递归版线段树 单点修改 + 区间查询
 const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
 #define l(x) ((x)<<1) //x的左儿子

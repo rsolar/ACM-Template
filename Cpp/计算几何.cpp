@@ -8,6 +8,7 @@ inline int sgn(double x) { return (fabs(x) < EPS ? 0 : (x < 0 ? -1 : 1)); }
 struct Point {
   double x, y;
   Point(double _x = 0, double _y = 0): x(_x), y(_y) {}
+  Point operator+(const Point &b)const { return Point(x + b.x, y + b.y); }
   Point operator-(const Point &b)const { return Point(x - b.x, y - b.y); }
   //点积
   double operator*(const Point &b)const { return x * b.x + y * b.y; }
