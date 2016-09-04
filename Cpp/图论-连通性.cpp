@@ -151,7 +151,7 @@ void Tarjan(int u, int p) {
   }
 }
 void EBCC(int n) {
-  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); memset(cut, 0, sizeof(cut));
+  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); memset(ecut, 0, sizeof(ecut));
   while (!stk.empty()) { stk.pop(); } index = bridge = block = 0;
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, -1); } }
 }

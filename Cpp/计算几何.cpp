@@ -578,22 +578,18 @@ void HPI(Line line[], int n, Point res[], int &resn) {
         || fabs((Q[head].e-Q[head].s) ^ (Q[head + 1].e-Q[head + 1].s)) < EPS) {
       return;
     }
-    while (head < tail
-           && (((Q[tail]&Q[tail - 1]) - line[i].s) ^ (line[i].e-line[i].s)) > EPS) {
+    while (head < tail && (((Q[tail]&Q[tail - 1]) - line[i].s) ^ (line[i].e-line[i].s)) > EPS) {
       tail--;
     }
-    while (head < tail
-           && (((Q[head]&Q[head + 1]) - line[i].s) ^ (line[i].e-line[i].s)) > EPS) {
+    while (head < tail && (((Q[head]&Q[head + 1]) - line[i].s) ^ (line[i].e-line[i].s)) > EPS) {
       head++;
     }
     Q[++tail] = line[i];
   }
-  while (head < tail
-         && (((Q[tail]&Q[tail - 1]) - Q[head].s) ^ (Q[head].e-Q[head].s)) > EPS) {
+  while (head < tail && (((Q[tail]&Q[tail - 1]) - Q[head].s) ^ (Q[head].e-Q[head].s)) > EPS) {
     tail--;
   }
-  while (head < tail
-         && (((Q[head]&Q[head - 1]) - Q[tail].s) ^ (Q[tail].e-Q[tail].e)) > EPS) {
+  while (head < tail && (((Q[head]&Q[head - 1]) - Q[tail].s) ^ (Q[tail].e-Q[tail].e)) > EPS) {
     head++;
   }
   if (tail <= head + 1) { return; }

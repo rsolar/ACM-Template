@@ -94,8 +94,11 @@ int minString(char *s) {
 //strstr 在str1中查找str2的第一次出现 无则返回NULL
 char *strstr(const char *str1, const char *str2);
 //KMP O(M + N)
-//nxt[]的含义：x[i-nxt[i]...i-1]=x[0...nxt[i]-1]
-//nxt[i]为满足x[i-z...i-1]=x[0...z-1]的最大z值(就是x的自身匹配)
+//nxt[]的含义：x[i - nxt[i]...i - 1] = x[0...nxt[i]-1]
+//nxt[i]为满足x[i - z...i-1] = x[0...z - 1]的最大z值(就是x的自身匹配)
+//定理: 假设S的长度为len, 则S存在最小循环节, 循环节的长度L为len - next[len], 子串为S[0...len - next[len] - 1]
+//(1) 如果len可以被len - next[len]整除, 则表明字符串S可以完全由循环节循环组成, 循环周期T = len / L
+//(2) 如果不能, 需要补的个数是循环个数L - len % L = L - (len - L) % L = L - next[len] % L, L = len - next[len]
 char x[N], y[N];
 int nxt[N];
 void getnxt(char *x, int m, int nxt[]) {
@@ -156,6 +159,26 @@ void getext(char *x, int m, char *y, int n, int nxt[], int ext[]) {
       j = max(0, p - i + 1);
       while (i + j < n && j < m && y[i + j] == x[j]) { j++; }
       ext[i] = j; k = i;
+    }
+  }
+}
+//Z算法 O(N)
+//z[i]表示suffix(i)与字符串本身的LCP长度
+int z[N];
+void getZ(char *s, int n, int z[]) {
+  z[0] = n;
+  for (int i = 1, l = 0, r = 0; i < n; i++) {
+    if (i > r) {
+      l = r = i;
+      while (r < n && s[r - l] == s[r]) { r++; }
+      z[i] = r - l; r--;
+    } else {
+      if (z[i - l] < r - i + 1) { z[i] = z[i - l]; }
+      else {
+        l = i;
+        while (r < n && s[r - l] == s[r]) { r++; }
+        z[i] = r - l; r--;
+      }
     }
   }
 }

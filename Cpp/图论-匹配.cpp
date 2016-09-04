@@ -1,7 +1,7 @@
-//图论点、边集和二分图的相关概念和性质
+//图论点、边集和二分图的相关概念
 //点覆盖: 点覆盖集即一个点集, 使得所有边至少有一个端点在集合里
 //边覆盖: 边覆盖集即一个边集, 使得所有点都与集合里的边邻接
-//独立集: 独立集即一个点集, 集合中任两个结点不相邻, 则称V为独立集
+//独立集: 独立集即一个点集, 集合中任两个结点不相邻
 //团: 团即一个点集, 集合中任两个结点相邻
 //边独立集: 边独立集即一个边集, 满足边集中的任两边不邻接
 //支配集: 支配集即一个点集, 使得所有其他点至少有一个相邻点在集合里
@@ -15,10 +15,15 @@
 //匹配数(matching number): 最大匹配的大小
 //完美匹配(perfect matching): 匹配了所有点的匹配
 //完备匹配(complete matching): 匹配了二分图较小集合（二分图X, Y中小的那个）的所有点的匹配
-//增广轨定理: 一个匹配是最大匹配当且仅当没有增广轨
 //所有匹配算法都是基于增广轨定理: 一个匹配是最大匹配当且仅当没有增广轨
-//最大匹配数 = 最小覆盖数 = 左边匹配点 + 右边未匹配点
-//最小边覆盖 = 图中点的个数 - 最大匹配数 = 独立数
+//二分图相关性质:
+//最大匹配数 = 最小点覆盖数 = 左边匹配点 + 右边未匹配点
+//最小边覆盖 = 点数 - 最大匹配数 = 独立数
+//最大团 = 补图的独立数
+//DAG的最小不相交路径覆盖:
+//拆点后作最大匹配, 结果为点数 - 新图最大匹配数, 匹配边i -> j', j -> k', ...构成一条有向路径
+//DAG的最小可相交路径覆盖:
+//用floyd求出传递闭包, 如a到b有路径, 那么就加边a -> b, 就转化成了最小不相交路径覆盖问题
 
 //二分图最大匹配
 //Hungary + dfs
@@ -40,10 +45,7 @@ bool dfs(int u) {
 int head[N], to[M], nxt[M], tot, uN, match[N];
 bool check[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) {
-  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
-  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
-}
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 bool dfs(int u) {
   for (int i = head[u]; ~i; i = nxt[i]) {
     int v = to[i];
@@ -103,10 +105,7 @@ int Hungary() {
 //Hungary + bfs + 邻接表 O(V*E)
 int head[N], to[M], nxt[M], tot, uN, match[N], check[N], pre[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) {
-  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
-  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
-}
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 int Hungary() {
   memset(match, -1, sizeof(match));
   memset(check, -1, sizeof(check));
@@ -192,8 +191,7 @@ int HK() {
 //若求最小权匹配,可将权值取相反数,结果取相反数 点的编号从0开始
 const int INF = 0x3f3f3f3f;
 int uN, vN, g[N][N];
-int matchy[N], lx[N], ly[N]; //y中各点匹配状态, 可行顶标
-int slack[N]; //松弛数组
+int matchy[N], lx[N], ly[N], slack[N]; //y中各点匹配状态, 可行顶标, 松弛数组
 bool visx[N], visy[N];
 bool dfs(int u) {
   visx[u] = true;
@@ -275,10 +273,7 @@ bool aug(int now) {
 int head[N], to[M], nxt[M], tot, match[N];
 bool check[N];
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) {
-  to[tot] = y; nxt[tot] = head[x]; head[x] = tot++;
-  to[tot] = x; nxt[tot] = head[y]; head[y] = tot++;
-}
+void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 bool aug(int now) {
   bool ret = false; check[now] = true;
   for (int i = head[now]; ~i; i = nxt[i]) {
