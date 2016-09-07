@@ -1,26 +1,3 @@
-//威佐夫博弈 Wizov game
-//有两堆各若干个物品, 两个人轮流从某一堆或同时从两堆中取同样多的物品, 规定每次至少取一个, 多者不限, 最后取光者得胜
-//ak = [k(1 + √ 5) / 2], bk = ak + k (k = 0, 1, 2, ..., n 方括号表示取整函数)
-const double gs = (sqrt(5.0) + 1.0) / 2.0;
-bool Wizov(ll a, ll b) {
-  return min(a, b) == (ll)(abs(a - b) * gs);
-}
-//威佐夫博弈 1 <= N <= 1e18
-const int N = 95; //~95 for 1e18
-ll fib[N] = { 0, 1 }; //预处理fibonacci数列
-bool s[N];
-bool Wizov(ll a, ll b) {
-  int w = upper_bound(fib + 1, fib + N, a) - fib - 1, pos = 1; ll ret = 0;
-  for (int i = w; i > 0; i--) {
-    if (a >= fib[i]) { s[i] = true; a -= fib[i]; }
-    else { s[i] = false; }
-  }
-  while (!s[pos]) { pos++; }
-  for (int i = pos & 1 ? w - 2 : w; i >= 0; i--) {
-    if (s[i]) { ret += fib[i + 1]; }
-  }
-  return ret == b;
-}
 //尼姆博奕 Nimm Game
 //有三堆各若干个物品, 两个人轮流从某一堆取任意多的物品, 规定每次至少取一个, 多者不限, 最后取光者得胜
 //计算从1 - n范围内的SG值
@@ -64,6 +41,29 @@ void printNim(int n) { //石子堆数
       printf("%d %d\n", ans[i][0], ans[i][1]);  //输出若先手为胜的走法
     }
   } else { puts("No"); }
+}
+//威佐夫博弈 Wizov game
+//有两堆各若干个物品, 两个人轮流从某一堆或同时从两堆中取同样多的物品, 规定每次至少取一个, 多者不限, 最后取光者得胜
+//ak = [k(1 + √ 5) / 2], bk = ak + k (k = 0, 1, 2, ..., n 方括号表示取整函数)
+const double gs = (sqrt(5.0) + 1.0) / 2.0;
+bool Wizov(ll a, ll b) {
+  return min(a, b) == (ll)(abs(a - b) * gs);
+}
+//威佐夫博弈 1 <= N <= 1e18
+const int N = 95; //~95 for 1e18
+ll fib[N] = { 0, 1 }; //预处理fibonacci数列
+bool s[N];
+bool Wizov(ll a, ll b) {
+  int w = upper_bound(fib + 1, fib + N, a) - fib - 1, pos = 1; ll ret = 0;
+  for (int i = w; i > 0; i--) {
+    if (a >= fib[i]) { s[i] = true; a -= fib[i]; }
+    else { s[i] = false; }
+  }
+  while (!s[pos]) { pos++; }
+  for (int i = pos & 1 ? w - 2 : w; i >= 0; i--) {
+    if (s[i]) { ret += fib[i + 1]; }
+  }
+  return ret == b;
 }
 //树上删边游戏
 //给定一棵n个点的有根树, 每次可以删掉一个子树

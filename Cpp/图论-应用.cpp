@@ -167,9 +167,7 @@ void init() {
   memset(vis, 0, sizeof(vis)); memset(in, 0, sizeof(in)); memset(out, 0, sizeof(out));
   for (int i = 0; i < N; i++) { fa[i] = i; }
 }
-int findfa(int n) {
-  return n == fa[n] ? n : fa[n] = findfa(fa[n]);
-}
+int findfa(int n) { return n == fa[n] ? n : fa[n] = findfa(fa[n]); }
 inline void unite(int x, int y) {
   x = findfa(x); y = findfa(y);
   if (x != y) { fa[y] = x; }

@@ -1048,7 +1048,7 @@ Point NearestPointToLineSeg(Point P, Line L) {
   }
   return result;
 }
-//计算险段L1到线段L2的最短距离
+//计算线段L1到线段L2的最短距离
 double MinDistance(Line L1, Line L2) {
   double d1, d2, d3, d4;
   if (LineSegIntersect(L1, L2)) {

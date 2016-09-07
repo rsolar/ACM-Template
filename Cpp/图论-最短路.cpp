@@ -152,7 +152,7 @@ typedef int wtype;
 int n, pre[N][N]; wtype mp[N][N]; //初始化为INF
 void Floyd() {
   for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= n; j++) { pre[i][j] = (i == j) ? -1 : i; }
+    for (int j = 1; j <= n; j++) { pre[i][j] = i; }
   }
   for (int k = 1; k <= n; k++) {
     for (int i = 1; i <= n; i++) {
@@ -165,25 +165,36 @@ void Floyd() {
   }
 }
 //无负权图的最小环
-//有向图: mp[i][i] = INF, 然后跑floyd, ans = min(d[i][i])
+//有向图: mp[i][i] = INF, 然后跑floyd, ret = min(d[i][i])
 //求无向图中经过至少3个点的最小环:
 typedef int wtype;
-const wtype INF = 0x3f3f3f3f;
-int n; wtype mp[N][N], d[N][N]; //初始化为INF
+const wtype INF = 0x1f1f1f1f;
+int pre[N][N]; wtype mp[N][N], d[N][N]; vector<int> path;
 wtype cycFloyd() {
-  memcpy(d, mp, sizeof(mp)); wtype ret = INF;
+  memcpy(d, mp, sizeof(d)); wtype ret = INF;
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= n; j++) { pre[i][j] = i; }
+  }
   for (int k = 1; k <= n; k++) {
     for (int i = 1; i < k; i++) {
       for (int j = i + 1; j < k; j++) {
-        ans = min(ans, d[i][j] + mp[i][k] + mp[k][j]);
+        if (ret > d[i][j] + mp[i][k] + mp[k][j]) {
+          ret = d[i][j] + mp[i][k] + mp[k][j];
+          int p = j; path.clear();
+          while (p != i) { path.push_back(p); p = pre[i][p]; }
+          path.push_back(i); path.push_back(k);
+        }
       }
     }
     for (int i = 1; i <= n; i++) {
       for (int j = 1; j <= n; j++) {
-        d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+        if (d[i][j] > d[i][k] + d[k][j]) {
+          d[i][j] = d[i][k] + d[k][j]; pre[i][j] = pre[k][j];
+        }
       }
     }
   }
+  return ret;
 }
 //Astar求k短路
 typedef int wtype;

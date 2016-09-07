@@ -106,6 +106,20 @@ ll countDigit(char *s) {
   for (int j = 1; j <= 900; j++) { ret += dp[n][j][0] * dp[n][j][1] % M; ret %= M; }
   return ret;
 }
+//阶乘最后非零位 O(nlogn)
+int a[N], dig[20] = {1, 1, 2, 6, 4, 2, 2, 4, 2, 8, 4, 4, 8, 4, 6, 8, 8, 6, 8, 2};
+int facLastDigit(char *s) {
+  int len = strlen(s), ret = 1;
+  if (len == 1) { return dig[s[0] - '0']; }
+  for (int i = 0; i < len; i++) { a[i] = s[len - 1 - i] - '0'; }
+  for (; len; len -= !a[len - 1]) {
+    ret = ret * dig[a[1] % 2 * 10 + a[0]] % 5;
+    for (int c = 0, i = len - 1; i >= 0; i--) {
+      c = c * 10 + a[i], a[i] = c / 5, c %= 5;
+    }
+  }
+  return ret + ret % 2 * 5;
+}
 //树hash
 int hs[N], P[N]; //一些质数
 void dfs(int u, int p) {
@@ -123,17 +137,17 @@ for (int j = 1; j <= n; j++) {
 }
 sort(hs[i] + 1, hs[i] + n + 1); //结果序列
 //整数划分方案数 O(n^1.5)
-int n, f[777] = {0, 1, 2, 5, 7}, g[N] = {1};
+int n, f[777] = {0, 1, 2, 5, 7}, dp[N] = {1};
 int main() {
   for (int i = 5; i < 777; i++) { f[i] = 3 + 2 * f[i - 2] - f[i - 4]; }
   while (~scanf("%d", &n)) {
     for (int i = 1; i <= n; i++) {
       for (int j = 1; f[j] <= i; j++) {
-        if ((j + 1) >> 1 & 1) { g[i] = (g[i] + g[i - f[j]]) % M; }
-        else { g[i] = ((g[i] - g[i - f[j]]) % M + M) % M; }
+        if ((j + 1) >> 1 & 1) { dp[i] = (dp[i] + dp[i - f[j]]) % M; }
+        else { dp[i] = ((dp[i] - dp[i - f[j]]) % M + M) % M; }
       }
     }
-    printf("%d\n", g[n]);
+    printf("%d\n", dp[n]);
   }
 }
 //所有区间gcd的预处理
@@ -144,6 +158,19 @@ void calGCD {
       v[j] = __gcd(v[j], a[i]);
       while (l[j] > 1 && __gcd(a[i], v[l[j] - 1]) == __gcd(a[i], v[j])) { l[j] = l[l[j] - 1]; }
       //[l[j]...j, i]区间内的值求gcd均为v[j]
+    }
+  }
+}
+//1 / n的循环节长度预处理
+int ret[N];
+void getRecurringCycle() {
+  for (int i = 1; i < N; i++) {
+    int t = i, tt = 1;
+    while (!(t & 1)) { t >>= 1; }
+    while (t % 5 == 0) { t /= 5; }
+    for (int j = 1; j <= t; j++) {
+      tt = tt * 10 % t;
+      if (tt == 1) { ret[i] = j; break; }
     }
   }
 }

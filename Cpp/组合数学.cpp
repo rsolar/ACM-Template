@@ -22,11 +22,11 @@ ll Com(ll n, ll m) {
 //求组合数取模
 //n <= 1e6 或 p <= 1e6 预处理阶乘逆元 O(min(n, p)) + O(1)
 ll fac[M + 5] = {1, 1}, invfac[M + 5] = {1, 1};
-void initFac(ll p) {
-  for (int i = 2; i < p; i++) {
+void initFac(ll n, ll p) {
+  for (int i = 2; i < n; i++) {
     fac[i] = fac[i - 1] * i % p; invfac[i] = (-invfac[p % i] * (p / i) % p + p) % p;
   }
-  for (int i = 2; i < p; i++) { invfac[i] = invfac[i] * invfac[i - 1] % p; }
+  for (int i = 2; i < n; i++) { invfac[i] = invfac[i] * invfac[i - 1] % p; }
 }
 ll Com(ll n, ll m, ll p) {
   return n < m ? 0 : fac[n] * invfac[n - m] % p * invfac[m] % p;
@@ -181,3 +181,25 @@ void printCatalan(int n) {
 //D(1) = 0, D(2) = 1, D(n) = (n - 1)(D(n - 2) + D(n - 1))
 //扩展 Cayley 公式
 //对于n个点, m个连通块的图, 假设每个连通块有a[i]个点, 那么用s - 1条边把它连通的方案数为n^(s-2)a[1]a[2]...a[m]
+
+//polya定理
+//polya定理: 设是n个对象的置换群, 用m种颜色给这n个对象着色,
+//则不同的着色方案数为: [m^c(a1) + m^c(a2) + ... + m^c(ag)] / |G|, 其中c(ai)为置换的循环节数
+//Burnside定理: 设G是N = {1, 2, ..., n}上的置换群, G是N上可引出不同的等价类,
+//其中不同的等价类的个数为∑(c1(g)) / |G|, 其中c1(g)为置换g中不变元的个数, 及g中1阶循环的个数
+//一般在题目中出现经过旋转、翻转等方式重合的计数问题时往往会用到polya定理或Burnside定理, 但由于题目中的取值范围很大, 有时就会用到欧拉函数进行优化
+//它们求解的一般步骤是:
+//1. 确定置换群
+//2. polya: 计算每个置换下循环节个数
+//   Burnside: 求解每个置换下本质不同的方案数即在该置换下保持不变的方案数, 有时会用到组合数学或动态规划的方法进行计数
+//3. 代入公式得到答案
+//POJ 2409 polya
+ll p[64] = {1};
+int main() {
+  while (scanf("%d%d", &c, &n), c) {
+    for (int c = 1; c <= s; c++) { p[c] = p[c - 1] * c; }
+    ll ans = n & 1 ? p[n / 2 + 1] * n : (p[n / 2 + 1] + p[n / 2]) * (n / 2);
+    for (i = 1; i <= n; i++) { ans += p[__gcd(n, i)]; }
+    ans = printf("%I64d\n", ans / (n * 2ll));
+  }
+}

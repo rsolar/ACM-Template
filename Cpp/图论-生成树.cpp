@@ -280,6 +280,34 @@ int Kruskal(int k) {
     }
   }
 }
+//Minimum Steiner tree O(V^3+V*2^K*(2^K+N))
+//G(V, E), A是V的一个子集, 求至少包含A中所有点的最小子树
+//mp[][]: 距离矩阵, 下标1 - n, id[]置为集合A中点的标号, 下标0 - n - 1
+const int K = 10;
+const int INF = 0x3f3f3f3f;
+int mp[N][N], id[K], dp[1 << K][N], STV[N];
+int MST(int n, int k) {
+  memset(dp, 0x3f, sizeof(dp));
+  for (int i = 0; i < k; i++) { dp[1 << i][id[i]] = 0; }
+  for (int i = 1; i < 1 << k; i++) {
+    for (int kk = 1; kk <= n; kk++) {
+      STV[kk] = 0;
+      for (int j = i & (i - 1); j; j = (j - 1) & i) {
+        dp[i][kk] = min(dp[i][kk], dp[j][kk] + dp[~j & i][kk]);
+      }
+    }
+    for (int j = 0, mn = INF, mnid = 0; j < n; j++, mn = INF) {
+      for (int kk = 1; kk <= n; kk++) {
+        if (dp[i][kk] <= mn && !STV[kk]) { mn = dp[i][mnid = kk]; }
+      }
+      STV[mnid] = 1;
+      for (int kk = 1; kk <= n; kk++) {
+        if (STV[kk] == 0) { dp[i][kk] = min(dp[i][kk], dp[i][mnid] + mp[mnid][kk]); }
+      }
+    }
+  }
+  return *min_element(dp[(1 << k) - 1] + 1, dp[(1 << k) - 1] + n + 1);
+}
 //生成树计数
 //Matrix-Tree定理(Kirchhoff 矩阵-树定理)
 //1、G的度数矩阵D[G]是一个n*n的矩阵, 并且满足: 当i ≠ j时,dij = 0; 当i = j时, dij等于vi的度数

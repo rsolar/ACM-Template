@@ -129,14 +129,20 @@ void findfac(ll n, int k = 107) {
   while (p >= n) { p = pollard_rho(p, c--); } //k值变化, 防止死循环
   findfac(p, k); findfac(n / p, k);
 }
+//欧拉函数φ(n) 小于等于n的数中与n互质的数的数目
+//φ(p^k) = p^k - p^(k - 1) = (p - 1)p^(k - 1) = p^k(1 - 1 / p)
+//∑(d|n)φ(d) = n
+//当n > 1时, 1到n中与n互质的整数和为nφ(n) / 2
 //求单个数的欧拉函数
 ll eular(ll n) {
-  ll ret = 1;
-  while ((n & 1) == 0) { n >>= 1; ret <<= 1; }
-  for (ll i = 3; i * i <= n; i += 2) {
-    if (n % i == 0) { n /= i; ret *= i - 1; while (n % i == 0) { n /= i; t *= i; } }
+  ll ret = n;
+  for (ll i = 2; i * i <= n; i++) {
+    if (n % i == 0) {
+      ret -= ret / i;
+      while (n % i == 0) { n /= i; }
+    }
   }
-  return n > 1 ? ret * (n - 1) : ret;
+  return n > 1 ? ret - ret / n : ret;
 }
 //欧拉函数筛 O(nloglogn)
 const int N = 10000000; //~400ms
@@ -220,11 +226,30 @@ ll sumPow(ll a, ll b, ll m) {
   }
   return r;
 }
+//快速GCD
+ll kgcd(ll a, ll b) {
+  if (a == 0) { return b; }
+  if (b == 0) { return a; }
+  if ((a & 1) == 0 && (b & 1) == 0) { return kgcd(a >> 1, b >> 1) << 1; }
+  else if ((a & 1) == 0) { return kgcd(a >> 1, b); }
+  else if ((b & 1) == 0) { return kgcd(a, b >> 1); }
+  else { return kgcd(a < b ? b - a : a - b, a < b ? a : b); }
+}
 //求逆元(ax = 1(mod m)的x值)
 //扩展欧几里得(求ax + by = gcd(a, b)的解), 求出的x为a对b的模逆元
 ll exgcd(ll a, ll b, ll &x, ll &y) {
   if (b == 0) { x = 1; y = 0; return a; }
   ll d = exgcd(b, a % b, y, x); y -= a / b * x; return d;
+}
+//模线性方程 求ax = b (mod p)循环节内的所有解
+ll ans[N], cnt;
+bool linear_equation(ll a, ll b, ll p) {
+  ll x, y, d = exgcd(a, p, x, y); cnt = 0;
+  if (b % d) { return false; }
+  x = (x % p + p) % p;
+  ans[++cnt] = x * (b / d) % (p / d);
+  for (int i = 1; i < d; i++) { ans[++cnt] = (ans[1] + i * p / d) % n; }
+  return true;
 }
 //解不定方程ax + by = c 求得的只是其中一组解
 //对于不定整数方程ax + by = c, 若c mod gcd(a, b) = 0, 则该方程存在整数解, 否则不存在整数解
@@ -236,16 +261,6 @@ bool linear_equation(int a, int b, int c, int &x, int &y) {
   int d = exgcd(a, b, x, y);
   if (c % d) { return false; }
   int k = c / d; x *= k; y *= k; return true;
-}
-//求ax = b (mod p)循环节内的所有解
-ll ans[N], cnt;
-bool linear_equation(ll a, ll b, ll p) {
-  ll x, y, d = exgcd(a, p, x, y); cnt = 0;
-  if (b % d) { return false; }
-  x = (x % p + p) % p;
-  ans[++cnt] = x * (b / d) % (p / d);
-  for (int i = 1; i < d; i++) { ans[++cnt] = (ans[1] + i * p / d) % n; }
-  return true;
 }
 //线性预处理逆元
 ll Inv[N] = {1, 1};
@@ -282,26 +297,6 @@ ll CRT(ll a[], ll m[], int k) {
     a1 = a3; m1 = m3;
   }
   return (a1 % m1 + m1) % m1;
-}
-//模线性方程组 需扩展欧几里得
-//求解方程ax ≡ b (mod m) 相当于求解方程ax + my = b (x, y为整数)
-int m[10], a[10]; //模数为m, 余数为a, X % m = a
-bool solve(int &m0, int &a0, int m, int a) {
-  ll y, x, d = exgcd(m0, m, x, y);
-  if (abs(a - a0) % d) { return false; }
-  x *= (a - a0) / d; x %= m / d;
-  a0 = (x * m0 + a0); m0 *= m / d; a0 %= m0;
-  if (a0 < 0) { a0 += m0; }
-  return true;
-}
-//无解返回false, 有解返回true
-//解的形式最后为a0 + m0 * t (0 <= a0 < m0)
-bool MLES(int &m0, int &a0, int n) {  //解为X = a0 + m0 * k
-  bool flag = true; m0 = 1; a0 = 0;
-  for (int i = 0; i < n; i++) {
-    if (!solve(m0, a0, m[i], a[i])) { flag = false; break; }
-  }
-  return flag;
 }
 //求原根
 ll fac[N];
@@ -359,10 +354,8 @@ struct Base {
   }
 };
 //离散对数 大步小步算法 Baby-Step Giant-Step
-//BSGS(a, b, p): 求ax = b (mod p)的最小非负整数解, 若无解则返回 -1
-//rev(a, p): 扩展欧几里得求逆元
-//powMod(base, pow, mod): 快速幂
-//mulMod(a, b, mod): 快速乘(这里用快速乘是为了避免爆long long int, 实际有时可以不用)
+//BSGS(a, b, p): 求ax = b (mod p)的最小非负整数解, 若无解则返回-1
+//inv(a, p): 扩展欧几里得求逆元
 unordered_map<ll, ll> Hash;
 ll BSGS(ll a, ll b, ll p) {
   if (b >= p) { return -1; }
@@ -374,7 +367,7 @@ ll BSGS(ll a, ll b, ll p) {
   for (ll j = 0; j < m; j++) { //预处理出a^j mod p的值
     Hash[tmp] = j; tmp = mulMod(tmp, a, p);
   }
-  tmp = rev(powMod(a, m, p), p); //tmp = a^(-m)
+  tmp = inv(powMod(a, m, p), p); //tmp = a^(-m)
   for (ll i = 0; i < m; i++) {
     if (Hash.find(b) != Hash.end()) { return i * m + Hash[b]; }
     b = mulMod(b, tmp, p);
@@ -461,7 +454,6 @@ int Gauss(int equ, int var) {
   }
   for (int i = row; i < equ; i++) { if (a[i][col]) { return -1; } } //无解
   if (row < var) { return var - row; } //返回自由变元个数
-  //for (int i = 0; i < var - row; i++) { x[freex[i]] = false; }
   for (int i = row - 1; i >= 0; i--) { //唯一解，回代
     for (int j = i + 1; j < var; j++) {
       if (a[i][j]) { x[i] = a[i][var]; break; }
@@ -471,7 +463,9 @@ int Gauss(int equ, int var) {
 }
 //自适应simpson积分
 //给定一个函数f(x), 求[a, b]区间内f(x)到x轴所形成区域的面积
-double simpson(double l, double r) {return (f(l) + f(r) + 4 * f((l + r) / 2.0)) * (r - l) / 6.0;}
+double simpson(double l, double r) {
+  return (f(l) + f(r) + 4.0 * f((l + r) / 2.0)) * (r - l) / 6.0;
+}
 double rsimpson(double l, double r) {
   double mid = (l + r) / 2.0;
   if (fabs(simpson(l, r) - simpson(l, mid) - simpson(mid, r)) < EPS) {
