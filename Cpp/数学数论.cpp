@@ -463,15 +463,17 @@ int Gauss(int equ, int var) {
 }
 //自适应simpson积分
 //给定一个函数f(x), 求[a, b]区间内f(x)到x轴所形成区域的面积
-double simpson(double l, double r) {
-  return (f(l) + f(r) + 4.0 * f((l + r) / 2.0)) * (r - l) / 6.0;
+double simpson(double a, double b) {
+  double c = a + (b - a) / 2.0;
+  return (f(a) + 4 * f(c) + f(b)) * (b - a) / 6;
 }
-double rsimpson(double l, double r) {
-  double mid = (l + r) / 2.0;
-  if (fabs(simpson(l, r) - simpson(l, mid) - simpson(mid, r)) < EPS) {
-    return simpson(l, mid) + simpson(mid, r);
-  }
-  return rsimpson(l, mid) + rsimpson(mid, r);
+double asr(double a, double b, double eps, double A) {
+  double c = a + (b - a) / 2.0, L = simpson(a, c), R = simpson(c, b);
+  if (fabs(L + R - A) <= 15.0 * eps) { return L + R + (L + R - A) / 15.0; }
+  return asr(a, c, eps / 2.0, L) + asr(c, b, eps / 2.0, R);
+}
+double asr(double a, double b, double eps) {
+  return asr(a, b, eps, simpson(a, b));
 }
 //FFT O(nlogn)
 //以下n必须为2的幂, op为1时是求DFT, op为-1时为求IDFT
