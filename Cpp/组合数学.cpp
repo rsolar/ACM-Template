@@ -1,3 +1,16 @@
+//公式
+//k = 1..n
+//sum(k) = n(n + 1) / 2
+//sum(2k - 1) = n^2
+//sum(k^2) = n(n + 1)(2n + 1) / 6
+//sum((2k - 1)^2) = n(4n^2 - 1) / 3
+//sum(k^3) = (n(n + 1) / 2)^2
+//sum((2k - 1)^3) = n^2(2n^2 - 1)
+//sum(k^4) = n(n + 1)(2n + 1)(3n^2 + 3n - 1) / 30
+//sum(k^5) = n^2(n + 1)^2(2n^2 + 2n - 1) / 12
+//sum(k(k + 1)) = n(n + 1)(n + 2) / 3
+//sum(k(k + 1)(k + 2) ) = n(n + 1)(n + 2)(n + 3) / 4
+//sum(k(k + 1)(k + 2)(k + 3)) = n(n + 1)(n + 2)(n + 3)(n + 4) / 5
 //组合数预处理 / 杨辉三角 O(n^2)
 //C[i][i] = C[i][0] = 1
 //C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
@@ -181,25 +194,72 @@ void printCatalan(int n) {
 //D(1) = 0, D(2) = 1, D(n) = (n - 1)(D(n - 2) + D(n - 1))
 //扩展 Cayley 公式
 //对于n个点, m个连通块的图, 假设每个连通块有a[i]个点, 那么用s - 1条边把它连通的方案数为n^(s-2)a[1]a[2]...a[m]
-
 //polya定理
 //polya定理: 设是n个对象的置换群, 用m种颜色给这n个对象着色,
 //则不同的着色方案数为: [m^c(a1) + m^c(a2) + ... + m^c(ag)] / |G|, 其中c(ai)为置换的循环节数
 //Burnside定理: 设G是N = {1, 2, ..., n}上的置换群, G是N上可引出不同的等价类,
 //其中不同的等价类的个数为∑(c1(g)) / |G|, 其中c1(g)为置换g中不变元的个数, 及g中1阶循环的个数
-//一般在题目中出现经过旋转、翻转等方式重合的计数问题时往往会用到polya定理或Burnside定理, 但由于题目中的取值范围很大, 有时就会用到欧拉函数进行优化
+//一般在题目中出现经过旋转、翻转等方式重合的计数问题时往往会用到polya定理或Burnside定理, 题目中的取值范围很大时用欧拉函数进行优化
 //它们求解的一般步骤是:
 //1. 确定置换群
 //2. polya: 计算每个置换下循环节个数
 //   Burnside: 求解每个置换下本质不同的方案数即在该置换下保持不变的方案数, 有时会用到组合数学或动态规划的方法进行计数
 //3. 代入公式得到答案
-//POJ 2409 polya
+//polya
+//POJ 2409 n个珠子, c种颜色, 旋转和翻转相同的视为同构
 ll p[64] = {1};
 int main() {
   while (scanf("%d%d", &c, &n), c) {
     for (int c = 1; c <= s; c++) { p[c] = p[c - 1] * c; }
-    ll ans = n & 1 ? p[n / 2 + 1] * n : (p[n / 2 + 1] + p[n / 2]) * (n / 2);
+    ll ans = 0;
+    if (n & 1) { ans += p[n / 2 + 1] * n; }
+    else { ans += (p[n / 2 + 1] + p[n / 2]) * (n / 2); }
     for (i = 1; i <= n; i++) { ans += p[__gcd(n, i)]; }
     ans = printf("%I64d\n", ans / (n * 2ll));
+  }
+}
+//POJ 2154 n种珠子, n个颜色, 旋转相同的视为同构
+int main() {
+  int C = 0, T;
+  scanf("%d", &T);
+  while (++C <= T) {
+    scanf("%d%d", &n, &p);
+    ll ans = 0;
+    for (int i = 1; i * i <= n; i++) {
+      if (n % i == 0) {
+        if (i * i == n) { ans = (ans + eular(i) * powMod(n, i - 1, p)) % p; }
+        else { ans = (ans + eular(i) * powMod(n, n / i - 1, p) + eular(n / i) * powMod(n, i - 1, p)) % p; }
+      }
+    }
+    printf("%I64d\n", ans);
+  }
+}
+//Burnside
+//POJ 2888 n个珠子, m种颜色, k对颜色不能出现在相邻的珠子上, 旋转相同的视为同构
+ll calc(const mat<ll> &base, ll x) {
+  mat<ll> t = base ^ x;
+  ll ret = 0;
+  for (int i = 0; i < m; i++) { ret = (ret + t[i][i]) % M; }
+  return ret;
+}
+int main() {
+  int C = 0, T;
+  scanf("%d", &T);
+  while (++C <= T) {
+    scanf("%d%d%d", &n, &m, &k);
+    mat<ll> base(m, m);
+    for (int i = 0; i < m; i++) { for (int j = 0; j < m; j++) { base[i][j] = 1; } }
+    for (int i = 0, u, v; i < k; i++) {
+      scanf("%d%d", &u, &v); u--; v--; base[u][v] = base[v][u] = 0;
+    }
+    ll ans = 0;
+    for (int i = 1; i * i <= n; i++) {
+      if (n % i == 0) {
+        if (i * i == n) { ans = (ans + eular(i) * calc(base, i)) % M; }
+        else { ans = (ans + eular(i) * calc(base, n / i) + eular(n / i) * calc(base, i)) % M; }
+      }
+    }
+    ans = ans * powMod(n, M - 2, M) % M;
+    printf("%I64d\n", ans);
   }
 }

@@ -724,10 +724,20 @@ double Area_of_overlap(const Point &c1, double r1, const Point &c2, double r2) {
 //8、Pick 公式
 //顶点坐标均是整点的简单多边形: 面积 = 内部格点数目 + 边上格点数目 / 2 - 1
 
-
+//多边形上的网格点个数
+int grid_onedge(int n, Point p[]) {
+  int ret = 0;
+  for (int i = 0; i < n; i++) { ret += __gcd(abs(p[i].x - p[(i + 1) % n].x), abs(p[i].y - p[(i + 1) % n].y)); }
+  return ret;
+}
+//多边形内的网格点个数
+int grid_inside(int n, Point p[]) {
+  int ret = 0;
+  for (int i = 0; i < n; i++) { ret += p[(i + 1) % n].y * (p[i].x - p[(i + 2) % n].x); }
+  return (abs(ret) - grid_onedge(n, p)) / 2 + 1;
+}
 
 //http://www.cppblog.com/abilitytao/archive/2009/08/04/92171.html
-
 //常量区
 const double M_PI       = acos(-1.0); //PI
 const double INF        = 1e10;       //无穷大

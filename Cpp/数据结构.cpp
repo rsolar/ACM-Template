@@ -100,27 +100,31 @@ template<typename T> struct BIT {
 };
 BIT<int> bit;
 //线段树 单点修改 + 区间查询
-#define lson l,m,rt<<1
-#define rson m+1,r,rt<<1|1
+#define lson l,m
+#define rson m+1,r
 template<typename T> struct SegmentTree {
-  T data[N << 2];
+  T data[N << 1];
+  int ID(int l, int r) { return l + r | l != r; }
   T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
-  void build(int l, int r, int rt) {
+  void build(int l, int r) {
+    int rt = ID(l, r);
     if (l == r) { scanf("%d", &data[rt]); return; }
     int m = (l + r) >> 1;
     build(lson);
     build(rson);
     push_up(rt);
   }
-  void update(int p, T val, int l, int r, int rt) {
+  void update(int p, T val, int l, int r) {
+    int rt = ID(l, r);
     if (l == r) { data[rt] += val; return; }
     int m = (l + r) >> 1;
     if (p <= m) { update(p, val, lson); }
     else { update(p, val, rson); }
     push_up(rt);
   }
-  T query(int L, int R, int l, int r, int rt) {
+  T query(int L, int R, int l, int r) {
+    int rt = ID(l, r);
     if (L <= l && r <= R) { return data[rt]; }
     int m = (l + r) >> 1; T ret = 0;
     if (L <= m) { ret = calc(ret, query(L, R, lson)); }
@@ -130,10 +134,11 @@ template<typename T> struct SegmentTree {
 };
 SegmentTree<int> st;
 //线段树 区间查询/修改 + 延迟标记
-#define lson l,m,rt<<1
-#define rson m+1,r,rt<<1|1
+#define lson l,m
+#define rson m+1,r
 template<typename T> struct SegmentTree {
   T data[N << 2], lazy[N << 2];
+  int ID(int l, int r) { return l + r | l != r; }
   T calc(const T &x, const T &y)const { return x + y; }
   void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
   void push_down(int rt, int len) {
@@ -143,7 +148,8 @@ template<typename T> struct SegmentTree {
       lazy[rt] = 0;
     }
   }
-  void build(int l, int r, int rt) {
+  void build(int l, int r) {
+    int rt = ID(l, r);
     lazy[rt] = 0;
     if (l == r) { scanf("%d", &data[rt]); return; }
     int m = (l + r) >> 1;
@@ -151,7 +157,8 @@ template<typename T> struct SegmentTree {
     build(rson);
     push_up(rt);
   }
-  void update(int L, int R, T val, int l, int r, int rt) {
+  void update(int L, int R, T val, int l, int r) {
+    int rt = ID(l, r);
     if (L <= l && r <= R) {
       data[rt] += val * (r - l + 1);
       lazy[rt] += val;
@@ -163,7 +170,8 @@ template<typename T> struct SegmentTree {
     if (m < R) { update(L, R, val, rson); }
     push_up(rt);
   }
-  T query(int L, int R, int l, int r, int rt) {
+  T query(int L, int R, int l, int r) {
+    int rt = ID(l, r);
     if (L <= l && r <= R) { return data[rt]; }
     push_down(rt, r - l + 1);
     int m = (l + r) >> 1; T ret = 0;
@@ -174,8 +182,75 @@ template<typename T> struct SegmentTree {
 };
 SegmentTree<int> st;
 //二维线段树
-
-
+int n, m, Q;
+int mx[N << 1][N << 1], mn[N << 1][N << 1];
+pair<int, int> A, B;
+int val, LL, RR, Max, Min;
+#define lson l,mid
+#define rson mid+1,r
+inline int ID(int l, int r) { return l + r | l != r; }
+void QUERY(int p, int l, int r) {
+  int q = ID(l, r);
+  if (B.first <= l && r <= B.second) { Max = max(Max, mx[p][q]); Min = min(Min, mn[p][q]); return; }
+  int mid = (l + r) >> 1;
+  if (B.first <= mid) { QUERY(p, lson); }
+  if (B.second > mid) { QUERY(p, rson); }
+}
+void query(int l, int r) {
+  int p = ID(l, r);
+  if (A.first <= l && r <= A.second) { QUERY(p, 1, m); return; }
+  int mid = (l + r) >> 1;
+  if (A.first <= mid) { query(lson); }
+  if (A.second > mid) { query(rson); }
+}
+void UPDATE(int p, int l, int r) {
+  int q = ID(l, r);
+  if (l == r) {
+    if (p & 1) { mx[p][q] = max(mx[LL][q], mx[RR][q]); mn[p][q] = min(mn[LL][q], mn[RR][q]); }
+    else { mx[p][q] = mn[p][q] = val; }
+    return;
+  }
+  int mid = (l + r) >> 1;
+  if (A.second <= mid) { UPDATE(p, lson); }
+  else { UPDATE(p, rson); }
+  mx[p][q] = max(mx[p][ID(lson)], mx[p][ID(rson)]);
+  mn[p][q] = min(mn[p][ID(lson)], mn[p][ID(rson)]);
+}
+void update(int l, int r) {
+  int p = ID(l, r);
+  if (l == r) { UPDATE(p, 1, m); return; }
+  int mid = (l + r) >> 1;
+  if (A.first <= mid) { update(lson); }
+  else { update(rson); }
+  LL = ID(lson), RR = ID(rson);
+  UPDATE(p, 1, m);
+}
+void work() {
+  char str[5];
+  scanf("%d%d", &n, &m);
+  memset(mx, 0x8f, sizeof(mx));
+  memset(mn, 0x7f, sizeof(mn));
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      scanf("%d", &val);
+      A = make_pair(i, j);
+      update(1, n);
+    }
+  }
+  scanf("%d", &Q);
+  while (Q--) {
+    scanf("%s", str);
+    if (*str == 'c') {
+      scanf("%d%d%d", &A.first, &A.second, &val);
+      update(1, n);
+    } else {
+      scanf("%d%d%d%d", &A.first, &B.first, &A.second, &B.second);
+      Max = -1 << 30, Min = 1 << 30;
+      query(1, n);
+      printf("%d %d\n", Max, Min);
+    }
+  }
+}
 //非递归版线段树 单点修改 + 区间查询
 const int N = ((131072 << 1) + 10); //节点个数->不小于区间长度+2的最小2的正整数次幂*2+10
 #define l(x) ((x)<<1) //x的左儿子

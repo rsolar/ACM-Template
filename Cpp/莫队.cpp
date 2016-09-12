@@ -4,25 +4,35 @@
 //lydsy 2038: [2009国家集训队]小Z的袜子(hose)
 int n, m;
 int c[N], pos[N];
-int ansup[N], ansdn[N], cnt[N];
+ll ans, ansup[N], ansdn[N], cnt[N];
 struct Node {
   int l, r, id;
   bool operator<(const Node &b)const { return pos[l] < pos[b.l] || (pos[l] == pos[b.l] && r < b.r); }
 } q[N];
+inline void add(int x) {
+  ans -= cnt[c[x]] * cnt[c[x]];
+  cnt[c[x]]++;
+  ans += cnt[c[x]] * cnt[c[x]];
+}
+inline void del(int x) {
+  ans -= cnt[c[x]] * cnt[c[x]];
+  cnt[c[x]]--;
+  ans += cnt[c[x]] * cnt[c[x]];
+}
 int main() {
   while (~scanf("%d%d", &n, &m)) {
-    memset(cnt, 0, sizeof(cnt)); ll ans = 0;
+    memset(cnt, 0, sizeof(cnt)); ans = 0;
     for (int i = 1, nn = ceil(sqrt(n)); i <= n; i++) { scanf("%d", &c[i]); pos[i] = (i - 1) / nn; }
     for (int i = 0; i < m; i++) { scanf("%d%d", &q[i].l, &q[i].r); q[i].id = i; }
     sort(q, q + m);
     for (int i = 0, l = 1, r = 0; i < m; i++) {
-      for (; l > q[i].l;) { ans += cnt[c[--l]]++; }
-      for (; l < q[i].l;) { ans -= --cnt[c[l++]]; }
-      for (; r < q[i].r;) { ans += cnt[c[++r]]++; }
-      for (; r > q[i].r;) { ans -= --cnt[c[r--]]; }
-      ll dn = (r - l + 1LL) * (r - l) >> 1, gcd = __gcd(ans, dn);
-      ansup[q[i].id] = ans / gcd; ansdn[q[i].id] = dn / gcd;
+      for (; l > q[i].l;) { add(--l); }
+      for (; l < q[i].l;) { del(l++); }
+      for (; r < q[i].r;) { add(++r); }
+      for (; r > q[i].r;) { del(r--); }
+      ll up = ans - q[i].r + q[i].l - 1, dn = (q[i].r - q[i].l + 1ll) * (q[i].r - q[i].l), gcd = __gcd(up, dn);
+      ansup[q[i].id] = up / gcd; ansdn[q[i].id] = dn / gcd;
     }
-    for (int i = 0; i < m; i++) { printf("%d/%d\n", ansup[i], ansdn[i]); }
+    for (int i = 0; i < m; i++) { printf("%lld/%lld\n", ansup[i], ansdn[i]); }
   }
 }

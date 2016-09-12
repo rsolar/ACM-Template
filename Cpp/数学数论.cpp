@@ -267,18 +267,13 @@ ll Inv[N] = {1, 1};
 void getInv(int m) {
   for (ll i = 2; i < m; i++) { Inv[i] = (m - m / i) * Inv[m % i] % m; }
 }
-//扩展欧几里得求逆元
-ll modReverse(ll a, ll m) {
+//扩展欧几里得求逆元 需a与m互质
+ll inv(ll a, ll m) {
   ll x, y, d = exgcd(a, m, x, y);
   if (d == 1) { return (x % m + m) % m; } else { return -1; }
 }
-//费马小定理, m为素数, a与m互质
+//费马小定理 需m为素数且a与m互质
 ll inv(ll a, ll m) { return powMod(a, m - 2, m); }
-//只能求0 < a < m的情况,a和m互质
-ll inv(ll a, ll m) {
-  if (a == 1) { return 1; }
-  return inv(m % a, m) * (m - m / a) % m;
-}
 //中国剩余定理 求模线性方程组x = a[i] (mod m[i]) m[i]可以不互质
 //[1, n]内解的个数为(n - x) / m1 + (x != 0)
 bool merge(ll a1, ll m1, ll a2, ll m2, ll &a3, ll &m3) {
@@ -307,6 +302,24 @@ ll getRoot(ll n) {
     for (j = 0; j < cnt; j++) { if (powMod(i, fac[j], n) == 1) { break; } }
     if (j == cnt) { return i; }
   }
+}
+//判线性相关 传入n个m维向量
+const double EPS = 1e-9;
+double ort[N][N];
+bool linearDependent(double a[][N], int n, int m) {
+  if (n > m) { return true; }
+  double e;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) { ort[i][j] = a[i][j]; }
+    for (int k = 0, j; k < i; k++) {
+      for (e = j = 0; j < m; j++) { e += ort[i][j] * ort[k][j]; }
+      for (j = 0; j < m; j++) { ort[i][j] -= e * ort[k][j]; }
+      for (e = j = 0; j < m; j++) { e += ort[i][j] * ort[i][j]; }
+      if (fabs(e = sqrt(e)) < EPS) { return true; }
+      for (j = 0; j < m; j++) { ort[i][j] /= e; }
+    }
+  }
+  return false;
 }
 //线性基
 //异或线性基
@@ -464,13 +477,13 @@ int Gauss(int equ, int var) {
 //自适应simpson积分
 //给定一个函数f(x), 求[a, b]区间内f(x)到x轴所形成区域的面积
 double simpson(double a, double b) {
-  double c = a + (b - a) / 2.0;
-  return (f(a) + 4 * f(c) + f(b)) * (b - a) / 6;
+  double c = (a + b) * 0.5;
+  return (F(a) + 4.0 * F(c) + F(b)) * (b - a) / 6.0;
 }
 double asr(double a, double b, double eps, double A) {
-  double c = a + (b - a) / 2.0, L = simpson(a, c), R = simpson(c, b);
+  double c = (a + b) * 0.5, L = simpson(a, c), R = simpson(c, b);
   if (fabs(L + R - A) <= 15.0 * eps) { return L + R + (L + R - A) / 15.0; }
-  return asr(a, c, eps / 2.0, L) + asr(c, b, eps / 2.0, R);
+  return asr(a, c, eps * 0.5, L) + asr(c, b, eps * 0.5, R);
 }
 double asr(double a, double b, double eps) {
   return asr(a, b, eps, simpson(a, b));

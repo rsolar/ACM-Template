@@ -309,9 +309,8 @@ int MST(int n, int k) {
   return *min_element(dp[(1 << k) - 1] + 1, dp[(1 << k) - 1] + n + 1);
 }
 //生成树计数
-//Matrix-Tree定理(Kirchhoff 矩阵-树定理)
-//1、G的度数矩阵D[G]是一个n*n的矩阵, 并且满足: 当i ≠ j时,dij = 0; 当i = j时, dij等于vi的度数
-//2、G的邻接矩阵A[G]也是一个n*n的矩阵, 并且满足: 如果vi vj之间有边直接相连, 则aij = 1, 否则为0
-//我们定义G的Kirchhoff矩阵(也称为拉普拉斯算子)C[G]为C[G] = D[G] - A[G], 则Matrix-Tree定理可以
-//描述为: G的所有不同的生成树的个数等于其Kirchhoff矩阵C[G]任何一个n - 1阶主子式的行列式的绝对值
-//所谓n - 1阶主子式, 就是对于r(1 ≤ r ≤ n), 将C[G]的第r行、第r列同时去掉后得到的新矩阵, 用Cr[G]表示。
+//Matrix-Tree Theorem (Kirchhoff 矩阵-树定理)
+//图G的度数矩阵D[G]是一个n*n的矩阵, 满足: 当i != j时,dij = 0; 当i = j时, dij等于vi的度数
+//图G的邻接矩阵A[G]是一个n*n的矩阵, 满足: 如果vi vj之间有边直接相连, 则aij = 1, 否则为0
+//则Kirchhoff矩阵C[G] = D[G] - A[G]
+//Matrix Tree Theorem: 以i为根的树形图个数 = 基尔霍夫矩阵去掉第i行第i列的行列式

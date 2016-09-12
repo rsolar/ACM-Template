@@ -59,6 +59,8 @@ bool Color(int u) {
 //对于每个D[i] > 0的点i, 连边<S, i>, 容量为D[i] / 2; 对于每个D[j] < 0的点j, 连边<j, T>, 容量为-D[j] / 2
 //G'中的每条边在网络中仍保留, 容量为1, 求这个网络的最大流, 若S引出的所有边均满流, 则原混合图是欧拉图
 //将网络中所有流量为1的不与S或T关联的边在G'中改变方向,形成的新图G''一定是有向欧拉图
+//Best Theorem: 有向图中以i为起点的欧拉回路个数 = 以i为根的树形图个数 * ((每个点度数 - 1)!)。
+//从某个点i出发并回到i的欧拉回路个数 = 以i为起点的欧拉回路个数 * i的度数
 //欧拉回路 + 邻接矩阵 O(N^2)
 //求欧拉路径/回路经过的点 支持自环和重边
 int n, mp[N][N], path[N], cnt;
@@ -358,37 +360,41 @@ int main() {
 }
 //最大团
 //搜索 O(n*2^n)
-int mp[N][N], stk[N][N], dp[N], ans;
+bool mp[N][N]; int stk[N][N], dp[N], ansn, ans[N], tmp[N];
 bool dfs(int crt, int tot) {
   if (!crt) {
-    if (tot > ans) { ans = tot; return true; }
+    if (tot > ansn) {
+      for (int i = 0; i < tot; i++) { ans[i] = tmp[i]; }
+      ansn = tot; return true;
+    }
     return false;
   }
   for (int i = 0, u, nxt; i < crt; i++) {
     u = stk[tot][i]; nxt = 0;
-    if (crt - i + tot <= ans) { return false; }
-    if (dp[u] + tot <= ans) { return false; }
+    if (crt - i + tot <= ansn) { return false; }
+    if (dp[u] + tot <= ansn) { return false; }
     for (int j = i + 1; j < crt; j++) {
       int v = stk[tot][j];
-      if (g[u][v]) { stk[tot + 1][nxt++] = v; }
+      if (mp[u][v]) { stk[tot + 1][nxt++] = v; }
     }
+    tmp[tot] = u;
     if (dfs(nxt, tot + 1)) { return true; }
   }
   return false;
 }
 int maxClique(int n) {
-  ans = 0;
+  ansn = 0;
   for (int i = n - 1, j, k; i >= 0; i--) {
     for (j = i + 1, k = 0; j < n; j++) {
-      if (g[i][j]) { stk[1][k++] = j; }
+      if (mp[i][j]) { stk[1][k++] = j; }
     }
-    dfs(k, 1); dp[i] = ans;
+    tmp[0] = i; dfs(k, 1); dp[i] = ansn;
   }
-  return ans;
+  return ansn;
 }
-//随机贪心 O(T*n^2)
+//随机 O(T*n^2)
 const int T = 1000;
-int mp[N][N], id[N], ansn, ans[N]; bool del[N];
+bool mp[N][N]; int id[N], ansn, ans[N]; bool del[N];
 void solve(int n) {
   memset(del, 0, sizeof(del)); int k = 0;
   for (int i = 0, j; i < n; i++) {
@@ -407,7 +413,7 @@ void maxClique(int n) {
   }
 }
 //最大独立集
-//随机算法 O(T*(V+E))
+//随机 O(T*(V+E))
 const int T = 1000;
 int q[N], pos[N]; bool del[N];
 int solve(int n) {

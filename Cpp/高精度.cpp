@@ -131,12 +131,7 @@ struct bint {
     for (int i = (int)s.size() - 2; i >= 0; i--) { printf("%09d", s[i]); }
   }
   friend istream &operator>>(istream &in, bint &v) { string s; in >> s; v = s; return in; }
-  friend ostream &operator<<(ostream &out, const bint &v) {
-    if (v.sign == -1) { out << '-'; }
-    out << setfill('0') << (v.s.empty() ? 0 : v.s.back());
-    for (int i = (int)v.s.size() - 2; i >= 0; i--) { out << setw(BASEDIGITS) << v.s[i]; }
-    return out << setfill(' ');
-  }
+  friend ostream &operator<<(ostream &out, const bint &v) { return out << v.toString(); }
   string toString()const {
     if (s.empty()) { return "0"; }
     string ret, x;

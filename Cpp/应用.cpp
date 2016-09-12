@@ -1,31 +1,23 @@
-//Joseph问题 O(n)
-int Joseph(int n, int m, int s) {
-  int ret = s - 1;
-  for (int i = 2; i <= n; i++) { ret = (ret + m) % i; }
-  return ret + 1;
-}
-//O(logn) 0 <= k < n
+//Joseph问题 O(logn) 0 <= k < n
 int Joseph(int n, int m, int k) {
   if (m == 1) { return n - 1; }
   for (k = k * m + m - 1; k >= n; k = k - n + (k - n) / (m - 1));
   return k;
 }
-//康托展开 fac[]为阶乘 0 <= ans
-ll Cantor(char *s) {
-  ll ans = 0;
-  for (int i = 0, len = strlen(s); i < len; i++) {
-    int cnt = 0;
-    for (int j = i + 1; j < len; j++) { if (s[j] < s[i]) { cnt++; } }
-    ans += cnt * fac[len - i - 1];
+//康托展开 0 <= ans < n!
+ll Cantor(int a[], int n) {
+  ll ans = 0, k = 1;
+  for (int i = n - 2; i >= 0; i--, k *= n - i) {
+    for (int j = i + 1; j < n; j++) { if (a[j] < a[i]) { ans += k; } }
   }
   return ans;
 }
-//康托展开逆运算 1 <= k <= n!
+//康托展开逆运算 0 < k <= n!
 vector<int> revCantor(ll n, ll k) {
   vector<int> v, ret; k--;
   for (int i = 1; i <= n; i++) { v.push_back(i); }
-  for (int i = n; i >= 1; i--) {
-    ll t = k / fac[i - 1]; k %= fac[i - 1];
+  for (int i = n - 1; i >= 0; i--) {
+    ll t = k / fac[i]; k %= fac[i];
     sort(v.begin(), v.end());
     ret.push_back(v[t]); v.erase(v.begin() + t);
   }
@@ -214,6 +206,14 @@ void work(int n) {
     for (int i = 0; i < cnt; i++) { printf("%d", ans[i]); }
     puts("");
   }
+}
+//生成reflected gray code
+//每次调用gray取得下一个, 00...0是第一个, 10...0是最后一个
+void gray(int code[], int n) {
+  int cnt = 0;
+  for (int i = 0; i < n; i++) { cnt += code[i]; }
+  if (cnt & 1) { for (n--; !code[n]; n--); }
+  code[n - 1] = 1 - code[n - 1];
 }
 //水仙花数 A023052 Powerful numbers(3): numbers n that are the sum of some fixed power of their digits.
 int Nar[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 153, 370, 371, 407, 1634, 4150, 4151, 8208, 9474, 54748, 92727, 93084,

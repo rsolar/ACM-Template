@@ -225,11 +225,12 @@ int hashMatch(char *s, int m, char *p, int n) {
 //数组实现
 struct Trie {
   int nxt[N * 20][26], val[N * 20], root, tot;
-  void init() { memset(nxt, 0, sizeof(nxt)); memset(val, 0, sizeof(val)); root = tot = 1; }
+  int new_node() { memset(nxt[tot], 0, sizeof(nxt[tot])); val[tot] = 0; return tot++; }
+  void init() { tot = 0; root = new_node(); }
   void insert(char *buf, int id) {
     int len = strlen(buf), now = root;
     for (int i = 0, c; i < len; i++) {
-      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = ++tot; }
+      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = new_node(); }
       now = nxt[now][c];
     }
     val[now] = id;
@@ -271,14 +272,15 @@ struct Trie {
 //AC自动机
 struct AC {
   int nxt[N * 20][26], fail[N * 20], val[N * 20], root, tot;
-  void init() { memset(nxt, 0, sizeof(nxt)); memset(val, 0, sizeof(val)); root = tot = 1; }
+  int new_node() { memset(nxt[tot], 0, sizeof(nxt[tot])); val[tot] = 0; return tot++; }
+  void init() { tot = 0; root = new_node(); }
   void insert(char *buf, int id) {
     int len = strlen(buf), now = root;
     for (int i = 0, c; i < len; i++) {
-      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = ++tot; }
+      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = new_node(); }
       now = nxt[now][c];
     }
-    val[now] = id;
+    val[now] += id;
   }
   void build() {
     queue<int> que; fail[root] = root;
@@ -295,13 +297,13 @@ struct AC {
     }
   }
   int query(char *buf) {
-    int len = strlen(buf), now = root, res = 0;
+    int len = strlen(buf), now = root, ret = 0;
     for (int i = 0, c; i < len; i++) {
       for (int tmp = now = nxt[now][c = buf[i] - 'a']; tmp != root; tmp = fail[tmp]) {
-        res += val[tmp]; //val[tmp] = 0;
+        ret += val[tmp]; //val[tmp] = 0;
       }
     }
-    return res;
+    return ret;
   }
 } ac;
 //后缀数组

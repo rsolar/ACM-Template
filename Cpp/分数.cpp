@@ -20,8 +20,4 @@ struct Frac {
   bool operator!=(const Frac &r)const { return a * r.b != r.a * b; }
   bool operator<=(const Frac &r)const { return a * r.b <= r.a * b; }
   bool operator>=(const Frac &r)const { return a * r.b >= r.a * b; }
-  void print() { if (b == 1) { printf("%I64d", a); } else { printf("%I64d/%I64d", a, b); } }
-  friend ostream &operator<<(ostream &out, const Frac &r) {
-    if (r.b == 1) { out << r.a; } else { out << r.a << '/' << r.b; } return out;
-  }
 };
