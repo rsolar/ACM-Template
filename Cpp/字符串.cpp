@@ -285,8 +285,7 @@ struct AC {
   void build() {
     queue<int> que; fail[root] = root;
     for (int i = 0; i < 26; i++) {
-      if (!nxt[root][i]) { nxt[root][i] = root; }
-      else { fail[nxt[root][i]] = root; que.push(nxt[root][i]); }
+      if (nxt[root][i]) { fail[nxt[root][i]] = root; que.push(nxt[root][i]); }
     }
     while (!que.empty()) {
       int now = que.front(); que.pop();

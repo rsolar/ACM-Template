@@ -106,14 +106,14 @@ template<typename T> struct SegmentTree {
   T data[N << 1];
   int ID(int l, int r) { return l + r | l != r; }
   T calc(const T &x, const T &y)const { return x + y; }
-  void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
+  void push_up(int l, int r) { data[ID(l, r)] = calc(data[ID(lson)], data[ID(rson)]); }
   void build(int l, int r) {
     int rt = ID(l, r);
     if (l == r) { scanf("%d", &data[rt]); return; }
     int m = (l + r) >> 1;
     build(lson);
     build(rson);
-    push_up(rt);
+    push_up(l, r);
   }
   void update(int p, T val, int l, int r) {
     int rt = ID(l, r);
@@ -121,7 +121,7 @@ template<typename T> struct SegmentTree {
     int m = (l + r) >> 1;
     if (p <= m) { update(p, val, lson); }
     else { update(p, val, rson); }
-    push_up(rt);
+    push_up(l, r);
   }
   T query(int L, int R, int l, int r) {
     int rt = ID(l, r);
@@ -137,14 +137,15 @@ SegmentTree<int> st;
 #define lson l,m
 #define rson m+1,r
 template<typename T> struct SegmentTree {
-  T data[N << 2], lazy[N << 2];
+  T data[N << 1], lazy[N << 1];
   int ID(int l, int r) { return l + r | l != r; }
   T calc(const T &x, const T &y)const { return x + y; }
-  void push_up(int rt) { data[rt] = calc(data[rt << 1], data[rt << 1 | 1]); }
-  void push_down(int rt, int len) {
+  void push_up(int l, int r) { data[ID(l, r)] = calc(data[ID(lson)], data[ID(rson)]); }
+  void push_down(int l, int r) {
+    int rt = ID(l, r), len = r - l + 1;
     if (lazy[rt]) {
-      data[rt << 1] += lazy[rt] * (len - (len >> 1)); lazy[rt << 1] += lazy[rt];
-      data[rt << 1 | 1] += lazy[rt] * (len >> 1); lazy[rt << 1 | 1] += lazy[rt];
+      data[ID(lson)] += lazy[rt] * (len - (len >> 1)); lazy[ID(lson)] += lazy[rt];
+      data[ID(rson)] += lazy[rt] * (len >> 1); lazy[ID(rson)] += lazy[rt];
       lazy[rt] = 0;
     }
   }
@@ -155,7 +156,7 @@ template<typename T> struct SegmentTree {
     int m = (l + r) >> 1;
     build(lson);
     build(rson);
-    push_up(rt);
+    push_up(l, r);
   }
   void update(int L, int R, T val, int l, int r) {
     int rt = ID(l, r);
@@ -164,16 +165,16 @@ template<typename T> struct SegmentTree {
       lazy[rt] += val;
       return;
     }
-    push_down(rt, r - l + 1);
+    push_down(l, r);
     int m = (l + r) >> 1;
     if (L <= m) { update(L, R, val, lson); }
     if (m < R) { update(L, R, val, rson); }
-    push_up(rt);
+    push_up(l, r);
   }
   T query(int L, int R, int l, int r) {
     int rt = ID(l, r);
     if (L <= l && r <= R) { return data[rt]; }
-    push_down(rt, r - l + 1);
+    push_down(l, r);
     int m = (l + r) >> 1; T ret = 0;
     if (L <= m) { ret = calc(ret, query(L, R, lson)); }
     if (m < R) { ret = calc(ret, query(L, R, rson)); }

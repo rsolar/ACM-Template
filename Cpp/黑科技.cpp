@@ -51,9 +51,24 @@ uint64_t __builtin_bswap64(uint64_t x);
 //rope O(log(len))
 #include <ext/rope>
 using namespace __gnu_cxx;
+int a[N];
+rope<int> x;
+rope<int> x(a, a + n);
+rope<int> a(x);
+x->at(10);
+x[10];
+x->push_back(x);     //在末尾添加x
+x->insert(pos, x);   //在pos插入x
+x->erase(pos, x);    //从pos开始删除x个
+x->replace(pos, x);  //从pos开始换成x
+x->substr(pos, x);   //提取pos开始x个
+crope r(1000000, 'x');
+crope r2 = r + "abc" + r;
+rope<char> *his[maxn];
+his[0] = new rope<char>();
+his[i] = new rope<char>(*his[i - 1]);
 
 //pb_ds库
-//http://gaotianyu1350.gitcafe.io/2015/02/17/pbds/
 //priority_queue
 //定义
 //包含：ext/pb_ds/priority_queue.hpp
@@ -89,6 +104,8 @@ using namespace __gnu_cxx;
 //pairing_heap_tag在绝大多数情况下优于binomial_heap_tag和rc_binomial_heap_tag
 //只有push，pop和join操作时，binary_heap_tag速度较快
 //在有modify操作时，可以考虑pairing_heap_tag，thin_heap_tag或手写数据结构
+#include <ext/pb_ds/priority_queue.hpp>
+using namespace __gnu_pbds;
 
 //Tree
 //定义
@@ -122,6 +139,9 @@ using namespace __gnu_cxx;
 //自带的tree_order_statistics_node_update统计的是子树size
 //稍加修改就可以统计容易合并的任意信息
 //以下代码实现了区间求和
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
 template<class Node_CItr, class Node_Itr, class Cmp_Fn, class _Alloc>
 struct my_node_update {
   virtual Node_CItr node_begin()const = 0;
@@ -171,6 +191,9 @@ int main() {
 //__gnu_pbds::gp_hash_table<Key, Mapped>
 //使用
 //支持find和operator[]
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/hash_policy.hpp>
+using namespace __gnu_pbds;
 
 //Trie
 //定义
@@ -198,6 +221,9 @@ int main() {
 //pair<const_iterator, const_iterator> prefix_range(key_const_reference)
 //Finds the const iterator range corresponding to all values whose prefixes match r_key
 //如果你想用这个函数，trie的模板参数得这么写trie<string, [your type here], string_trie_e_access_traits<>, pat_trie_tag, trie_prefix_search_node_update>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/trie_policy.hpp>
+using namespace __gnu_pbds;
 
 //List（用作multimap/multiset）
 //定义
@@ -210,6 +236,9 @@ int main() {
 //         typename Update_Policy = move_to_front_lu_policy<>,
 //         typename Allocator = std::allocator<char>>
 //class list_update;
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/list_update_policy.hpp>
+using namespace __gnu_pbds;
 
 //总结
 //priority_queue，与STL相比支持了modify，erase和join

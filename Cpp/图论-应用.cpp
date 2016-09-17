@@ -228,26 +228,26 @@ int main() {
   }
 }
 //2-SAT
-//染色法
-const int N = 20005;
-const int M = 100005;
+//染色法 HDU 1814
+int n, m;
 int head[N], to[M], nxt[M], tot;
-bool vis[N]; //染色标记
-int S[N], top; //栈
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
 void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
+int S[N], top;
+bool vis[N];
 bool dfs(int u) {
   if (vis[u ^ 1]) { return false; }
   if (vis[u]) { return true; }
   vis[u] = true; S[top++] = u;
   for (int i = head[u]; ~i; i = nxt[i]) {
-    if (!dfs(to[i])) { return false; }
+    int v = to[i];
+    if (!dfs(v)) { return false; }
   }
   return true;
 }
 bool twoSAT(int n) {
   memset(vis, 0, sizeof(vis));
-  for (int i = 0; i < n; i += 2) {
+  for (int i = 0; i < n << 1; i += 2) {
     if (vis[i] || vis[i ^ 1]) { continue; }
     top = 0;
     if (!dfs(i)) {
@@ -257,105 +257,100 @@ bool twoSAT(int n) {
   }
   return true;
 }
-//HDU 1814
 int main() {
-  int n, m, u, v;
   while (~scanf("%d%d", &n, &m)) {
     init();
-    while (m--) {
+    for (int i = 0, u, v; i < m; i++) {
       scanf("%d%d", &u, &v); u--; v--;
       addedge(u, v ^ 1); addedge(v, u ^ 1);
     }
-    if (twoSAT(n << 1)) {
+    if (twoSAT(n)) {
       for (int i = 0; i < n << 1; i++) {
         if (vis[i]) { printf("%d\n", i + 1); }
       }
-    } else { printf("NIE\n"); }
+    } else { puts("NIE"); }
   }
 }
-//Tarjan强连通缩点
-const int N = 1005;
-const int M = 100005;
-int head[N], to[M], nxt[M], tot;
-int num[N], Low[N], DFN[N], S[N], Belong[N], idx, top, scc; //Belong数组的值1~scc
+//Tarjan强连通缩点 + 拓扑排序求任意一组解 POJ 3648
+int n, m;
+vector<int> e[N];
+int low[N], dfn[N], index, belong[N], scc;
+stack<int> stk;
 bool instack[N];
-void init() { tot = 0; memset(head, -1, sizeof(head)); }
-void addedge(int x, int y) { to[tot] = y; nxt[tot] = head[x]; head[x] = tot++; }
 void Tarjan(int u) {
-  Low[u] = DFN[u] = ++idx; S[top++] = u; instack[u] = true;
-  for (int i = head[u]; ~i; i = nxt[i]) {
-    int v = to[i];
-    if (!DFN[v]) { Tarjan(v); Low[u] = min(Low[u], Low[v]); }
-    else if (instack[v] && Low[u] > DFN[v]) { Low[u] = DFN[v]; }
+  int v; low[u] = dfn[u] = ++index; stk.push(u); instack[u] = true;
+  for (int i = 0; i < (int)e[u].size(); i++) {
+    int v = e[u][i];
+    if (!dfn[v]) { Tarjan(v); low[u] = min(low[u], low[v]); }
+    else if (instack[v] && low[u] > dfn[v]) { low[u] = dfn[v]; }
   }
-  if (Low[u] == DFN[u]) {
+  if (low[u] == dfn[u]) {
     scc++;
-    do { v = S[--top]; instack[v] = false; Belong[v] = scc; num[scc]++; } while (v != u);
+    do {
+      v = stk.top(); stk.pop();
+      instack[v] = false; belong[v] = scc;
+    } while (v != u);
   }
 }
-bool solvable(int n) { //n是总个数, 需要选择一半
-  memset(DFN, 0, sizeof(DFN));
-  memset(instack, 0, sizeof(instack));
-  memset(num, 0, sizeof(num));
-  idx = scc = top = 0;
-  for (int i = 0; i < n; i++) { if (!DFN[i]) { Tarjan(i); } }
-  for (int i = 0; i < n; i += 2) { if (Belong[i] == Belong[i ^ 1]) { return false; } }
+void SCC(int n) {
+  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); index = scc = 0;
+  while (!stk.empty()) { stk.pop(); }
+  for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i); } }
+}
+
+bool solvable(int n) {
+  SCC(n << 1);
+  for (int i = 0; i < n << 1; i += 2) {
+    if (belong[i] == belong[i ^ 1]) { return false; }
+  }
   return true;
 }
-//拓扑排序求任意一组解部分
-queue<int> q1, q2;
-vector<vector<int>> dag; //缩点后的逆向DAG图
+vector<int> dag[N]; //缩点后的逆向DAG图
 char color[N]; //染色, 为'R'是选择的
-int cf[N], indeg[N]; //入度
+int cf[N], in[N]; //入度
 void solve(int n) {
-  dag.assign(scc + 1, vector<int>());
-  memset(indeg, 0, sizeof(indeg));
-  memset(color, 0, sizeof(color));
-  for (int u = 0; u < n; u++) {
-    for (int i = head[u]; ~i; i = nxt[i]) {
-      int v = to[i];
-      if (Belong[u] != Belong[v]) { dag[Belong[v]].push_back(Belong[u]); indeg[Belong[u]]++; }
+  for (int i = 1; i <= scc; i++) { dag[i].clear(); }
+  memset(in, 0, sizeof(in)); memset(color, 0, sizeof(color));
+  for (int u = 0; u < n << 1; u++) {
+    for (int i = 0; i < (int)e[u].size(); i++) {
+      int v = e[u][i];
+      if (belong[u] != belong[v]) { dag[belong[v]].push_back(belong[u]); in[belong[u]]++; }
     }
   }
-  for (int i = 0; i < n; i += 2) {
-    cf[Belong[i]] = Belong[i ^ 1]; cf[Belong[i ^ 1]] = Belong[i];
+  for (int i = 0; i < n << 1; i += 2) {
+    cf[belong[i]] = belong[i ^ 1]; cf[belong[i ^ 1]] = belong[i];
   }
-  while (!q1.empty()) { q1.pop(); }
-  while (!q2.empty()) { q2.pop(); }
-  for (int i = 1; i <= scc; i++) { if (indeg[i] == 0) { q1.push(i); } }
-  while (!q1.empty()) {
-    int u = q1.front(); q1.pop();
+  queue<int> que;
+  for (int i = 1; i <= scc; i++) { if (in[i] == 0) { que.push(i); } }
+  while (!que.empty()) {
+    int u = que.front(); que.pop();
     if (color[u] == 0) { color[u] = 'R'; color[cf[u]] = 'B'; }
     for (int i = 0; i < (int)dag[u].size(); i++) {
-      if (--indeg[dag[u][i]] == 0) { q1.push(dag[u][i]); }
+      if (--in[dag[u][i]] == 0) { que.push(dag[u][i]); }
     }
   }
 }
-int change(char s[]) {
-  int ret = 0, i = 0;
-  while (s[i] >= '0' && s[i] <= '9') { ret *= 10; ret += s[i++] - '0'; }
-  return (ret << 1) + (s[i] != 'w');
+inline int get(char *s) {
+  int ret = 0;
+  while (isdigit(*s)) { ret = ret * 10 + *s++ - '0'; }
+  return ret * 2 + (*s == 'h');
 }
-//POJ3648
 int main() {
-  int n, m, u, v;
   char s1[10], s2[10];
   while (scanf("%d%d", &n, &m), (n || m)) {
-    init();
-    while (m--) {
-      scanf("%s%s", s1, s2); u = change(s1); v = change(s2);
-      addedge(u ^ 1, v); addedge(v ^ 1, u);
+    for (int i = 0; i < n << 1; i++) { e[i].clear(); }
+    e[1].push_back(0);
+    for (int i = 0, u, v; i < m; i++) {
+      scanf("%s%s", s1, s2);
+      u = get(s1); v = get(s2);
+      e[u ^ 1].push_back(v); e[v ^ 1].push_back(u);
     }
-    addedge(1, 0);
-    if (solvable(n << 1)) {
-      solve(n << 1);
+    if (solvable(n)) {
+      solve(n);
       for (int i = 1; i < n; i++) {
-        //注意这一定是判断color[Belong[
-        if (color[Belong[i << 1]] == 'R') { printf("%dw", i); }
-        else { printf("%dh", i); }
-        putchar(i != n - 1 ? ' ' : '\n');
+        printf("%d%c%c", i, color[belong[i << 1]] == 'R' ? 'w' : 'h', i == n - 1 ? '\n' : ' ');
       }
-    } else { printf("bad luck\n"); }
+    } else { puts("bad luck"); }
   }
 }
 //最大团
