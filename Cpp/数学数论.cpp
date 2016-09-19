@@ -129,6 +129,22 @@ void findfac(ll n, int k = 107) {
   while (p >= n) { p = pollard_rho(p, c--); } //k值变化, 防止死循环
   findfac(p, k); findfac(n / p, k);
 }
+//求[1, n]中的素数个数 O(n^(2 / 3)) 1s for 1e11
+ll f[340000], g[340000];
+ll primeCnt(ll n) {
+  ll m;
+  for (m = 1; m * m <= n; m++) { f[m] = n / m - 1; }
+  for (ll i = 1; i <= m; i++) { g[i] = i - 1; }
+  for (ll i = 2; i <= m; i++) {
+    if (g[i] == g[i - 1]) { continue; }
+    for (ll j = 1; j <= min(m - 1, n / i / i); j++) {
+      if (i * j < m) { f[j] -= f[i * j] - g[i - 1]; }
+      else { f[j] -= g[n / i / j] - g[i - 1]; }
+    }
+    for (ll j = m; j >= i * i; j--) { g[j] -= g[j / i] - g[i - 1]; }
+  }
+  return f[1];
+}
 //欧拉函数φ(n) 小于等于n的数中与n互质的数的数目
 //φ(p^k) = p^k - p^(k - 1) = (p - 1)p^(k - 1) = p^k(1 - 1 / p)
 //∑(d|n)φ(d) = n
