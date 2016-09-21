@@ -1369,13 +1369,13 @@ int ask(int x, int y) {
   int ret = 0;
   while (top[x] != top[y]) {
     if (dep[top[x]] < dep[top[y]]) { swap(x, y); }
-    ret ^= st.query(w[top[x]], w[x], 1, n);
+    ret += st.query(w[top[x]], w[x], 1, n);
     x = fa[top[x]][0];
   }
   if (dep[x] > dep[y]) { swap(x, y); }
-  ret ^= st.query(w[x], w[y], 1, n);
+  ret += st.query(w[x], w[y], 1, n);
   //边权
-  //if (x != y) { st.query(w[x] + 1, w[y], 1, n); }
+  //if (x != y) { ret += st.query(w[x] + 1, w[y], 1, n); }
   return ret;
 }
 //查询以root为根时的子树信息
@@ -1427,13 +1427,13 @@ int ask(int x, int y) {
   int ret = 0;
   while (belong[x] != belong[y]) {
     if (dep[top[belong[x]]] < dep[top[belong[y]]]) { swap(x, y); }
-    ret ^= st.query(w[top[belong[x]]], w[x], 1, n);
+    ret += st.query(w[top[belong[x]]], w[x], 1, n);
     x = fa[top[belong[x]]];
   }
   if (dep[x] > dep[y]) { swap(x, y); }
-  ret ^= st.query(w[x], w[y], 1, n);
+  ret += st.query(w[x], w[y], 1, n);
   //边权
-  //if (x != y) { st.query(w[x] + 1, w[y], 1, n); }
+  //if (x != y) { ret += st.query(w[x] + 1, w[y], 1, n); }
   return ret;
 }
 //Link-Cut Tree 动态树

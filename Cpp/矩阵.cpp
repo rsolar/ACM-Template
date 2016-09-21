@@ -6,9 +6,9 @@ template<typename T> struct mat {
   mat(const int &_h, const int &_w): a(_h * _w), h(_h), w(_w) { }
   void init() { a.clear(); a.resize(h * w); }
   static mat e(const int &_h, const int &_w) {
-    mat res(_h, _w);
-    for (int i = 0, n = min(_h, _w); i < n; i++) { res[i][i] = 1; }
-    return res;
+    mat ret(_h, _w);
+    for (int i = 0, n = min(_h, _w); i < n; i++) { ret[i][i] = 1; }
+    return ret;
   }
   static mat e(const mat &b) { return e(b.h, b.w); }
   T *operator[](const int &v) { return &a[v * w]; }
@@ -89,27 +89,24 @@ template<typename T> struct mat {
   //求行列式模M 需逆元
   ll detmod()const {
     if (h != w) { return 0; }
-    ll res = 1; mat c(*this);
+    ll ret = 1; mat c(*this);
     for (int i = 0; i < h; i++) {
-      for (int j = 0; j < h; j++) { c[i][j] = (c[i][j] % M + M) % M; }
+      for (int j = 0; j < h; j++) { c[i][j] %= M; }
     }
     for (int i = 0; i < h; i++) {
-      for (int j = i; j < h; j++) {
-        if (c[j][i] != 0) {
-          for (int k = i; k < h; k++) { swap(c[i][k], c[j][k]); }
-          if (i != j) { res = (-res + M) % M; }
-          break;
+      for (int j = i + 1; j < h; j++) {
+        for (; c[j][i]; ret = -ret) {
+          ll t = c[i][i] / c[j][i];
+          for (int k = i; k < h; k++) {
+            c[i][k] = (c[i][k] - c[j][k] * t) % M;
+            swap(c[j][k], c[i][k]);
+          }
         }
       }
-      if (c[i][i] == 0) { return -1; }
-      for (int j = i + 1; j < h; j++) {
-        //int mul = (c[j][i] * Inv[c[i][i]]) % M; //打表逆元
-        ll mul = (c[j][i] * inv(c[i][i], M)) % M;
-        for (int k = i; k < h; k++) { c[j][k] = (c[j][k] - (c[i][k] * mul) % M + M) % M; }
-      }
-      res = (res * c[i][i]) % M;
+      if (c[i][i] == 0) { return 0; }
+      ret = ret * c[i][i] % M;
     }
-    return res;
+    return (ret + M) % M;
   }
   //求行列式 限double
   double det()const {
