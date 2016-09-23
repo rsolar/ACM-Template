@@ -67,11 +67,11 @@ void SCC(int n) {
 }
 //Tarjan算法 O(V + E)
 vector<int> e[N];
-int low[N], dfn[N], index, belong[N], num[N], scc; //所属分量, 分量点数, 分量个数
+int low[N], dfn[N], idx, belong[N], num[N], scc; //所属分量, 分量点数, 分量个数
 stack<int> stk;
 bool instack[N];
 void Tarjan(int u) {
-  int v; low[u] = dfn[u] = ++index; stk.push(u); instack[u] = true;
+  int v; low[u] = dfn[u] = ++idx; stk.push(u); instack[u] = true;
   for (int i = 0; i < (int)e[u].size(); i++) {
     int v = e[u][i];
     if (!dfn[v]) { Tarjan(v); low[u] = min(low[u], low[v]); }
@@ -87,17 +87,17 @@ void Tarjan(int u) {
 }
 void SCC(int n) {
   memset(dfn, 0, sizeof(dfn)); memset(num, 0, sizeof(num));
-  memset(instack, 0, sizeof(instack)); index = scc = 0;
+  memset(instack, 0, sizeof(instack)); idx = scc = 0;
   while (!stk.empty()) { stk.pop(); }
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i); } }
 }
 //无向图的割点和桥
 //Tarjan算法 O(V + E)
-int low[N], dfn[N], index, addblock[N], bridge;
+int low[N], dfn[N], idx, addblock[N], bridge;
 bool instack[N], cut[N], ecut[M];
 stack<int> stk;
 void Tarjan(int u, int p) {
-  int son = 0; low[u] = dfn[u] = ++index;
+  int son = 0; low[u] = dfn[u] = ++idx;
   stk.push(u); instack[u] = true;
   for (int i = head[u]; ~i; i = nxt[i]) {
     int v = to[i];
@@ -120,18 +120,18 @@ void Tarjan(int u, int p) {
 void CUT(int n) {
   memset(dfn, 0, sizeof(dfn)); memset(addblock, 0, sizeof(addblock));
   memset(instack, 0, sizeof(instack)); memset(cut, 0, sizeof(cut)); memset(ecut, 0, sizeof(ecut));
-  while (!stk.empty()) { stk.pop(); } index = bridge = 0;
+  while (!stk.empty()) { stk.pop(); } idx = bridge = 0;
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, i); } }
 }
 //无向图的边双连通分量
 //求出所有的桥以后, 把桥边删除, 原图变成了多个连通块, 则每个连通块就是一个边双连通分量
 //桥不属于任何一个边双连通分量, 其余的边和每个顶点都属于且只属于一个边双连通分量
 //Tarjan算法 O(V + E)
-int low[N], dfn[N], index, belong[N], bridge, block;
+int low[N], dfn[N], idx, belong[N], bridge, block;
 bool instack[N], ecut[M];
 stack<int> stk;
 void Tarjan(int u, int p) {
-  low[u] = dfn[u] = ++index; stk.push(u); instack[u] = true;
+  low[u] = dfn[u] = ++idx; stk.push(u); instack[u] = true;
   for (int i = head[u]; ~i; i = nxt[i]) {
     int v = to[i];
     if (v == p) { continue; }
@@ -152,7 +152,7 @@ void Tarjan(int u, int p) {
 }
 void EBCC(int n) {
   memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); memset(ecut, 0, sizeof(ecut));
-  while (!stk.empty()) { stk.pop(); } index = bridge = block = 0;
+  while (!stk.empty()) { stk.pop(); } idx = bridge = block = 0;
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, -1); } }
 }
 //无向图的点双连通分量
@@ -162,11 +162,11 @@ void EBCC(int n) {
 //直到遇到了边(u,v), 取出的这些边与其关联的点, 组成一个点双连通分量
 //割点可以属于多个点双连通分量, 其余点和每条边只属于且属于一个点双连通分量
 //Tarjan算法 O(V + E)
-int low[N], dfn[N], index, belong[N], block; //所属分量, 分量点数, 分量个数
+int low[N], dfn[N], idx, belong[N], block; //所属分量, 分量点数, 分量个数
 stack<int> stk;
 bool instack[N];
 void Tarjan(int u, int p) {
-  low[u] = dfn[u] = ++index;
+  low[u] = dfn[u] = ++idx;
   stk.push(u); instack[u] = true;
   for (int i = head[u]; ~i; i = nxt[i]) {
     int v = to[i];
@@ -186,7 +186,7 @@ void Tarjan(int u, int p) {
 }
 void BCC(int n) {
   memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack));
-  while (!stk.empty()) { stk.pop(); } index = block = 0;
+  while (!stk.empty()) { stk.pop(); } idx = block = 0;
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i, -1); } }
 }
 //构造双连通图

@@ -277,7 +277,8 @@ struct AC {
   void insert(char *buf, int id) {
     int len = strlen(buf), now = root;
     for (int i = 0, c; i < len; i++) {
-      if (!nxt[now][c = buf[i] - 'a']) { nxt[now][c] = new_node(); }
+      c = buf[i] - 'a';
+      if (!nxt[now][c]) { nxt[now][c] = new_node(); }
       now = nxt[now][c];
     }
     val[now] += id;
@@ -298,7 +299,8 @@ struct AC {
   int query(char *buf) {
     int len = strlen(buf), now = root, ret = 0;
     for (int i = 0, c; i < len; i++) {
-      for (int tmp = now = nxt[now][c = buf[i] - 'a']; tmp != root; tmp = fail[tmp]) {
+      c = buf[i] - 'a';
+      for (int tmp = now = nxt[now][c]; tmp != root; tmp = fail[tmp]) {
         ret += val[tmp]; //val[tmp] = 0;
       }
     }

@@ -10,7 +10,7 @@ void initRMQ() {
     }
   }
 }
-inline int query(int l, int r) {
+inline int queryRMQ(int l, int r) {
   if (l > r) { swap(l, r); }
   int k = p[r - l + 1];
   return dp[l][k] > dp[r - (1 << k) + 1][k] ? dp[l][k] : dp[r - (1 << k) + 1][k];
@@ -34,7 +34,7 @@ void initRMQ() {
     }
   }
 }
-inline int query(int x1, int y1, int x2, int y2) {
+inline int queryRMQ(int x1, int y1, int x2, int y2) {
   if (x1 > x2) { swap(x1, x2); } if (y1 > y2) { swap(y1, y2); }
   int k1 = p[x2 - x1 + 1], k2 = p[y2 - y1 + 1]; x2 -= (1 << k1) - 1; y2 -= (1 << k2) - 1;
   return max(max(dp[x1][y1][k1][k2], dp[x1][y2][k1][k2]), max(dp[x2][y1][k1][k2], dp[x2][y2][k1][k2]));

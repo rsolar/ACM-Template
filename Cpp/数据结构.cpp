@@ -1339,7 +1339,7 @@ int main() {
 //树链剖分
 //轻重链剖分将一棵树划分成至多logn条重链和若干条轻边, 满足每个节点属于一条重链
 //从而将树上路径修改转化为至多logn次线性修改, 非常利于套用树状数组、线段树等各类数据结构
-//dfs实现 可搭配倍增查询LCS
+//dfs实现 可搭配倍增查询LCA 也可直接查询LCA
 const int DEP = 20;
 int head[N], to[M], nxt[M], tot;
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
@@ -1364,6 +1364,13 @@ void dfs2(int u, int tp) {
   }
 }
 void split() { idx = 0; dfs1(1); dfs2(1, 1); }
+int queryLCA(int x, int y) {
+  while (top[x] != top[y]) {
+    if (dep[top[x]] < dep[top[y]]) { swap(x, y); }
+    x = fa[top[x]][0];
+  }
+  return dep[x] < dep[y] ? x : y;
+}
 //路径修改由此修改
 int ask(int x, int y) {
   int ret = 0;
@@ -1378,7 +1385,7 @@ int ask(int x, int y) {
   //if (x != y) { ret += st.query(w[x] + 1, w[y], 1, n); }
   return ret;
 }
-//查询以root为根时的子树信息
+//查询以root为根时rt的子树信息
 int ask(int rt) {
   if (rt == root) { return st.query(1, n, 1, n); }
   int pre = queryLCA(root, rt);
