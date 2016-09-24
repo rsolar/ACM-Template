@@ -134,8 +134,6 @@ bool isconvex(Point poly[], int n) {
   return true;
 }
 
-
-
 //随机化求最小圆覆盖
 //圆心为O, 半径为R
 double R, EPS = 1e-9;

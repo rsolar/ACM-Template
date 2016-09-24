@@ -297,7 +297,6 @@ void SCC(int n) {
   while (!stk.empty()) { stk.pop(); }
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i); } }
 }
-
 bool solvable(int n) {
   SCC(n << 1);
   for (int i = 0; i < n << 1; i += 2) {

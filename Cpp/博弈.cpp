@@ -30,8 +30,7 @@ void printNim(int n) { //石子堆数
   for (int i = 0; i < n; i++) { ret ^= a[i]; }
   for (int i = 0; i < n; i++) {
     if (a[i] > (ret ^ a[i])) {
-      ans[cnt][0] = a[i]; ans[cnt][1] = s ^ a[i];
-      cnt++;
+      ans[cnt][0] = a[i]; ans[cnt][1] = s ^ a[i]; cnt++;
     }
   }
   if (cnt) { //判断先手是胜是负

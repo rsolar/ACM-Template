@@ -707,9 +707,7 @@ struct Splay {
     ch[y][f ^ 1] = ch[x][f];
     pre[ch[x][f]] = y;
     pre[x] = pre[y];
-    if (pre[x]) {
-      ch[pre[y]][ch[pre[y]][1] == y] = x;
-    }
+    if (pre[x]) { ch[pre[y]][ch[pre[y]][1] == y] = x; }
     ch[x][f] = y;
     pre[y] = x;
     push_up(y);
@@ -719,37 +717,25 @@ struct Splay {
     while (pre[x] != goal) {
       int y = pre[x], z = pre[y];
       if (z == goal) {
-        push_down(y);
-        push_down(x);
+        push_down(y); push_down(x);
         rotate(x, ch[y][0] == x);
       } else {
-        push_down(z);
-        push_down(y);
-        push_down(x);
+        push_down(z); push_down(y); push_down(x);
         int f = ch[z][0] == y;
-        if (ch[y][f] == x) {
-          rotate(x, f ^ 1);
-        } else {
-          rotate(y, f);
-        }
+        if (ch[y][f] == x) { rotate(x, f ^ 1); }
+        else { rotate(y, f); }
         rotate(x, f);
       }
     }
     push_up(x);
-    if (goal == 0) {
-      root = x;
-    }
+    if (goal == 0) { root = x; }
   }
   void rotate_to(int k, int goal) {
     int x = root;
     push_down(x);
     while (size[ch[x][0]] != k) {
-      if (k < size[ch[x][0]]) {
-        x = ch[x][0];
-      } else {
-        k -= size[ch[x][0]] + 1;
-        x = ch[x][1];
-      }
+      if (k < size[ch[x][0]]) { x = ch[x][0]; }
+      else { k -= size[ch[x][0]] + 1; x = ch[x][1]; }
       push_down(x);
     }
     splay(x, goal);
@@ -758,66 +744,39 @@ struct Splay {
     int fa = pre[x], head = 0, tail = 0;
     for (que[tail++] = x; head < tail; ++head) {
       gc[tot2++] = que[head];
-      if (ch[que[head]][0]) {
-        que[tail++] = ch[que[head]][0];
-      }
-      if (ch[que[head]][1]) {
-        que[tail++] = ch[que[head]][1];
-      }
+      if (ch[que[head]][0]) { que[tail++] = ch[que[head]][0]; }
+      if (ch[que[head]][1]) { que[tail++] = ch[que[head]][1]; }
     }
     ch[fa][ch[fa][1] == x] = 0;
     push_up(fa);
   }
   void new_node(int &x, int v, int fa) {
-    if (tot2) {
-      x = gc[--tot2];
-    } else {
-      x = ++tot1;
-    }
+    if (tot2) { x = gc[--tot2]; }
+    else { x = ++tot1; }
     ch[x][0] = ch[x][1] = 0;
-    pre[x] = fa;
-    size[x] = 1;
+    pre[x] = fa; size[x] = 1;
     key[x] = vmin[x] = v;
     add[x] = rev[x] = 0;
   }
   void update_add(int x, int d) {
-    if (x) {
-      key[x] += d;
-      add[x] += d;
-      vmin[x] += d;
-    }
+    if (x) { key[x] += d; add[x] += d; vmin[x] += d; }
   }
   void update_rev(int x) {
-    if (x) {
-      swap(ch[x][0], ch[x][1]);
-      rev[x] ^= 1;
-    }
+    if (x) { swap(ch[x][0], ch[x][1]); rev[x] ^= 1; }
   }
   void push_up(int x) {
     size[x] = size[ch[x][0]] + size[ch[x][1]] + 1;
     vmin[x] = min(key[x], min(vmin[ch[x][0]], vmin[ch[x][1]]));
   }
   void push_down(int x) {
-    if (add[x]) {
-      update_add(ch[x][0], add[x]);
-      update_add(ch[x][1], add[x]);
-      add[x] = 0;
-    }
-    if (rev[x]) {
-      update_rev(ch[x][0]);
-      update_rev(ch[x][1]);
-      rev[x] = 0;
-    }
+    if (add[x]) { update_add(ch[x][0], add[x]); update_add(ch[x][1], add[x]); add[x] = 0; }
+    if (rev[x]) { update_rev(ch[x][0]); update_rev(ch[x][1]); rev[x] = 0; }
   }
   void build(int &x, int l, int r, int f) {
     int m = l + r >> 1;
     new_node(x, num[m], f);
-    if (l < m) {
-      build(ch[x][0], l, m - 1, x);
-    }
-    if (r > m) {
-      build(ch[x][1], m + 1, r, x);
-    }
+    if (l < m) { build(ch[x][0], l, m - 1, x); }
+    if (r > m) { build(ch[x][1], m + 1, r, x); }
     push_up(x);
   }
   void init(int n) {
@@ -828,9 +787,7 @@ struct Splay {
     new_node(root, -1, 0);
     new_node(ch[root][1], -1, root);
     size[root] = 2;
-    for (int i = 1; i <= n; ++i) {
-      scanf("%d", &num[i]);
-    }
+    for (int i = 1; i <= n; ++i) { scanf("%d", &num[i]); }
     build(keyTree, 1, n, ch[root][1]);
     push_up(ch[root][1]);
     push_up(root);
@@ -847,9 +804,7 @@ struct Splay {
   }
   void revolve(int l, int r, int k) {
     k %= r - l + 1;
-    if (!k) {
-      return;
-    }
+    if (!k) { return; }
     rotate_to(r - k, 0);
     rotate_to(r + 1, root);
     int tmp = keyTree;
@@ -884,8 +839,7 @@ struct Splay {
   }
 } splay;
 int main() {
-  int n, m, x, y, v;
-  char op[10];
+  int n, m, x, y, v; char op[10];
   while (~scanf("%d", &n)) {
     splay.init(n);
     scanf("%d", &m);
@@ -893,236 +847,23 @@ int main() {
       scanf("%s", op);
       switch (op[0]) {
         case 'A':
-          scanf("%d%d%d", &x, &y, &v);
-          splay.plus(x, y, v);
-          break;
+          scanf("%d%d%d", &x, &y, &v); splay.plus(x, y, v); break;
         case 'R':
           scanf("%d%d", &x, &y);
-          if (op[3] == 'E') {
-            splay.reverse(x, y);
-          } else {
-            scanf("%d", &v);
-            splay.revolve(x, y, v);
-          }
+          if (op[3] == 'E') { splay.reverse(x, y); }
+          else { scanf("%d", &v); splay.revolve(x, y, v); }
           break;
         case 'I':
-          scanf("%d%d", &x, &v);
-          splay.insert(x, v);
-          break;
+          scanf("%d%d", &x, &v); splay.insert(x, v); break;
         case 'D':
-          scanf("%d", &x);
-          splay.del(x);
-          break;
+          scanf("%d", &x); splay.del(x); break;
         case 'M':
-          scanf("%d%d", &x, &y);
-          printf("%d\n", splay.query(x, y));
-          break;
+          scanf("%d%d", &x, &y); printf("%d\n", splay.query(x, y)); break;
       }
     }
   }
 }
 //ver.2
-int k1, k2, num[N];
-struct Splay {
-  int root, tot, point;
-  int ch[N][2], pre[N], size[N];
-  int key[N], add[N], rev[N];
-  bool isroot(int x) { return !pre[x] || ch[pre[x]][0] != x && ch[pre[x]][1] != x; }
-  void rotate(int x) {
-    int y = pre[x], f = ch[y][1] == x;
-    ch[y][f] = ch[x][f ^ 1];
-    pre[ch[y][f]] = y;
-    if (!isroot(y)) { ch[pre[y]][ch[pre[y]][1] == y] = x; }
-    pre[x] = pre[y];
-    ch[x][f ^ 1] = y;
-    pre[y] = x;
-    push_up(y);
-  }
-  void splay(int x) {
-    push_down(x);
-    while (!isroot(x)) {
-      int y = pre[x], z = pre[y];
-      if (isroot(y)) {
-        push_down(y);
-        push_down(x);
-        rotate(x);
-      } else {
-        push_down(z);
-        push_down(y);
-        push_down(x);
-        rotate((ch[z][1] == y) == (ch[y][1] == x) ? y : x);
-        rotate(x);
-      }
-    }
-    push_up(x);
-  }
-  void new_node(int &x, int v, int fa) {
-    x = ++tot;
-    ch[x][0] = ch[x][1] = 0;
-    pre[x] = fa;
-    size[x] = 1;
-    key[x] = v;
-    add[x] = rev[x] = 0;
-  }
-  void update_add(int x, int v) {
-    if (x) { key[x] += v; add[x] += v; }
-  }
-  void update_rev(int x) {
-    if (x) { rev[x] ^= 1; swap(ch[x][0], ch[x][1]); }
-  }
-  void push_down(int x) {
-    if (add[x]) {
-      update_add(ch[x][0], add[x]);
-      update_add(ch[x][1], add[x]);
-      add[x] = 0;
-    }
-    if (rev[x]) {
-      update_rev(ch[x][0]);
-      update_rev(ch[x][1]);
-      rev[x] = 0;
-    }
-  }
-  void push_up(int x) { size[x] = size[ch[x][0]] + size[ch[x][1]] + 1; }
-  void build(int &x, int l, int r, int fa) {
-    int m = l + r >> 1;
-    new_node(x, num[m], fa);
-    if (l < m) { build(ch[x][0], l, m - 1, x); }
-    if (r > m) { build(ch[x][1], m + 1, r, x); }
-    push_up(x);
-  }
-  void init(int n) {
-    root = tot = size[0] = 0;
-    for (int i = 1; i <= n; ++i) {
-      scanf("%d", &num[i]);
-    }
-    build(root, 1, n, 0);
-    point = 1;
-  }
-  int find(int rt, int k) {
-    int x = rt;
-    while (size[ch[x][0]] + 1 != k) {
-      push_down(x);
-      if (k <= size[ch[x][0]]) {
-        x = ch[x][0];
-      } else {
-        k -= size[ch[x][0]] + 1;
-        x = ch[x][1];
-      }
-    }
-    return x;
-  }
-  void split(int &x, int &y, int sz) {
-    if (!sz) { y = x; x = 0; return; }
-    y = find(x, sz + 1);
-    splay(y);
-    x = ch[y][0];
-    ch[y][0] = 0;
-    push_up(y);
-  }
-  void split3(int &x, int &y, int &z, int l, int r) {
-    split(x, z, r); split(x, y, l - 1);
-  }
-  void join(int &x, int &y) {
-    if (!x || !y) { x |= y; return; }
-    x = find(x, size[x]);
-    splay(x);
-    ch[x][1] = y;
-    pre[y] = x;
-    push_up(x);
-  }
-  void join3(int &x, int y, int z) {
-    join(y, z); join(x, y);
-  }
-  void evert() {
-    if (point > 1) {
-      int x;
-      split(root, x, point - 1);
-      swap(root, x);
-      join(root, x);
-      point = 1;
-    }
-  }
-  void plus(int v) {
-    evert();
-    int x, y;
-    split3(root, x, y, point, point + k2 - 1);
-    update_add(x, v);
-    join3(root, x, y);
-  }
-  void reverse() {
-    evert();
-    int x, y;
-    split3(root, x, y, point, point + k1 - 1);
-    update_rev(x);
-    join3(root, x, y);
-  }
-  void insert(int v) {
-    evert();
-    int x, y;
-    split(root, x, point);
-    new_node(y, v, 0);
-    join3(root, y, x);
-  }
-  void erase() {
-    evert();
-    int x, y;
-    split3(root, x, y, point, point);
-    join(root, y);
-  }
-  void move(int tag) {
-    switch (tag) {
-      case 1:
-        if (--point == 0) { point = size[root]; }
-        break;
-      case 2:
-        if (++point == size[root] + 1) { point = 1; }
-        break;
-    }
-  }
-  void query() {
-    evert();
-    int x, y;
-    split3(root, x, y, point, point);
-    printf("%d\n", key[x]);
-    join3(root, x, y);
-  }
-} splay;
-//HDU4453
-int main() {
-  int n, m, v, cas = 0;
-  char op[10];
-  while (~scanf("%d%d%d%d", &n, &m, &k1, &k2) && (n || m || k1 || k2)) {
-    splay.init(n);
-    printf("Case #%d:\n", ++cas);
-    while (m--) {
-      scanf("%s", op);
-      switch (op[0]) {
-        case 'a':
-          scanf("%d", &v);
-          splay.plus(v);
-          break;
-        case 'r':
-          splay.reverse();
-          break;
-        case 'i':
-          scanf("%d", &v);
-          splay.insert(v);
-          break;
-        case 'd':
-          splay.erase();
-          break;
-        case 'm':
-          scanf("%d", &v);
-          splay.move(v);
-          break;
-        case 'q':
-          splay.query();
-          break;
-      }
-    }
-  }
-}
-//ver.3
 const int N = 500005;
 const int INF = 0x3f3f3f3f;
 int n, q;
@@ -1227,13 +968,8 @@ struct Splay {
         push_down(r);
         int y = pre[r];
         int kind = ch[pre[y]][0] == y;
-        if (ch[y][kind] == r) {
-          Rotate(r, !kind);
-          Rotate(r, kind);
-        } else {
-          Rotate(y, kind);
-          Rotate(r, kind);
-        }
+        if (ch[y][kind] == r) { Rotate(r, !kind); Rotate(r, kind); }
+        else { Rotate(y, kind); Rotate(r, kind); }
       }
     }
     push_up(r);
@@ -1309,10 +1045,9 @@ struct Splay {
   }
 } splay;
 int main() {
-  while (scanf("%d%d", &n, &q) == 2) {
+  char op[20]; int x, y, z;
+  while (~scanf("%d%d", &n, &q)) {
     splay.Init();
-    char op[20];
-    int x, y, z;
     while (q--) {
       scanf("%s", op);
       if (strcmp(op, "INSERT") == 0) {
@@ -2133,7 +1868,7 @@ int query(int pt1[], int pt2[], int rt, int dep = 0) {
   }
   return ret;
 }
-//
+//另一版本 不支持点的插入删除
 const int N = 100005;
 const ll INF = 0x3f3f3f3f3f3f3f3fll;
 const int DIM = 2;
@@ -2204,7 +1939,7 @@ void ask(int x) {
   }
 }
 int getP(int root) { ans = INF; ask(root); return ansP.id; }
-//估价函数:
+//估价函数
 //欧几里得距离下界: sqr(max(max(X−x.mx[0],x.mn[0]−X),0))+sqr(max(max(Y−x.mx[1],x.mn[1]−Y),0))
 //欧几里得距离上界: max(sqr(X−x.mn[0]),sqr(X−x.mx[0]))+max(sqr(Y−x.mn[1]),sqr(Y−x.mx[1])
 //曼哈顿距离下界: max(x.mn[0]−X,0)+max(X−x.mx[0],0)+max(x.mn[1]−Y,0)+max(Y−x.mx[1],0)
@@ -2214,8 +1949,7 @@ int X1, Y1, X2, Y2, ret;
 void query(int rt) {
   if (kdt[rt].mn[0] > X2 || kdt[rt].mx[0] < X1 || kdt[rt].mn[1] > Y2 || kdt[rt].mx[1] < Y1) { return; }
   if (kdt[rt].mn[0] >= X1 && kdt[rt].mx[0] <= X2 && kdt[rt].mn[1] >= Y1 && kdt[rt].mx[1] <= Y2) {
-    ret += kdt[rt].sum;
-    return;
+    ret += kdt[rt].sum; return;
   }
   if (kdt[rt].x[0] >= X1 && kdt[rt].x[0] <= X2 && kdt[rt].x[1] >= Y1 && kdt[rt].x[1] <= Y2) { ret += kdt[rt].val; }
   if (kdt[rt].ls) { ask(kdt[rt].ls); }
@@ -2259,9 +1993,7 @@ struct CartesianTree {
     root = st[0];
   }
 } ct;
-bool cmp(int x, int y) {
-  return ct.key[x] < ct.key[y];
-}
+inline bool cmp(int x, int y) { return ct.key[x] < ct.key[y]; }
 int main() {
   while (~scanf("%d", &n)) {
     ct.init();

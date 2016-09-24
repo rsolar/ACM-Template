@@ -1,6 +1,6 @@
 //LCA (Least Common Ancestors, 最近公共祖先)
 //在线dfs + ST O(nlogn + q)
-int dfso[N << 1], cnt; //欧拉序列, 即dfs序, 长度为2n-1, 下标从1开始
+int dfso[N << 1], cnt; //欧拉序列, 即dfs序, 长度为2n - 1, 下标从1开始
 int pos[N]; //pos[i]表示点i在欧拉序列中第一次出现的位置
 int dep[N << 1]; //欧拉序列对应的深度
 int p[N << 1] = { -1}, dp[N << 1][20];
