@@ -63,7 +63,7 @@ template<> inline void read(double &x) {
   if (c == '.') { for (double bit = 0.1; isdigit(c = gc()); bit *= 0.1) { x += (c - '0') * bit; } }
   if (neg) { x = -x; }
 }
-inline void reads(char *s) {
+inline void read(char *s) {
   char c;
   while (isspace(c = gc()));
   if (eof) { return; }
@@ -74,8 +74,11 @@ inline void reads(char *s) {
 const int OUTSIZE = 1 << 20;
 char OUT[OUTSIZE], *O = OUT, OUTN[25]; int OUTCNT;
 template<typename T> inline void write(T x) {
-  if (x == 0) { *O++ = '0'; return; }
+  if (x == 0) { write('0'); return; }
   for (OUTCNT = 0; x; x /= 10) { OUTN[++OUTCNT] = x % 10 + '0'; }
-  while (OUTCNT) { *O++ = OUTN[OUTCNT--]; }
+  while (OUTCNT) { write(OUTN[OUTCNT--]); }
 }
-template<> inline void write(char x) { *O++ = x; }
+template<> inline void write(char x) {
+  *O++ = x;
+  if (O == OUT + OUTSIZE) { fwrite(OUT, 1, O - OUT, stdout); O = OUT; }
+}

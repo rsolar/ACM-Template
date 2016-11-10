@@ -320,25 +320,25 @@ template<typename T> struct zkwSegmentTree {
   }
 };
 zkwSegmentTree<int> st;
-//可持久化线段树
+//可持久化线段树 记得置零tot
 const int N = 100005;
 const int M = 2500005;
 const int INF = 0x3f3f3f3f;
-int n, m, nn; //离散化后大小
+int n, m, nn, root[N];
 #define lson l,m,ls[rt]
 #define rson m+1,r,rs[rt]
 template<typename T> struct PersistentSegmentTree {
-  int ls[M], rs[M], root[N], tot; T data[M];
-  int new_node() { return ++tot; }
+  int ls[M], rs[M], tot; T data[M];
+  int new_node(int lst = 0) { ls[++tot] = ls[lst]; rs[tot] = rs[lst]; data[tot] = data[lst]; return tot; }
   void build(int l, int r, int &rt) {
-    rt = new_node(); data[rt] = 0;
+    rt = new_node();
     if (l == r) { return; }
     int m = (l + r) >> 1;
     build(lson);
     build(rson);
   }
   void update(int p, T val, int lst, int l, int r, int &rt) {
-    rt = new_node(); ls[rt] = ls[lst]; rs[rt] = rs[lst]; data[rt] = data[lst] + val;
+    rt = new_node(lst); data[rt] += val;
     if (l == r) { return; }
     int m = (l + r) >> 1;
     if (p <= m) { update(p, val, ls[lst], lson); }
@@ -402,11 +402,11 @@ int main() {
       a[i] = lower_bound(hs + 1, hs + nn + 1, a[i]) - hs;
     }
     st.tot = 0;
-    st.build(1, nn, st.root[0]);
+    st.build(1, nn, root[0]);
     for (int i = 1; i <= n; i++) {
-      st.update(a[i], 1, st.root[i - 1], 1, nn, st.root[i]);
+      st.update(a[i], 1, root[i - 1], 1, nn, root[i]);
     }
-    for (int i = 1; i <= n; i++) { st.tree[i] = st.root[0]; }
+    for (int i = 1; i <= n; i++) { st.tree[i] = root[0]; }
     for (int i = 0; i < m; i++) {
       switch (op[i]) {
         case 'Q':
@@ -421,20 +421,16 @@ int main() {
     }
   }
 }
-//实时开节点的权值线段树 (无需离散化) O(logV)
+//实时开节点的权值线段树 (无需离散化, 但只支持非负数) O(logV)
 const int N = 60005;
 const int M = 2500005;
 const int INF = 0x3f3f3f3f;
-int n, a[N];
+int n, a[N], root[N];
 #define lson l,m,ls[rt]
 #define rson m+1,r,rs[rt]
 struct SegmentTree {
-  int ls[M], rs[M], cnt[M], root[N], tot;
-  void init() {
-    tot = 0; memset(cnt, 0, sizeof(cnt)); memset(root, 0, sizeof(root));
-    memset(ls, 0, sizeof(ls)); memset(rs, 0, sizeof(rs));
-  }
-  int new_node() { return ++tot; }
+  int ls[M], rs[M], cnt[M], tot;
+  int new_node() { ++tot; ls[tot] = rs[tot] = cnt[tot] = 0; return tot; }
   void update(int p, int val, int l, int r, int &rt) {
     if (!rt) { rt = new_node(); }
     if (l == r) { cnt[rt] += val; return; }
@@ -477,7 +473,7 @@ struct SegmentTree {
 int main() {
   int m, l, r, k; char op[5];
   while (~scanf("%d%d", &n, &m)) {
-    st.init();
+    st.tot = 0;
     for (int i = 1; i <= n; ++i) {
       scanf("%d", &a[i]);
       st.modify(i, a[i], 1);
@@ -1696,17 +1692,16 @@ int sorted[N]; //已经排序好的数
 int tol[20][N]; //tol[p][i] 表示第i层从1到i有数分入左边
 void build(int l, int r, int dep) {
   if (l == r) { return; }
-  int m = l + r >> 1, cnt = m - l + 1; //表示等于中间值而且被分入左边的个数
-  for (int i = l; i <= r; ++i) {
-    if (part[dep][i] < sorted[m]) { --cnt; }
+  int m = (l + r) >> 1, cnt = m - l + 1; //表示等于中间值而且被分入左边的个数
+  for (int i = l; i <= r; i++) {
+    if (part[dep][i] < sorted[m]) { cnt--; }
   }
   int lpos = l, rpos = m + 1;
-  for (int i = l; i <= r; ++i) {
+  for (int i = l; i <= r; i++) {
     if (part[dep][i] < sorted[m]) {
       part[dep + 1][lpos++] = part[dep][i];
     } else if (part[dep][i] == sorted[m] && cnt > 0) {
-      part[dep + 1][lpos++] = part[dep][i];
-      --cnt;
+      part[dep + 1][lpos++] = part[dep][i]; cnt--;
     } else {
       part[dep + 1][rpos++] = part[dep][i];
     }
@@ -1762,6 +1757,7 @@ void build(int l, int r, int dep = 0) {
   build(lson);
   build(rson);
 }
+//求一个点的前K近点
 priority_queue<pair<int, Node>> pq;
 void query(const Node &x, int k, int l, int r, int dep = 0) {
   if (l > r) { return; }
@@ -1833,7 +1829,7 @@ void insert(int pt[], int rt, int dep = 0) {
     else { insert(pt, rson); }
   }
 }
-//求最近点距离
+//求点pt的最近点距离
 ll query(const Node &pt, int rt, int dep = 0) {
   if (!~rt) { return INF; }
   dep %= DIM;
@@ -1849,7 +1845,7 @@ ll query(const Node &pt, int rt, int dep = 0) {
   }
   return ret;
 }
-//查询区间内有多少个点
+//查询矩形范围内有多少个点
 int query(int pt1[], int pt2[], int rt, int dep = 0) {
   if (!~rt) { return 0; }
   dep %= DIM;
@@ -1914,9 +1910,9 @@ int build(int l, int r, int dep, int fa) {
 void change(int x, int val) {
   for (kdt[x = id[x]].val += val; x; x = kdt[x].fa) { kdt[x].sum += val; }
 }
-//求最近点
+//求点(px, py)的最近点
 int px, py; ll ans; Node ansP;
-inline ll sqr(int x) {return (ll)x * x;}
+inline ll sqr(ll x) {return x * x;}
 inline ll dist(int p1) {
   ll ret = 0;
   if (px < kdt[p1].mn[0]) { ret += sqr(kdt[p1].mn[0] - px); }

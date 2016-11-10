@@ -207,6 +207,7 @@ int main() {
 //曼哈顿距离最小生成树
 //Kruskal O(VlogV)
 const int INF = 0x3f3f3f3f;
+int n, tot, fa[N], a[N], b[N];
 struct Point {
   int x, y, id;
   bool operator<(const Point &r)const { return x < r.x || (x == r.x && y < r.y); }
@@ -215,26 +216,20 @@ struct Edge { //有效边
   int u, v, w;
   bool operator<(const Edge &r)const { return w < r.w; }
 } edge[N << 2];
-struct BIT { //树状数组, 找y-x大于当前的, 但是y+x最小的
-  int min_val, pos;
-  void init() { min_val = INF; pos = -1; }
+struct BIT { //树状数组, 找y - x大于当前的, 但是y + x最小的
+  int mn, pos;
+  void init() { mn = INF; pos = -1; }
 } bit[N];
-int n, tot, fa[N];
-int a[N], b[N];
 void addedge(int u, int v, int w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
 int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
-inline int cost(Point a, Point b) { return abs(a.x - b.x) + abs(a.y - b.y); }
-inline int lowbit(int x) { return x & (-x); }
+inline int cost(const Point &a, const Point &b) { return abs(a.x - b.x) + abs(a.y - b.y); }
+inline int lowbit(int x) { return x & -x; }
 void update(int i, int val, int pos) {
-  for (; i > 0; i -= lowbit(i)) {
-    if (val < bit[i].min_val) { bit[i].min_val = val; bit[i].pos = pos; }
-  }
+  for (; i; i -= lowbit(i)) { if (val < bit[i].mn) { bit[i].mn = val; bit[i].pos = pos; } }
 }
-int query(int i, int m) { //查询[i, m]的最小值位置
-  int min_val = INF, pos = -1;
-  for (; i <= m; i += lowbit(i)) {
-    if (bit[i].min_val < min_val) { min_val = bit[i].min_val; pos = bit[i].pos; }
-  }
+int query(int i, int nn) { //查询[i, nn]的最小值位置
+  int mn = INF, pos = -1;
+  for (; i <= nn; i += lowbit(i)) { if (bit[i].mn < mn) { mn = bit[i].mn; pos = bit[i].pos; } }
   return pos;
 }
 void MMST() {
@@ -245,10 +240,10 @@ void MMST() {
     sort(p, p + n);
     for (int i = 0; i < n; i++) { a[i] = b[i] = p[i].y - p[i].x; }
     sort(b, b + n);
-    int m = unique(b, b + n) - b;
-    for (int i = 1; i <= m; i++) { bit[i].init(); }
-    for (int i = n - 1 ; i >= 0; i--) {
-      int pos = lower_bound(b, b + m, a[i]) - b + 1, ans = query(pos, m);
+    int nn = unique(b, b + n) - b;
+    for (int i = 1; i <= nn; i++) { bit[i].init(); }
+    for (int i = n - 1; i >= 0; i--) {
+      int pos = lower_bound(b, b + nn, a[i]) - b + 1, ans = query(pos, nn);
       if (ans != -1) { addedge(p[i].id, p[ans].id, cost(p[i], p[ans])); }
       update(pos, p[i].x + p[i].y, i);
     }
@@ -269,7 +264,7 @@ int Kruskal() {
 }
 //POJ3241 求曼哈顿最小生成树上第k大的边
 int Kruskal(int k) {
-  MMST(n, p);
+  MMST();
   memset(fa, -1, sizeof(fa));
   sort(edge, edge + tot);
   for (int i = 0; i < tot; i++) {
@@ -312,5 +307,5 @@ int MST(int n, int k) {
 //Matrix-Tree Theorem (Kirchhoff 矩阵-树定理)
 //图G的度数矩阵D[G]是一个n*n的矩阵, 满足: 当i != j时,dij = 0; 当i = j时, dij等于vi的度数
 //图G的邻接矩阵A[G]是一个n*n的矩阵, 满足: 如果vi vj之间有边直接相连, 则aij = 1, 否则为0
-//则Kirchhoff矩阵C[G] = D[G] - A[G]
-//Matrix Tree Theorem: 以i为根的树形图个数 = 基尔霍夫矩阵去掉第i行第i列的行列式
+//则基尔霍夫矩阵C[G] = D[G] - A[G]
+//以i为根的树形图个数 = 基尔霍夫矩阵去掉第i行第i列的行列式

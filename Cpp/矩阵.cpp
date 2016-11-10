@@ -126,3 +126,26 @@ template<typename T> struct mat {
     return sign & 1 ? -ret : ret;
   }
 };
+//short ver.
+struct mat {
+  ll m[N][N]; int h, w;
+  mat(int _h = 0, int _w = 0): h(_h), w(_w) {}
+  mat(const mat &v): h(v.h), w(v.w) { memcpy(m, v.m, sizeof(m)); }
+  mat &operator=(const mat &v) { h = v.h; w = v.w; memcpy(m, v.m, sizeof(m)); return *this; }
+};
+mat mul(const mat &a, const mat &b) {
+  mat c(a.h, b.w);
+  for (int i = 0; i < a.h; i++) {
+    for (int k = 0; k < a.w; k++) {
+      if (!a.m[i][k]) { continue; }
+      for (int j = 0; j < b.w; j++) { c.m[i][j] = (c.m[i][j] + a.m[i][j] * b.m[k][j]) % M; }
+    }
+  }
+  return c;
+}
+mat pow(const mat &a, ll b) {
+  mat ret(a.h, a.w), t(a);
+  for (int i = 0; i < min(a.h, a.w); i++) { ret.m[i][i] = 1; }
+  for (; b; b >>= 1) { if (b & 1) { ret = mul(ret, t); } t = mul(t, t); }
+  return ret;
+}

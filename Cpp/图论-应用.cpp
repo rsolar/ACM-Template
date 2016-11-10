@@ -228,7 +228,7 @@ int main() {
   }
 }
 //2-SAT
-//染色法 HDU 1814
+//染色法 可求字典序 O(V * E) HDU 1814
 int n, m;
 int head[N], to[M], nxt[M], tot;
 void init() { tot = 0; memset(head, -1, sizeof(head)); }
@@ -271,14 +271,15 @@ int main() {
     } else { puts("NIE"); }
   }
 }
-//Tarjan强连通缩点 + 拓扑排序求任意一组解 POJ 3648
+//Tarjan强连通缩点 + 拓扑排序 求任意一组解 O(V + E) POJ 3648
 int n, m;
 vector<int> e[N];
-int low[N], dfn[N], index, belong[N], scc;
+int low[N], dfn[N], idx, belong[N], scc;
 stack<int> stk;
 bool instack[N];
+inline void addedge(int u, int v) { e[u].push_back(v); }
 void Tarjan(int u) {
-  int v; low[u] = dfn[u] = ++index; stk.push(u); instack[u] = true;
+  int v; low[u] = dfn[u] = ++idx; stk.push(u); instack[u] = true;
   for (int i = 0; i < (int)e[u].size(); i++) {
     int v = e[u][i];
     if (!dfn[v]) { Tarjan(v); low[u] = min(low[u], low[v]); }
@@ -293,7 +294,7 @@ void Tarjan(int u) {
   }
 }
 void SCC(int n) {
-  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); index = scc = 0;
+  memset(dfn, 0, sizeof(dfn)); memset(instack, 0, sizeof(instack)); idx = scc = 0;
   while (!stk.empty()) { stk.pop(); }
   for (int i = 0; i < n; i++) { if (!dfn[i]) { Tarjan(i); } }
 }
@@ -306,7 +307,7 @@ bool solvable(int n) {
 }
 vector<int> dag[N]; //缩点后的逆向DAG图
 char color[N]; //染色, 为'R'是选择的
-int cf[N], in[N]; //入度
+int cf[N], in[N];
 void solve(int n) {
   for (int i = 1; i <= scc; i++) { dag[i].clear(); }
   memset(in, 0, sizeof(in)); memset(color, 0, sizeof(color));
@@ -338,11 +339,11 @@ int main() {
   char s1[10], s2[10];
   while (scanf("%d%d", &n, &m), (n || m)) {
     for (int i = 0; i < n << 1; i++) { e[i].clear(); }
-    e[1].push_back(0);
+    addedge(1, 0);
     for (int i = 0, u, v; i < m; i++) {
       scanf("%s%s", s1, s2);
       u = get(s1); v = get(s2);
-      e[u ^ 1].push_back(v); e[v ^ 1].push_back(u);
+      addedge(u ^ 1, v); addedge(v ^ 1, u);
     }
     if (solvable(n)) {
       solve(n);

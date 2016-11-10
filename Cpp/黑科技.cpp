@@ -187,8 +187,8 @@ int main() {
 //定义
 //包含：ext/pb_ds/assoc_container.hpp和ext/pb_ds/hash_policy.hpp
 //声明：
-//__gnu_pbds::cc_hash_table<Key, Mapped>
-//__gnu_pbds::gp_hash_table<Key, Mapped>
+//__gnu_pbds::cc_hash_table<Key, Mapped> 链表解决冲突
+//__gnu_pbds::gp_hash_table<Key, Mapped> 试探法解决冲突
 //使用
 //支持find和operator[]
 #include <ext/pb_ds/assoc_container.hpp>

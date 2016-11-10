@@ -69,7 +69,7 @@ Point nearestPointToLine(const Point &P, const Line &L) {
 //点到线段距离
 //返回线段上到该点最近的点
 Point nearestPointToSeg(const Point &P, const Line &L) {
-  double t = ((P - L.s) * (L.e-L.s)) / ((L.e-L.s) * (L.e-L.s));
+  double t = ((P - L.s) * (L.e - L.s)) / ((L.e - L.s) * (L.e - L.s));
   if (t >= 0 && t <= 1) { return Point(L.s.x + (L.e.x - L.s.x) * t, L.s.y + (L.e.y - L.s.y) * t); }
   else { return dist(P, L.s) < dist(P, L.e) ? L.s : L.e; }
 }

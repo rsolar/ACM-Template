@@ -26,10 +26,10 @@ int main() {
     for (int i = 0; i < m; i++) { scanf("%d%d", &q[i].l, &q[i].r); q[i].id = i; }
     sort(q, q + m);
     for (int i = 0, l = 1, r = 0; i < m; i++) {
-      for (; l > q[i].l;) { add(--l); }
-      for (; l < q[i].l;) { del(l++); }
-      for (; r < q[i].r;) { add(++r); }
-      for (; r > q[i].r;) { del(r--); }
+      while (l > q[i].l) { add(--l); }
+      while (l < q[i].l) { del(l++); }
+      while (r < q[i].r) { add(++r); }
+      while (r > q[i].r) { del(r--); }
       ll up = ans - q[i].r + q[i].l - 1, dn = (q[i].r - q[i].l + 1ll) * (q[i].r - q[i].l), gcd = __gcd(up, dn);
       ansup[q[i].id] = up / gcd; ansdn[q[i].id] = dn / gcd;
     }

@@ -16,7 +16,7 @@
 //C[i][j] = C[i - 1][j] + C[i - 1][j - 1], 0 < j < i
 const int maxc = 105;
 ll C[maxc][maxc];
-void calC() {
+void getCom() {
   for (int i = 0; i < maxc; i++) { C[i][i] = C[i][0] = 1; }
   for (int i = 2; i < maxc; i++) {
     for (int j = 1; j < i; j++) { C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M; }
@@ -179,6 +179,30 @@ void Catalan() {
 //输出大数
 void printCatalan(int n) {
   for (int i = b[n] - 1; i >= 0; i--) { printf("%d", a[n][i]); }
+}
+//伯努利数 (Bernoulli number)
+//B(n) = -(C(0, n + 1)B(0) + C(1, n + 1)B(1) + ... + C(n - 1)B(n - 1)) / (n + 1)
+//sum{i = 1...n}(i ^ k) = sum{i = 1...k + 1}(C(i, k + 1)B(k + 1 - i)((n + 1) ^ i)) / (k + 1)
+//预处理伯努利数
+ll B[K] = {1};
+void getBer() {
+  for (int i = 1; i < K - 1; i++) {
+    for (int j = 0; j < i; j++) {
+      B[i] = (B[i] + C[i + 1][j] * B[j]) % M;
+    }
+    B[i] = (B[i] * -Inv[i + 1] % M + M) % M;
+  }
+}
+//计算sum{i = 1...n}(i ^ k) % M
+ll tmp[K] = {1};
+ll sumPow(ll n, int k) {
+  n %= M;
+  for (int i = 1; i <= k + 1; i++) { tmp[i] = tmp[i - 1] * (n + 1) % M; }
+  ll sum = 0;
+  for (int i = 1; i <= k + 1; i++) {
+    sum = (sum + C[k + 1][i] * tmp[i] % M * B[k + 1 - i] % M) % M;
+  }
+  return sum * Inv[k + 1] % M;
 }
 //各种情况下小球放盒子的方案数
 //k个球 m个盒子 是否允许有空盒子 方案数

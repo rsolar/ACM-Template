@@ -291,8 +291,8 @@ struct AC {
     while (!que.empty()) {
       int now = que.front(); que.pop();
       for (int i = 0; i < 26; i++) {
-        if (!nxt[now][i]) { nxt[now][i] = nxt[fail[now]][i]; }
-        else { fail[nxt[now][i]] = nxt[fail[now]][i]; que.push(nxt[now][i]); }
+        if (!nxt[now][i]) { nxt[now][i] = nxt[fail[now]][i]; continue; }
+        fail[nxt[now][i]] = nxt[fail[now]][i]; que.push(nxt[now][i]);
       }
     }
   }

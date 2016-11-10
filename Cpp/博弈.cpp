@@ -53,6 +53,7 @@ const int N = 95; //~95 for 1e18
 ll fib[N] = { 0, 1 }; //预处理fibonacci数列
 bool s[N];
 bool Wizov(ll a, ll b) {
+  if (a == 1 || b == 1) { return a != b; }
   int w = upper_bound(fib + 1, fib + N, a) - fib - 1, pos = 1; ll ret = 0;
   for (int i = w; i > 0; i--) {
     if (a >= fib[i]) { s[i] = true; a -= fib[i]; }
