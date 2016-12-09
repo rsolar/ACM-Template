@@ -734,6 +734,78 @@ int grid_inside(int n, Point p[]) {
   for (int i = 0; i < n; i++) { ret += p[(i + 1) % n].y * (p[i].x - p[(i + 2) % n].x); }
   return (abs(ret) - grid_onedge(n, p)) / 2 + 1;
 }
+//圆的面积并 SPOJ CIRU2
+struct Cir {
+  double x, y, r, ang; int d;
+  Cir(double _x = 0, double _y = 0, double _ang = 0, int _d = 0): x(_x), y(_y), r(0), ang(_ang), d(_d) {}
+  void get() { scanf("%lf%lf%lf", &x, &y, &r); d = 1; }
+} cir[N], tmp[N * 2];
+double area[N];
+inline int sgn(double x) { return (fabs(x) < EPS ? 0 : (x < 0 ? -1 : 1)); }
+inline double sqr(double x) { return x * x; }
+inline double dis(const Cir &a, const Cir &b) {
+  return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));
+}
+inline double cross(const Cir &p0, const Cir &p1, const Cir &p2) {
+  return (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
+}
+int CirCrossCir(const Cir &p1, double r1, const Cir &p2, double r2, Cir &cp1, Cir &cp2) {
+  double mx = p2.x - p1.x, sx = p2.x + p1.x, my = p2.y - p1.y, sy = p2.y + p1.y;
+  double sq = sqr(mx) + sqr(my), d = -(sq - sqr(r1 - r2)) * (sq - sqr(r1 + r2));
+  if (sgn(d) < 0) { return 0; }
+  if (sgn(d) == 0) { d = 0; }
+  else { d = sqrt(d); }
+  double x = mx * ((r1 + r2) * (r1 - r2) + mx * sx) + sx * sqr(my);
+  double y = my * ((r1 + r2) * (r1 - r2) + my * sy) + sy * sqr(mx);
+  double dx = mx * d, dy = my * d; sq *= 2;
+  cp1.x = (x - dy) / sq; cp1.y = (y + dx) / sq;
+  cp2.x = (x + dy) / sq; cp2.y = (y - dx) / sq;
+  return sgn(d) > 0 ? 2 : 1;
+}
+inline bool circmp(const Cir &u, const Cir &v) { return sgn(u.r - v.r) < 0; }
+inline bool cmp(const Cir &u, const Cir &v) {
+  if (sgn(u.ang - v.ang)) { return u.ang < v.ang; }
+  return u.d > v.d;
+}
+inline double calcArea(const Cir &cir, const Cir &cp1, const Cir &cp2) {
+  return ((cp2.ang - cp1.ang) * sqr(cir.r) - cross(cir, cp1, cp2) + cross(Cir(0, 0), cp1, cp2)) / 2.0;
+}
+void CirUnion(Cir cir[], int n) {
+  Cir cp1, cp2;
+  sort(cir, cir + n, circmp);
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (sgn(dis(cir[i], cir[j]) + cir[i].r - cir[j].r) <= 0) { cir[i].d++; }
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    int tn = 0, cnt = 0;
+    for (int j = 0; j < n; j++) {
+      if (i == j) { continue; }
+      if (CirCrossCir(cir[i], cir[i].r, cir[j], cir[j].r, cp2, cp1) < 2) { continue; }
+      cp1.ang = atan2(cp1.y - cir[i].y, cp1.x - cir[i].x);
+      cp2.ang = atan2(cp2.y - cir[i].y, cp2.x - cir[i].x);
+      cp1.d = 1; tmp[tn++] = cp1;
+      cp2.d = -1; tmp[tn++] = cp2;
+      if (sgn(cp1.ang - cp2.ang) > 0) { cnt++; }
+    }
+    tmp[tn++] = Cir(cir[i].x - cir[i].r, cir[i].y, PI, -cnt);
+    tmp[tn++] = Cir(cir[i].x - cir[i].r, cir[i].y, -PI, cnt);
+    sort(tmp, tmp + tn, cmp);
+    for (int j = 1, p, s = cir[i].d + tmp[0].d; j < tn; j++) {
+      p = s; s += tmp[j].d; area[p] += calcArea(cir[i], tmp[j - 1], tmp[j]);
+    }
+  }
+}
+void solve() {
+  memset(area, 0, sizeof(area));
+  for (int i = 0; i < n; i++) { cir[i].get(); }
+  CirUnion(cir, n);
+  for (int i = 1; i <= n; ++i) {
+    area[i] -= area[i + 1];
+    printf("[%d] = %.3f\n", i, area[i]);
+  }
+}
 
 //http://www.cppblog.com/abilitytao/archive/2009/08/04/92171.html
 //常量区

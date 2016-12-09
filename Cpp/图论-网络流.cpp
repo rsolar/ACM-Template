@@ -265,12 +265,14 @@ int HLPP(int n) {
 //最小费用最大流: 若dis[sink]不为INF则继续增广
 //求最大费用只需取相反数, 结果取相反数即可
 typedef int ftype;
-const ftype INF = 0x3f3f3f3f;
+typedef int cotype;
+const cotype INF = 0x3f3f3f3f;
 int head[N], to[M], nxt[M], tot, cur[N];
-ftype cap[M], cost[M], flow[N], dis[N], mncost, mxflow;
+ftype cap[M], flow[N], mxflow;
+cotype cost[M], dis[N], mncost;
 bool vis[N];
 inline void init() { tot = 0; memset(head, -1, sizeof(head)); }
-inline void addedge(int x, int y, ftype w, ftype c) {
+inline void addedge(int x, int y, ftype w, cotype c) {
   to[tot] = y; cap[tot] = w; cost[tot] = c; nxt[tot] = head[x]; head[x] = tot++;
   to[tot] = x; cap[tot] = 0; cost[tot] = -c; nxt[tot] = head[y]; head[y] = tot++;
 }
@@ -297,12 +299,12 @@ bool SPFA(int src, int sink) {
   }
   return true;
 }
-ftype MCMF(int src, int sink) {
+cotype MCMF(int src, int sink) {
   mxflow = mncost = 0;
   while (SPFA(src, sink));
   return mncost;
 }
-//无向图最小割 Stoer-Wagner算法 O(V^3)
+//无向图全局最小割 Stoer-Wagner算法 O(V^3)
 const int INF = 0x3f3f3f3f;
 int g[N][N], dis[N], v[N]; bool vis[N];
 int StoerWagner(int n) {
@@ -314,14 +316,16 @@ int StoerWagner(int n) {
       for (j = 1, k = -1; j < n; j++) {
         if (!vis[v[j]]) {
           dis[v[j]] += g[v[pre]][v[j]];
-          if (k == -1 || dis[v[k]] < dis[v[j]]) { k = j; }
+          if (k == -1 || dis[v[j]] > dis[v[k]]) { k = j; }
         }
       }
       vis[v[k]] = true;
       if (i == n - 1) {
         ret = min(ret, dis[v[k]]);
+        if (ret == 0) { return ret; }
         for (int j = 0; j < n; j++) {
-          g[v[pre]][v[j]] += g[v[j]][v[k]]; g[v[j]][v[pre]] = g[v[pre]][v[j]];
+          g[v[pre]][v[j]] += g[v[j]][v[k]];
+          g[v[j]][v[pre]] += g[v[j]][v[k]];
         }
         v[k] = v[--n];
       }

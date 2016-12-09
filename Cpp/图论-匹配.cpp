@@ -61,14 +61,14 @@ bool dfs(int u) {
 }
 int Hungary() {
   memset(match, -1, sizeof(match));
-  int res = 0;
+  int ret = 0;
   for (int u = 0; u < uN; u++) {
     if (match[u] == -1) {
       memset(check, 0, sizeof(check));
-      if (dfs(u)) { res++; }
+      if (dfs(u)) { ret++; }
     }
   }
-  return res;
+  return ret;
 }
 //Hungary + bfs + 邻接矩阵 O(V*E)
 bool g[N][N];
@@ -77,7 +77,7 @@ int Hungary() {
   memset(match, -1, sizeof(match));
   memset(check, -1, sizeof(check));
   queue<int> que;
-  int res = 0;
+  int ret = 0;
   for (int i = 0; i < uN; i++) {
     if (match[i] == -1) {
       while (!que.empty()) { que.pop(); }
@@ -98,10 +98,10 @@ int Hungary() {
           }
         }
       }
-      if (~match[i]) { res++; }
+      if (~match[i]) { ret++; }
     }
   }
-  return res;
+  return ret;
 }
 //Hungary + bfs + 邻接表 O(V*E)
 int head[N], to[M], nxt[M], tot, uN, match[N], check[N], pre[N];
@@ -111,7 +111,7 @@ int Hungary() {
   memset(match, -1, sizeof(match));
   memset(check, -1, sizeof(check));
   queue<int> que;
-  int res = 0;
+  int ret = 0;
   for (int i = 0; i < uN; i++) {
     if (match[i] == -1) {
       while (!que.empty()) { que.pop(); }
@@ -133,10 +133,10 @@ int Hungary() {
           }
         }
       }
-      if (~match[i]) { res++; }
+      if (~match[i]) { ret++; }
     }
   }
-  return res;
+  return ret;
 }
 //Hopcroft-Karp + vector + O(sqrt(V)*E)
 const int INF = 0x3f3f3f3f;
@@ -178,53 +178,51 @@ bool dfs(int u) {
 int HK() {
   memset(matchx, -1, sizeof(matchx));
   memset(matchy, -1, sizeof(matchy));
-  int res = 0;
+  int ret = 0;
   while (SearchP()) {
     memset(check, 0, sizeof(check));
     for (int i = 0; i < uN; i++) {
-      if (matchx[i] == -1 && dfs(i)) { res++; }
+      if (matchx[i] == -1 && dfs(i)) { ret++; }
     }
   }
-  return res;
+  return ret;
 }
 //二分图最佳匹配
-//Kuhn-Munkers + 邻接矩阵 O(uN^2*vN)
+//Kuhn-Munkers + 邻接矩阵 O(V^3)
 //若求最小权匹配,可将权值取相反数,结果取相反数 点的编号从0开始
 const int INF = 0x3f3f3f3f;
-int uN, vN, g[N][N];
-int matchy[N], lx[N], ly[N], slack[N]; //y中各点匹配状态, 可行顶标, 松弛数组
-bool visx[N], visy[N];
-bool dfs(int u) {
-  visx[u] = true;
-  for (int v = 0; v < vN; v++) {
-    if (visy[v]) { continue; }
-    int tmp = lx[u] + ly[v] - g[u][v];
-    if (tmp == 0) {
-      visy[v] = true;
-      if (matchy[v] == -1 || dfs(matchy[v])) { matchy[v] = u; return true; }
-    } else if (slack[v] > tmp) { slack[v] = tmp; }
-  }
-  return false;
+int n, g[N][N], lx[N], ly[N], match[N], slack[N], prev[N];
+bool vy[N];
+void augment(int rt) {
+  memset(vy, 0, sizeof(vy));
+  memset(slack, 0x3f, sizeof(slack));
+  int py = 0; match[py] = rt;
+  do {
+    vy[py] = true;
+    int x = match[py], delta = INF, yy;
+    for (int y = 1; y <= n; y++) {
+      if (vy[y]) { continue; }
+      if (lx[x] + ly[y] - g[x][y] < slack[y]) { slack[y] = lx[x] + ly[y] - g[x][y]; prev[y] = py; }
+      if (slack[y] < delta) { delta = slack[y]; yy = y; }
+    }
+    for (int y = 0; y <= n; y++) {
+      if (vy[y]) { lx[match[y]] -= delta; ly[y] += delta; }
+      else { slack[y] -= delta; }
+    }
+    py = yy;
+  } while (match[py] != -1);
+  do { int pre = prev[py]; match[py] = match[pre]; py = pre; } while (py);
 }
 int KM() {
-  memset(matchy, -1, sizeof(matchy));
+  memset(match, -1, sizeof(match));
   memset(ly, 0, sizeof(ly));
-  for (int i = 0; i < uN; i++) { lx[i] = *max_element(g[i], g[i] + vN); }
-  for (int u = 0; u < uN; u++) {
-    memset(slack, 0x3f, sizeof(slack));
-    for (;;) {
-      memset(visx, 0, sizeof(visx));
-      memset(visy, 0, sizeof(visy));
-      if (dfs(u)) { break; }
-      int d = INF;
-      for (int i = 0; i < vN; i++) { if (!visy[i] && d > slack[i]) { d = slack[i]; } }
-      for (int i = 0; i < uN; i++) { if (visx[i]) { lx[i] -= d; } }
-      for (int i = 0; i < vN; i++) { if (visy[i]) { ly[i] += d; } else { slack[i] -= d; } }
-    }
+  for (int i = 1; i <= n; i++) { lx[i] = *max_element(g[i] + 1, g[i] + n + 1); }
+  int ret = 0;
+  for (int i = 1; i <= n; i++) { augment(i); }
+  for (int i = 1; i <= n; i++) {
+    ret += lx[i] + ly[i]; //printf("%d %d\n", match[i], i);
   }
-  int res = 0;
-  for (int i = 0; i < vN; i++) { if (matchy[i] != -1) { res += g[matchy[i]][i]; } }
-  return res;
+  return ret;
 }
 //二分图多重匹配
 int uN, vN, g[N][N], match[N][N]; //match[i][0]为个数
@@ -243,13 +241,13 @@ bool dfs(int u) {
   return false;
 }
 int Hungary() {
-  int res = 0;
+  int ret = 0;
   for (int i = 0; i < vN; i++) { match[i][0] = 0; }
   for (int u = 0; u < uN; u++) {
     memset(check, false, sizeof(check));
-    res += dfs(u);
+    ret += dfs(u);
   }
-  return res;
+  return ret;
 }
 //一般图最大匹配
 //邻接矩阵 O(V^3)

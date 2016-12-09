@@ -1884,13 +1884,13 @@ inline void umin(int &a, int b) { if (a > b) { a = b; } }
 void up(int rt) {
   if (kdt[rt].ls) {
     for (int d = 0; d < K; d++) {
-      umax(ktd[rt].mx[d], kdt[kdt[rt].ls].mx[d]);
+      umax(kdt[rt].mx[d], kdt[kdt[rt].ls].mx[d]);
       umin(kdt[rt].mn[d], kdt[kdt[rt].ls].mn[d]);
     }
   }
   if (kdt[rt].rs) {
     for (int d = 0; d < K; d++) {
-      umax(ktd[rt].mx[d], kdt[kdt[rt].rs].mx[d]);
+      umax(kdt[rt].mx[d], kdt[kdt[rt].rs].mx[d]);
       umin(kdt[rt].mn[d], kdt[kdt[rt].rs].mn[d]);
     }
   }
@@ -1922,7 +1922,7 @@ inline ll dist(int p1) {
   return ret;
 }
 void ask(int x) {
-  ll dl, dr, d0 = sqr(kdt[x].d[0] - px) + sqr(kdt[x].d[1] - py);
+  ll dl, dr, d0 = sqr(kdt[x].x[0] - px) + sqr(kdt[x].x[1] - py);
   if (d0 < ans || (d0 == ans && kdt[x] < ansP)) { ans = d0; ansP = kdt[x]; }
   dl = kdt[x].ls ? dist(kdt[x].ls) : INF;
   dr = kdt[x].rs ? dist(kdt[x].rs) : INF;

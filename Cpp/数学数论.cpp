@@ -342,14 +342,13 @@ bool linearDependent(double a[][N], int n, int m) {
 //若要查询第k小子集异或和, 则把k写成二进制, 对于是1的第i位, 把从低位到高位第i个不为0的数异或进答案
 //若要判断是否有非空子集的异或和为0, 如果不存在自由基, 那么说明只有空集的异或值为0, 需要高斯消元来判断
 struct XORBase {
-  int a[64];
+  ll a[64];
   void clear() { memset(a, 0, sizeof(a)); }
   void ins(ll x) {
     for (int i = 62; i >= 0; i--) {
       if (x & (1 << i)) {
         if (a[i]) { x ^= a[i]; }
-        else { a[i] = x; }
-        break;
+        else { a[i] = x; break; }
       }
     }
   }
@@ -368,7 +367,7 @@ struct Base {
   void clear() { memset(a, 0, sizeof(a)); memset(v, 0, sizeof(v)); }
   bool ins(double *x) {
     for (int i = 0; i < m; i++)  {
-      if (fabs(x[i]) > 1e-6) {
+      if (fabs(x[i]) > 1e-8) {
         if (v[i]) {
           double t = x[i] / a[i][i];
           for (int j = 0; j < m; j++) { x[j] -= t * a[i][j]; }
@@ -491,7 +490,7 @@ int Gauss(int equ, int var) {
   return 0;
 }
 //自适应simpson积分
-//给定一个函数f(x), 求[a, b]区间内f(x)到x轴所形成区域的面积
+//给定一个函数F(x), 求[a, b]区间内F(x)到x轴所形成区域的面积
 double simpson(double a, double b) {
   double c = (a + b) * 0.5;
   return (F(a) + 4.0 * F(c) + F(b)) * (b - a) / 6.0;
@@ -501,7 +500,7 @@ double asr(double a, double b, double eps, double A) {
   if (fabs(L + R - A) <= 15.0 * eps) { return L + R + (L + R - A) / 15.0; }
   return asr(a, c, eps * 0.5, L) + asr(c, b, eps * 0.5, R);
 }
-double asr(double a, double b, double eps) {
+double cal(double a, double b, double eps = 1e-5) {
   return asr(a, b, eps, simpson(a, b));
 }
 //FFT O(nlogn)

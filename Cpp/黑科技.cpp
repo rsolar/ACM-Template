@@ -55,18 +55,22 @@ int a[N];
 rope<int> x;
 rope<int> x(a, a + n);
 rope<int> a(x);
-x->at(10);
-x[10];
-x->push_back(x);     //在末尾添加x
-x->insert(pos, x);   //在pos插入x
-x->erase(pos, x);    //从pos开始删除x个
-x->replace(pos, x);  //从pos开始换成x
-x->substr(pos, x);   //提取pos开始x个
 crope r(1000000, 'x');
 crope r2 = r + "abc" + r;
 rope<char> *his[maxn];
 his[0] = new rope<char>();
 his[i] = new rope<char>(*his[i - 1]);
+//push_back(x): 在末尾添加x(x是char)
+//insert(pos, x): 在pos插入x(x是字符串, x后面加个int参数可以只能x中插入几个)
+//erase(pos, x): 从pos开始删除x个
+//replace(pos, x): 从pos开始换成x(x是字符串, x后面加个int参数可以只能x中的前几个)
+//substr(pos, x): 提取pos开始x个
+//copy(x): 复制rope中所有内容到x字符串
+//at(x)/[x]: 访问第x个元素
+//1. rope好像并不原生支持对一个字符串复制n遍的做法, 要手写快速幂
+//2. rope可以用+=来做追加操作
+//3. rope中访问修改一个特定字符的操作是O(log length)的
+//4. rope中[]运算符只能访问不能修改, 需要修改要用mutable_begin() + 偏移量, 得到迭代器再修改
 
 //pb_ds库
 //priority_queue
