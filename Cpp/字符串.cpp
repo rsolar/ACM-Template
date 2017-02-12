@@ -308,12 +308,12 @@ struct AC {
   }
 } ac;
 //后缀数组
-//n：串长
-//m：字符集大小
-//s[0..n - 1]：字符串
-//sa[1..n]：字典序第 i 小的是哪个后缀
-//rnk[0..n - 1]：后缀 i 的排名
-//height[i]：lcp(sa[i], sa[i - 1])
+//n: 串长
+//m: 字符集大小
+//s[0..n - 1]: 字符串
+//sa[1..n]: 字典序第 i 小的是哪个后缀
+//rnk[0..n - 1]: 后缀 i 的排名
+//height[i]: lcp(sa[i], sa[i - 1])
 int rnk[N], sa[N], height[N], tmp[N], cnt[N];
 void SA(char *s, int n, int m) {
   int i, j, k; n++;

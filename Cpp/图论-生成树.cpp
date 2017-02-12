@@ -60,8 +60,7 @@ wtype Kruskal() {
   int cnt = 0; wtype ret = 0;
   for (int i = 0; i < tot; i++) {
     int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
-    if (t1 != t2) { ret += w; fa[t1] = t2; cnt++; }
-    if (cnt == n - 1) { break; }
+    if (t1 != t2) { ret += w; fa[t1] = t2; cnt++; if (cnt == n - 1) { break; } }
   }
   if (cnt < n - 1) { return -1; } //不连通
   return ret;
@@ -84,8 +83,9 @@ wtype Prim() {
   for (int i = 1; i < n; i++) { cost[i] = mp[0][i]; }
   for (int j = 1; j < n; j++) {
     int u = -1; wtype mn = INF;
-    for (int j = 0; j < n; j++)
+    for (int j = 0; j < n; j++) {
       if (!vis[j] && mn > cost[j]) { mn = cost[j]; u = j; }
+    }
     if (mn == INF) { return -1; } //原图不连通
     vis[u] = true; ret += mn;
     used[u][pre[u]] = used[pre[u]][u] = true;
@@ -94,44 +94,6 @@ wtype Prim() {
       if (!vis[v] && cost[v] > mp[u][v]) { cost[v] = mp[u][v]; pre[v] = u; }
     }
   }
-  return ret;
-}
-//Kruskal + 邻接表 O(VElogE)
-typedef int wtype;
-const wtype INF = 0x3f3f3f3f;
-struct Edge {
-  int u, v; wtype w;
-  bool operator<(const Edge &r)const { return w < r.w; }
-} edge[M];
-int n, fa[N], path[N], tot; //加边前赋值为0
-void addedge(int u, int v, wtype w) { edge[tot].u = u; edge[tot].v = v; edge[tot++].w = w; }
-int findfa(int x) { return fa[x] == -1 ? x : fa[x] = findfa(fa[x]); }
-wtype Kruskal() {
-  memset(fa, -1, sizeof(fa));
-  sort(edge, edge + tot);
-  int cnt = 0; wtype ret = 0;
-  for (int i = 0; i < tot; i++) {
-    int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
-    if (t1 != t2) { ret += w; fa[t1] = t2; path[cnt++] = i; }
-    if (cnt == n - 1) { break; }
-  }
-  if (cnt < n - 1) { return -1; } //不连通
-  return ret;
-}
-wtype KruskalSec() {
-  wtype ret = INF;
-  for (int x = 0; x < n - 1; x++) {
-    memset(fa, -1, sizeof(fa));
-    int cnt = 0; wtype tmp = 0;
-    for (int i = 0; i < tot; i++) {
-      if (i != path[x]) {
-        int u = edge[i].u, v = edge[i].v, t1 = findfa(u), t2 = findfa(v); wtype w = edge[i].w;
-        if (t1 != t2) { tmp += w; fa[t1] = t2; cnt++; }
-        if (cnt == n - 1) { if (tmp < ret) { ret = tmp; } break; }
-      }
-    }
-  }
-  if (ret == INF) { return -1; } //不存在
   return ret;
 }
 //最小树形图

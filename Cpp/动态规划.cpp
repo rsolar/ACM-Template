@@ -19,7 +19,7 @@ ll maxSum_adj(int a[], int n) {
     if (mn > mnc) { mn = mnc; }
     sum += a[i];
   }
-  return mx < 0 || mx > sum - mn ? mx : sum - mn;
+  return mx < 0 || mx >= sum - mn ? mx : sum - mn;
 }
 //最大M子段和 O(nm)
 ll dp[N], mxsum[N];

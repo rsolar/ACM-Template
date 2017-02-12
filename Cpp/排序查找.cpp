@@ -39,17 +39,3 @@ void quickSort(int a[], int l, int r) {
   quickSort(a, l, i - 1);
   quickSort(a, i + 1, r);
 }
-//nth_element
-int kth_element(int a[], int n, int k) {
-  int l = 0, r = n - 1, key, i, j;
-  while (l < r) {
-    for (i = l - 1, j = r + 1, key = a[(i + j) >> 1]; i < j;) {
-      for (j--; key < a[j]; j--);
-      for (i++; a[i] < key; i++);
-      if (i < j) { swap(a[i], a[j]); }
-    }
-    if (k > j) { l = j + 1; }
-    else { r = j; }
-  }
-  return a[k];
-}
