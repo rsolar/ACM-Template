@@ -129,7 +129,7 @@ template<typename T> struct mat {
 //short ver.
 struct mat {
   ll m[N][N]; int h, w;
-  mat(int _h = 0, int _w = 0): h(_h), w(_w) {}
+  mat(int _h = 0, int _w = 0): h(_h), w(_w) { memset(m, 0, sizeof(m)); }
   mat(const mat &v): h(v.h), w(v.w) { memcpy(m, v.m, sizeof(m)); }
   mat &operator=(const mat &v) { h = v.h; w = v.w; memcpy(m, v.m, sizeof(m)); return *this; }
 };
@@ -138,7 +138,7 @@ mat mul(const mat &a, const mat &b) {
   for (int i = 0; i < a.h; i++) {
     for (int k = 0; k < a.w; k++) {
       if (!a.m[i][k]) { continue; }
-      for (int j = 0; j < b.w; j++) { c.m[i][j] = (c.m[i][j] + a.m[i][j] * b.m[k][j]) % M; }
+      for (int j = 0; j < b.w; j++) { c.m[i][j] = (c.m[i][j] + a.m[i][k] * b.m[k][j]) % M; }
     }
   }
   return c;

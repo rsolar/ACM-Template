@@ -1,7 +1,7 @@
 //最大子段和 O(n)
 ll maxSum(int a[], int n, int &st, int &ed) {
   ll mx = a[0], mxc = 0; st = ed = 0;
-  for (int i = 1; i < n; i++) {
+  for (int i = 1, s; i < n; i++) {
     if (mxc > 0) { mxc += a[i]; }
     else { mxc = a[i]; s = i; }
     if (mxc > mx) { mx = mxc; st = s; ed = i; }
